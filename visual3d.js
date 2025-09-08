@@ -1,4 +1,3 @@
-// visual3d.js
 let scene, camera, renderer, cubelets = [], animating = false;
 
 function init3DCube(containerId = "cube3d") {
