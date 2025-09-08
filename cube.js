@@ -5,8 +5,7 @@ document.getElementById('res').innerHTML = 'Initializing solver in worker...';
 // Draw scrambled cube immediately
 function initCube() {
   cube = new Cube();
-  cube.move("U F R2 B' D2 L'");
-  cube.randomize();
+  cube.move("R U R' U'");
 
   // Show cube state right away
   document.getElementById('cube').innerHTML = cube.asString();

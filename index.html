@@ -6,9 +6,12 @@
     <script>
       eruda.init();
     </script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/three@0.156.1/build/three.min.js"></script>
 
     <!-- load visual.js FIRST so drawCube is defined -->
     <script src="visual.js"></script>
+    <script src="visual3d.js"></script>
 
     <!-- cubejs libs -->
     <script src="https://cdn.jsdelivr.net/gh/ldez/cubejs/lib/cube.js"></script>
@@ -18,6 +21,7 @@
     <script src="cube.js" defer></script>
   </head>
   <body>
+    <div id="cube3d" style="width:600px;height:400px;"></div>
     <canvas id="cubeCanvas" width="600" height="400"></canvas>
     <p id="cube"></p>
     <p id="res"></p>
