@@ -16,9 +16,6 @@ initCube();
 // Start the worker
 const worker = new Worker('Corker.js');
 
-init3DCube("cube3d"); // start 3D cube
-
-
 worker.onmessage = function (e) {
   if (e.data.type === 'ready') {
     document.getElementById('res').innerHTML = 'Solver ready!';
@@ -45,3 +42,5 @@ worker.onmessage = function (e) {
     animateSolution(cube, moves, 'cubeCanvas', 600);*/
   }
 };
+
+init3DCube("cube3d"); // start 3D cube

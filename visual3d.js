@@ -1,5 +1,17 @@
-let scene, camera, renderer, cubelets = [], animating = false;
+// visual3d.js
+// This script creates and animates a 3D Rubik's Cube using Three.js.
 
+// Global variables for the scene, camera, renderer, and cubelets
+let scene, camera, renderer, cubelets = [], animating = false, controls;
+
+// Image loaders for textures
+// Note: This assumes 'Gan_cube_brand.webp' is in the same directory as the HTML file.
+const logoGan = new THREE.TextureLoader().load('Gan_cube_brand.webp');
+
+/**
+ * Initializes the 3D cube scene, camera, and renderer.
+ * @param {string} containerId The ID of the HTML container for the 3D scene.
+ */
 function init3DCube(containerId = "cube3d") {
   const container = document.getElementById(containerId);
   if (!container) {
@@ -9,6 +21,9 @@ function init3DCube(containerId = "cube3d") {
 
   // Scene setup
   scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x000000); // Set background to black
+
+  // Camera setup
   camera = new THREE.PerspectiveCamera(
     45,
     container.clientWidth / container.clientHeight,
@@ -18,14 +33,21 @@ function init3DCube(containerId = "cube3d") {
   camera.position.set(6, 6, 6);
   camera.lookAt(0, 0, 0);
 
+  // Renderer setup
   renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setSize(container.clientWidth, container.clientHeight);
   container.appendChild(renderer.domElement);
 
-  // Light
+  // Add OrbitControls for camera movement
+  controls = new THREE.OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true; // smooth camera movement
+  controls.dampingFactor = 0.25;
+
+  // Add lights
   const light = new THREE.DirectionalLight(0xffffff, 1);
   light.position.set(5, 5, 5).normalize();
   scene.add(light);
+  scene.add(new THREE.AmbientLight(0x404040));
 
   // Build cubelets (3x3x3)
   const colors = {
@@ -44,18 +66,23 @@ function init3DCube(containerId = "cube3d") {
     for (let y = -1; y <= 1; y++) {
       for (let z = -1; z <= 1; z++) {
         const materials = [
-          new THREE.MeshBasicMaterial({ color: colors.R }), // right
-          new THREE.MeshBasicMaterial({ color: colors.L }), // left
-          new THREE.MeshBasicMaterial({ color: colors.U }), // up
-          new THREE.MeshBasicMaterial({ color: colors.D }), // down
-          new THREE.MeshBasicMaterial({ color: colors.F }), // front
-          new THREE.MeshBasicMaterial({ color: colors.B }), // back
+          new THREE.MeshStandardMaterial({ color: x === 1 ? colors.R : 0x000000 }), // right
+          new THREE.MeshStandardMaterial({ color: x === -1 ? colors.L : 0x000000 }), // left
+          new THREE.MeshStandardMaterial({ color: y === 1 ? colors.U : 0x000000, map: y === 1 && x === 0 && z === 0 ? logoGan : null }), // up (white)
+          new THREE.MeshStandardMaterial({ color: y === -1 ? colors.D : 0x000000 }), // down
+          new THREE.MeshStandardMaterial({ color: z === 1 ? colors.F : 0x000000 }), // front
+          new THREE.MeshStandardMaterial({ color: z === -1 ? colors.B : 0x000000 }), // back
         ];
         const geo = new THREE.BoxGeometry(cubeletSize, cubeletSize, cubeletSize);
         const cubelet = new THREE.Mesh(geo, materials);
         cubelet.position.set(x * offset, y * offset, z * offset);
         scene.add(cubelet);
         cubelets.push(cubelet);
+
+        // Add black wireframe for definition
+        const edges = new THREE.EdgesGeometry(geo);
+        const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0x000000 }));
+        cubelet.add(line);
       }
     }
   }
@@ -63,8 +90,12 @@ function init3DCube(containerId = "cube3d") {
   animate3D();
 }
 
+/**
+ * The main animation loop for the 3D scene.
+ */
 function animate3D() {
   requestAnimationFrame(animate3D);
+  controls.update(); // Update controls
   renderer.render(scene, camera);
 }
 

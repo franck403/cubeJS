@@ -2,12 +2,14 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <script src="//cdn.jsdelivr.net/npm/eruda"></script>
+    <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
     <script>
       eruda.init();
     </script>
     
-    <script src="https://cdn.jsdelivr.net/npm/three@0.156.1/build/three.min.js"></script>
+    <!-- Load Three.js and OrbitControls using classic script tags for compatibility -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="orbit.js"></script>
 
     <!-- load visual.js FIRST so drawCube is defined -->
     <script src="visual.js"></script>
