@@ -1,4 +1,3 @@
-// cube.js
 let cube; // keep cube instance global
 document.getElementById('res').innerHTML = 'Initializing solver in worker...';
 
@@ -12,6 +11,7 @@ function initCube() {
   drawCube(cube.asString(), 'cubeCanvas');
 }
 initCube();
+init3DCube("cube3d",cube); // start 3D cube
 
 // Start the worker
 const worker = new Worker('Corker.js');
@@ -42,5 +42,3 @@ worker.onmessage = function (e) {
     animateSolution(cube, moves, 'cubeCanvas', 600);*/
   }
 };
-
-init3DCube("cube3d"); // start 3D cube
