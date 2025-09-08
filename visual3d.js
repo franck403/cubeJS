@@ -185,6 +185,8 @@ function init3DCube(containerId = "cube3d") {
     
     // Initial render from the logical cube state
     update3DCubeFromState(cube.asString());
+
+    window.addEventListener('resize', onWindowResize, false);
     animate3D();
 }
 
@@ -194,33 +196,33 @@ function init3DCube(containerId = "cube3d") {
  * @param {string} stateString The state of the cube as a 54-character string.
  */
 function update3DCubeFromState(stateString) {
-  window.lastStateString = stateString;
-  let cubeletIndex = 0;
-  const cubeletSize = 0.95;
-  const offset = 1;
+    window.lastStateString = stateString;
+    let cubeletIndex = 0;
+    const cubeletSize = 0.95;
+    const offset = 1;
 
-  for (let x = -1; x <= 1; x++) {
-      for (let y = -1; y <= 1; y++) {
-          for (let z = -1; z <= 1; z++) {
-              const cubelet = cubed[cubeletIndex];
-              
-              // Update material colors based on cube.js state
-              cubelet.material[0].color.set(get3DColor('R', {x, y, z})); // right
-              cubelet.material[1].color.set(get3DColor('L', {x, y, z})); // left
-              cubelet.material[2].color.set(get3DColor('U', {x, y, z})); // up
-              cubelet.material[3].color.set(get3DColor('D', {x, y, z})); // down
-              cubelet.material[4].color.set(get3DColor('F', {x, y, z})); // front
-              cubelet.material[5].color.set(get3DColor('B', {x, y, z})); // back
-              
-              // Apply logo texture to center white face
-              if (x === 0 && y === 1 && z === 0) {
-                  cubelet.material[2].map = logoTexture;
-              }
-              
-              cubeletIndex++;
-          }
-      }
-  }
+    for (let x = -1; x <= 1; x++) {
+        for (let y = -1; y <= 1; y++) {
+            for (let z = -1; z <= 1; z++) {
+                const cubelet = cubed[cubeletIndex];
+                
+                // Update material colors based on cube.js state
+                cubelet.material[0].color.set(get3DColor('R', {x, y, z})); // right
+                cubelet.material[1].color.set(get3DColor('L', {x, y, z})); // left
+                cubelet.material[2].color.set(get3DColor('U', {x, y, z})); // up
+                cubelet.material[3].color.set(get3DColor('D', {x, y, z})); // down
+                cubelet.material[4].color.set(get3DColor('F', {x, y, z})); // front
+                cubelet.material[5].color.set(get3DColor('B', {x, y, z})); // back
+                
+                // Apply logo texture to center white face
+                if (x === 0 && y === 1 && z === 0) {
+                    cubelet.material[2].map = logoTexture;
+                }
+                
+                cubeletIndex++;
+            }
+        }
+    }
 }
 
 /**
@@ -248,22 +250,30 @@ function rotateFace(face, clockwise = true) {
     
         let axis, targetCubelets;
         let pivot = new THREE.Object3D();
-    
+        
+        let angle = clockwise ? Math.PI / 2 : -Math.PI / 2;
+
         switch (face) {
             case 'U':
                 axis = new THREE.Vector3(0, 1, 0);
                 targetCubelets = cubed.filter(c => Math.round(c.position.y) === 1);
                 pivot.position.y = 1;
+                // Reverse the angle for the U face to match standard notation from the user's perspective.
+                angle = clockwise ? -Math.PI / 2 : Math.PI / 2;
                 break;
             case 'D':
                 axis = new THREE.Vector3(0, -1, 0);
                 targetCubelets = cubed.filter(c => Math.round(c.position.y) === -1);
                 pivot.position.y = -1;
+                // Reverse the angle for the D face to match standard notation.
+                angle = clockwise ? -Math.PI / 2 : Math.PI / 2;
                 break;
             case 'L':
                 axis = new THREE.Vector3(-1, 0, 0);
                 targetCubelets = cubed.filter(c => Math.round(c.position.x) === -1);
                 pivot.position.x = -1;
+                // Reverse the angle for the L face to match standard notation.
+                angle = clockwise ? -Math.PI / 2 : Math.PI / 2;
                 break;
             case 'R':
                 axis = new THREE.Vector3(1, 0, 0);
@@ -279,6 +289,8 @@ function rotateFace(face, clockwise = true) {
                 axis = new THREE.Vector3(0, 0, -1);
                 targetCubelets = cubed.filter(c => Math.round(c.position.z) === -1);
                 pivot.position.z = -1;
+                // Reverse the angle for the B face to match standard notation.
+                angle = clockwise ? -Math.PI / 2 : Math.PI / 2;
                 break;
             default:
                 console.error("Invalid face:", face);
@@ -290,7 +302,6 @@ function rotateFace(face, clockwise = true) {
         scene.add(pivot);
         targetCubelets.forEach(c => pivot.attach(c));
     
-        const angle = clockwise ? Math.PI / 2 : -Math.PI / 2;
         const targetQuaternion = new THREE.Quaternion().setFromAxisAngle(axis, angle);
         const startTime = performance.now();
         const duration = 200; // Animation duration in milliseconds
@@ -326,20 +337,48 @@ async function animate3DSolution(moves, delay = 200) {
     for (const move of moves) {
         if (animating) return;
         
-        // Logical move
-        //cube.move(move);
-
         // Visual animation
         const face = move[0];
         const clockwise = !move.includes("'");
         await rotateFace(face, clockwise);
         
+        // Logical move AFTER animation
+        cube.move(move);
+
         // Update state after each animation
-        //update3DCubeFromState(cube.asString());
+        update3DCubeFromState(cube.asString());
         
         // Add delay between moves
         await new Promise(resolve => setTimeout(resolve, delay));
     }
+}
+
+/**
+ * Scrambles the cube with a random sequence of moves.
+ * @param {string} newStateString The new state string after the scramble.
+ */
+function scrambleCube() {
+    if (animating) return;
+    const moves = ['U', 'D', 'L', 'R', 'F', 'B'];
+    const scrambleMoves = [];
+    for (let i = 0; i < 20; i++) {
+        const move = moves[Math.floor(Math.random() * moves.length)];
+        scrambleMoves.push(move);
+    }
+    
+    // We can now call animate3DSolution directly and it will handle the state updates.
+    animate3DSolution(scrambleMoves);
+}
+
+/**
+ * Resets the cube to its solved state.
+ * @param {string} newStateString The new state string after solving.
+ */
+function solveCube(newStateString) {
+    if (animating) return;
+    
+    // Reset the visual cube instantly
+    update3DCubeFromState(newStateString);
 }
 
 /**
@@ -369,3 +408,5 @@ window.logCubeString = logCubeString;
 window.rotateFace = rotateFace;
 window.update3DCubeFromState = update3DCubeFromState;
 window.animate3DSolution = animate3DSolution;
+window.scrambleCube = scrambleCube;
+window.solveCube = solveCube;

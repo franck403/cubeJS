@@ -86,11 +86,11 @@ function drawCube(cubeState, canvasId = 'cubeCanvas') {
 
 // 🔹 Animate a list of moves step-by-step
 function animateSolution(
-  cubeInstance,
   moves,
   canvasId = 'cubeCanvas',
   delay = 500
 ) {
+  let cubeInstance = cube
   let i = 0;
   function step() {
     if (i >= moves.length) return;

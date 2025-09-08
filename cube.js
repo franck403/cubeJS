@@ -25,13 +25,14 @@ worker.onmessage = function (e) {
   }
 
   if (e.data.type === 'solution') {
+    return;
     document.getElementById("res").innerHTML =
       "Solution: " + e.data.solution;
 
     const moves = e.data.solution.trim().split(/\s+/);
 
     // 2D animation
-    animateSolution(cube, moves, "cubeCanvas", 600);
+    animateSolution(moves, "cubeCanvas", 600);
 
     // 3D animation
     animate3DSolution(moves, 600);
