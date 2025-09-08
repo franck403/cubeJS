@@ -9,9 +9,9 @@ function initCube() {
   // Show cube state right away
   document.getElementById('cube').innerHTML = cube.asString();
   drawCube(cube.asString(), 'cubeCanvas');
+  init3DCube("cube3d"); // start 3D cube
 }
 initCube();
-init3DCube("cube3d",cube); // start 3D cube
 
 // Start the worker
 const worker = new Worker('Corker.js');
@@ -34,7 +34,7 @@ worker.onmessage = function (e) {
     animateSolution(cube, moves, "cubeCanvas", 600);
 
     // 3D animation
-    animate3DSolution(moves, 800);
+    animate3DSolution(moves, 600);
     /*document.getElementById('res').innerHTML = 'Solution: ' + e.data.solution;
 
     const moves = e.data.solution.trim().split(/\s+/);
