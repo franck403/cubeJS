@@ -51,13 +51,14 @@ function getMoves() {
 }
 
 // --- Send inverse moves ---
-function send() {
+function reset2() {
     if (moves.length === 0) {
         console.warn("No moves to send");
         return;
     }
 
     const reversed = [...moves].reverse(); // non-destructive reverse
+    var moves = []
     reversed.forEach(mov => {
         let rmov;
         switch (mov) {
@@ -78,8 +79,9 @@ function send() {
                 return;
         }
         console.log("Inverse Move:", rmov);
-        move(rmov);
+        moves.push(rmov)
     });
+    window.animate3DSolution(moves);
 }
 
 const reversedMoves = new Set(["D", "L"]);
@@ -103,6 +105,6 @@ function connect() {
 }
 
 function reset() {
-    send()
+    reset2()
     targetFrame.postMessage('reset')
 }
