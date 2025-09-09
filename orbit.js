@@ -66,7 +66,7 @@ class OrbitControls extends THREE.EventDispatcher {
         // Set to true to automatically rotate around the target
         // If auto-rotate is enabled, you must call controls.update() in your animation loop
 
-        this.autoRotate = true;
+        this.autoRotate = false;
         this.autoRotateSpeed = 2.0; // 30 seconds per orbit when fps is 60
         // The four arrow keys
 

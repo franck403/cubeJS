@@ -40,14 +40,15 @@
     color: #fff;
     background-color: #333;
     border: none;
-    margin: .1em;
-    padding: .5em 1em;
+    margin: 15px;
+    font-size: 2rem;
+    width: 200px;
     font-weight: 700;
     cursor: pointer;
-    border-radius: 1em;
-    font-size: 1rem;
+    line-height: 0;
+    padding: 16px;
+    border-radius: 10px;
 }
-
 .wow {
   position: fixed;
   bottom: 50px;
@@ -62,8 +63,8 @@
     <div id="cube3d" style="background-color:black;width:100vw;height:100vh;margin:auto;"></div>
     <div class="controls wow">
       <button id="connect" onclick="connect()">Connect</button>
-      <button id="reset-state" onclick="reset()">Reset State</button>
-      <button id="get-moves" onclick="getMoves()">Get Moves</button>
+      <button id="reset-state" onclick="reset()">Reset</button>
+      <button id="get-moves" onclick="getMoves()">Start</button>
     </div>
     <iframe style="display:none;" src="gan/index.html" frameborder="0" class="cube-view" id="cube-view" allow="bluetooth"></iframe>
     <script src="sync.js"></script>
