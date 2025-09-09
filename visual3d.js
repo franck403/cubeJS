@@ -232,10 +232,79 @@ function animate3D() {
 }
 
 /**
- * Rotates a specific face of the cube with animation.
- * @param {string} face The face to rotate ('U', 'D', 'L', 'R', 'F', 'B').
- * @param {boolean} clockwise True for clockwise, false for counter-clockwise.
- * @returns {Promise<void>} A promise that resolves when the animation is complete.
+ * Normalise une valeur flottante en entier (évite les erreurs d'arrondi).
+ */
+function snap(val) {
+    return Math.round(val);
+}
+
+/**
+ * Corrige la position et la rotation d'un cubelet après une rotation.
+ */
+function fixCubelet(c) {
+    c.position.x = snap(c.position.x);
+    c.position.y = snap(c.position.y);
+    c.position.z = snap(c.position.z);
+
+    // Quantifie la rotation à des multiples de 90°
+    c.rotation.x = Math.round(c.rotation.x / (Math.PI / 2)) * (Math.PI / 2);
+    c.rotation.y = Math.round(c.rotation.y / (Math.PI / 2)) * (Math.PI / 2);
+    c.rotation.z = Math.round(c.rotation.z / (Math.PI / 2)) * (Math.PI / 2);
+}
+
+/**
+ * Détermine l'axe et l'angle pour une face donnée.
+ */
+function faceConfig(face, clockwise) {
+    const angle90 = Math.PI / 2;
+    let axis, selector, pivotPos, angle;
+
+    switch (face) {
+        case 'U': // Haut
+            axis = new THREE.Vector3(0, 1, 0);
+            selector = c => snap(c.position.y) === 1;
+            pivotPos = { y: 1 };
+            angle = clockwise ? -angle90 : angle90;
+            break;
+        case 'D': // Bas
+            axis = new THREE.Vector3(0, -1, 0);
+            selector = c => snap(c.position.y) === -1;
+            pivotPos = { y: -1 };
+            angle = clockwise ? angle90 : -angle90;
+            break;
+        case 'L': // Gauche
+            axis = new THREE.Vector3(-1, 0, 0);
+            selector = c => snap(c.position.x) === -1;
+            pivotPos = { x: -1 };
+            angle = clockwise ? angle90 : -angle90;
+            break;
+        case 'R': // Droite
+            axis = new THREE.Vector3(1, 0, 0);
+            selector = c => snap(c.position.x) === 1;
+            pivotPos = { x: 1 };
+            angle = clockwise ? -angle90 : angle90;
+            break;
+        case 'F': // Face avant
+            axis = new THREE.Vector3(0, 0, 1);
+            selector = c => snap(c.position.z) === 1;
+            pivotPos = { z: 1 };
+            angle = clockwise ? angle90 : -angle90;
+            break;
+        case 'B': // Face arrière
+            axis = new THREE.Vector3(0, 0, -1);
+            selector = c => snap(c.position.z) === -1;
+            pivotPos = { z: -1 };
+            angle = clockwise ? -angle90 : angle90;
+            break;
+        default:
+            throw new Error("Invalid face: " + face);
+    }
+
+    return { axis, selector, pivotPos, angle };
+}
+
+/**
+ * Rotation animée d'une face.
  */
 function rotateFace(face, clockwise = true) {
     return new Promise((resolve) => {
@@ -245,75 +314,35 @@ function rotateFace(face, clockwise = true) {
         }
         animating = true;
 
-        let axis, targetCubelets;
+        const { axis, selector, pivotPos, angle } = faceConfig(face, clockwise);
+
         let pivot = new THREE.Object3D();
+        Object.assign(pivot.position, pivotPos);
 
-        let angle = clockwise ? Math.PI / 2 : -Math.PI / 2;
-
-        switch (face) {
-            case 'U':
-                axis = new THREE.Vector3(0, 1, 0);
-                targetCubelets = cubed.filter(c => Math.round(c.position.y) === 1);
-                pivot.position.y = 1;
-                // Reverse the angle for the U face to match standard notation from the user's perspective.
-                angle = clockwise ? -Math.PI / 2 : Math.PI / 2;
-                break;
-            case 'D':
-                axis = new THREE.Vector3(0, -1, 0);
-                targetCubelets = cubed.filter(c => Math.round(c.position.y) === -1);
-                pivot.position.y = -1;
-                // Reverse the angle for the D face to match standard notation.
-                angle = clockwise ? -Math.PI / 2 : Math.PI / 2;
-                break;
-            case 'L':
-                axis = new THREE.Vector3(-1, 0, 0);
-                targetCubelets = cubed.filter(c => Math.round(c.position.x) === -1);
-                pivot.position.x = -1;
-                // Reverse the angle for the L face to match standard notation.
-                angle = clockwise ? -Math.PI / 2 : Math.PI / 2;
-                break;
-            case 'R':
-                axis = new THREE.Vector3(1, 0, 0);
-                targetCubelets = cubed.filter(c => Math.round(c.position.x) === 1);
-                pivot.position.x = 1;
-                break;
-            case 'F':
-                axis = new THREE.Vector3(0, 0, 1);
-                targetCubelets = cubed.filter(c => Math.round(c.position.z) === 1);
-                pivot.position.z = 1;
-                break;
-            case 'B':
-                axis = new THREE.Vector3(0, 0, -1);
-                targetCubelets = cubed.filter(c => Math.round(c.position.z) === -1);
-                pivot.position.z = -1;
-                // Reverse the angle for the B face to match standard notation.
-                angle = clockwise ? -Math.PI / 2 : Math.PI / 2;
-                break;
-            default:
-                console.error("Invalid face:", face);
-                animating = false;
-                resolve();
-                return;
-        }
-
+        const targetCubelets = cubed.filter(selector);
         scene.add(pivot);
         targetCubelets.forEach(c => pivot.attach(c));
 
         const targetQuaternion = new THREE.Quaternion().setFromAxisAngle(axis, angle);
+        const startQuat = pivot.quaternion.clone();
+
         const startTime = performance.now();
-        const duration = 200; // Animation duration in milliseconds
+        const duration = 200;
 
         function animateRotation() {
             const now = performance.now();
-            const progress = Math.min(1, (now - startTime) / duration);
+            const t = Math.min(1, (now - startTime) / duration);
 
-            pivot.quaternion.slerp(targetQuaternion, progress);
+            pivot.quaternion.slerpQuaternions(startQuat, targetQuaternion, t);
 
-            if (progress < 1) {
+            if (t < 1) {
                 requestAnimationFrame(animateRotation);
             } else {
                 pivot.quaternion.copy(targetQuaternion);
-                targetCubelets.forEach(c => scene.attach(c));
+                targetCubelets.forEach(c => {
+                    scene.attach(c);
+                    fixCubelet(c); // corrige position/rotation
+                });
                 scene.remove(pivot);
                 animating = false;
                 resolve();
@@ -323,29 +352,26 @@ function rotateFace(face, clockwise = true) {
     });
 }
 
-
 /**
- * Animates a sequence of cube moves.
- * @param {Array} moves An array of moves, e.g., ['R', 'U', 'R\''].
- * @param {number} delay The delay between each move in milliseconds.
+ * Joue une séquence de mouvements avec animation.
  */
 async function animate3DSolution(moves, delay = 200) {
-    if (animating) return;
     for (const move of moves) {
-        if (animating) return;
-
-        // Visual animation
         const face = move[0];
-        const clockwise = !move.includes("'");
-        await rotateFace(face, clockwise);
+        let times = 1;
+        let clockwise = true;
 
-        // Update state after each animation
-        update3DCubeFromState(cube.asString());
+        if (move.includes("2")) times = 2;
+        if (move.includes("'")) clockwise = false;
 
-        // Add delay between moves
-        await new Promise(resolve => setTimeout(resolve, delay));
+        for (let i = 0; i < times; i++) {
+            await rotateFace(face, clockwise);
+            await new Promise(r => setTimeout(r, delay));
+        }
     }
 }
+
+
 
 /**
  * Scrambles the cube with a random sequence of moves.

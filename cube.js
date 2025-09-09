@@ -8,7 +8,6 @@ function initCube() {
 
   // Show cube state right away
   document.getElementById('cube').innerHTML = cube.asString();
-  drawCube(cube.asString(), 'cubeCanvas');
   init3DCube("cube3d"); // start 3D cube
 }
 initCube();
@@ -31,11 +30,8 @@ worker.onmessage = function (e) {
 
     const moves = e.data.solution.trim().split(/\s+/);
 
-    // 2D animation
-    animateSolution(moves, "cubeCanvas", 600);
-
     // 3D animation
-    animate3DSolution(moves, 500);
+    animate3DSolution(moves, 10);
     /*document.getElementById('res').innerHTML = 'Solution: ' + e.data.solution;
 
     const moves = e.data.solution.trim().split(/\s+/);
