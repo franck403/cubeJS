@@ -23,63 +23,61 @@ function get3DColor(face, position) {
     const x = roundTo(position.x);
     const y = roundTo(position.y);
     const z = roundTo(position.z);
-    
-    // Map the 3D position to the sticker index in the cube.js string
+
     let stickerIndex = -1;
     switch (face) {
-        case 'U': // White face
+        case 'U': // White face (top)
             if (y > 0) {
-                if (x === -1 && z === 1) stickerIndex = 0; // UBL
-                else if (x === 0 && z === 1) stickerIndex = 1; // UB
-                else if (x === 1 && z === 1) stickerIndex = 2; // UBR
-                else if (x === -1 && z === 0) stickerIndex = 3; // UL
-                else if (x === 0 && z === 0) stickerIndex = 4; // U
-                else if (x === 1 && z === 0) stickerIndex = 5; // UR
-                else if (x === -1 && z === -1) stickerIndex = 6; // UFL
-                else if (x === 0 && z === -1) stickerIndex = 7; // UF
-                else if (x === 1 && z === -1) stickerIndex = 8; // UFR
+                if (x === -1 && z === -1) stickerIndex = 0;  // ULB
+                else if (x === 0 && z === -1) stickerIndex = 1;  // UB
+                else if (x === 1 && z === -1) stickerIndex = 2;  // URB
+                else if (x === -1 && z === 0) stickerIndex = 3;  // UL
+                else if (x === 0 && z === 0) stickerIndex = 4;  // U
+                else if (x === 1 && z === 0) stickerIndex = 5;  // UR
+                else if (x === -1 && z === 1) stickerIndex = 6;  // ULF
+                else if (x === 0 && z === 1) stickerIndex = 7;  // UF
+                else if (x === 1 && z === 1) stickerIndex = 8;  // URF
             }
             break;
-        case 'R': // Red face
-            if (x > 0) {
-                if (y === 1 && z === 1) stickerIndex = 9; // URB
-                else if (y === 0 && z === 1) stickerIndex = 10; // RB
-                else if (y === -1 && z === 1) stickerIndex = 11; // DRB
-                else if (y === 1 && z === 0) stickerIndex = 12; // UR
-                else if (y === 0 && z === 0) stickerIndex = 13; // R
-                else if (y === -1 && z === 0) stickerIndex = 14; // DR
-                else if (y === 1 && z === -1) stickerIndex = 15; // URF
-                else if (y === 0 && z === -1) stickerIndex = 16; // RF
-                else if (y === -1 && z === -1) stickerIndex = 17; // DRF
-            }
-            break;
-        case 'F': // Green face
+        case 'F': // Green face (front)
             if (z > 0) {
-                if (y === 1 && x === -1) stickerIndex = 18; // UFL
+                if (y === 1 && x === -1) stickerIndex = 18; // ULF
                 else if (y === 1 && x === 0) stickerIndex = 19; // UF
-                else if (y === 1 && x === 1) stickerIndex = 20; // UFR
+                else if (y === 1 && x === 1) stickerIndex = 20; // URF
                 else if (y === 0 && x === -1) stickerIndex = 21; // FL
                 else if (y === 0 && x === 0) stickerIndex = 22; // F
                 else if (y === 0 && x === 1) stickerIndex = 23; // FR
-                else if (y === -1 && x === -1) stickerIndex = 24; // DFL
+                else if (y === -1 && x === -1) stickerIndex = 24; // DLF
                 else if (y === -1 && x === 0) stickerIndex = 25; // DF
-                else if (y === -1 && x === 1) stickerIndex = 26; // DFR
+                else if (y === -1 && x === 1) stickerIndex = 26; // DRF
             }
             break;
-        case 'D': // Yellow face
+        case 'D': // Yellow face (bottom)
             if (y < 0) {
-                if (x === -1 && z === -1) stickerIndex = 27; // DBL
-                else if (x === 0 && z === -1) stickerIndex = 28; // DB
-                else if (x === 1 && z === -1) stickerIndex = 29; // DBR
+                if (x === -1 && z === 1) stickerIndex = 27; // DLF
+                else if (x === 0 && z === 1) stickerIndex = 28; // DF
+                else if (x === 1 && z === 1) stickerIndex = 29; // DRF
                 else if (x === -1 && z === 0) stickerIndex = 30; // DL
                 else if (x === 0 && z === 0) stickerIndex = 31; // D
                 else if (x === 1 && z === 0) stickerIndex = 32; // DR
-                else if (x === -1 && z === 1) stickerIndex = 33; // DFL
-                else if (x === 0 && z === 1) stickerIndex = 34; // DF
-                else if (x === 1 && z === 1) stickerIndex = 35; // DFR
+                else if (x === -1 && z === -1) stickerIndex = 33; // DLB
+                else if (x === 0 && z === -1) stickerIndex = 34; // DB
+                else if (x === 1 && z === -1) stickerIndex = 35; // DRB
             }
             break;
-        case 'L': // Orange face
+        case 'R': // Red face (right) FIXED
+            if (x > 0) {
+                if (y === 1 && z === 1) stickerIndex = 9; // UL 9 -> UR 15 x
+                else if (y === 0 && z === 1) stickerIndex = 12; // L 10 -> U 12 x
+                else if (y === -1 && z === 1) stickerIndex = 15; // DL 11 -> UL 9
+                else if (y === 1 && z === 0) stickerIndex = 10; // U 12 -> L 10 x
+                else if (y === 0 && z === 0) stickerIndex = 13; // C 13 ->
+                else if (y === -1 && z === 0) stickerIndex = 16; // D 14 -> R 16 x
+                else if (y === 1 && z === -1) stickerIndex = 11; // UR 15 -> DL 11
+                else if (y === 0 && z === -1) stickerIndex = 14; // R 16 -> D 14 x
+                else if (y === -1 && z === -1) stickerIndex = 17; // DR 17 x
+            }
+            break; case 'L': // Orange face (left) FIXED
             if (x < 0) {
                 if (y === 1 && z === -1) stickerIndex = 36; // ULF
                 else if (y === 0 && z === -1) stickerIndex = 37; // LF
@@ -92,11 +90,11 @@ function get3DColor(face, position) {
                 else if (y === -1 && z === 1) stickerIndex = 44; // DLB
             }
             break;
-        case 'B': // Blue face
+        case 'B': // Blue face (back)
             if (z < 0) {
                 if (y === 1 && x === 1) stickerIndex = 45; // URB
                 else if (y === 1 && x === 0) stickerIndex = 46; // UB
-                else if (y === 1 && x === -1) stickerIndex = 47; // UBL
+                else if (y === 1 && x === -1) stickerIndex = 47; // ULB
                 else if (y === 0 && x === 1) stickerIndex = 48; // RB
                 else if (y === 0 && x === 0) stickerIndex = 49; // B
                 else if (y === 0 && x === -1) stickerIndex = 50; // LB
@@ -106,14 +104,13 @@ function get3DColor(face, position) {
             }
             break;
     }
-    
-    // The cube object is no longer directly accessed here
+
     if (stickerIndex !== -1 && window.lastStateString) {
         const stateString = window.lastStateString;
         const facelet = stateString[stickerIndex];
         return colors[facelet];
     }
-    
+
     return 0x000000;
 }
 
@@ -168,7 +165,7 @@ function init3DCube(containerId = "cube3d") {
                     new THREE.MeshStandardMaterial({ color: 0x000000 }), // front
                     new THREE.MeshStandardMaterial({ color: 0x000000 }), // back
                 ];
-                
+
                 const geo = new THREE.BoxGeometry(cubeletSize, cubeletSize, cubeletSize);
                 const cubelet = new THREE.Mesh(geo, materials);
                 cubelet.position.set(x * offset, y * offset, z * offset);
@@ -182,7 +179,7 @@ function init3DCube(containerId = "cube3d") {
             }
         }
     }
-    
+
     // Initial render from the logical cube state
     update3DCubeFromState(cube.asString());
 
@@ -205,20 +202,20 @@ function update3DCubeFromState(stateString) {
         for (let y = -1; y <= 1; y++) {
             for (let z = -1; z <= 1; z++) {
                 const cubelet = cubed[cubeletIndex];
-                
+
                 // Update material colors based on cube.js state
-                cubelet.material[0].color.set(get3DColor('R', {x, y, z})); // right
-                cubelet.material[1].color.set(get3DColor('L', {x, y, z})); // left
-                cubelet.material[2].color.set(get3DColor('U', {x, y, z})); // up
-                cubelet.material[3].color.set(get3DColor('D', {x, y, z})); // down
-                cubelet.material[4].color.set(get3DColor('F', {x, y, z})); // front
-                cubelet.material[5].color.set(get3DColor('B', {x, y, z})); // back
-                
+                cubelet.material[0].color.set(get3DColor('R', { x, y, z })); // right
+                cubelet.material[1].color.set(get3DColor('L', { x, y, z })); // left
+                cubelet.material[2].color.set(get3DColor('U', { x, y, z })); // up
+                cubelet.material[3].color.set(get3DColor('D', { x, y, z })); // down
+                cubelet.material[4].color.set(get3DColor('F', { x, y, z })); // front
+                cubelet.material[5].color.set(get3DColor('B', { x, y, z })); // back
+
                 // Apply logo texture to center white face
                 if (x === 0 && y === 1 && z === 0) {
                     cubelet.material[2].map = logoTexture;
                 }
-                
+
                 cubeletIndex++;
             }
         }
@@ -247,10 +244,10 @@ function rotateFace(face, clockwise = true) {
             return;
         }
         animating = true;
-    
+
         let axis, targetCubelets;
         let pivot = new THREE.Object3D();
-        
+
         let angle = clockwise ? Math.PI / 2 : -Math.PI / 2;
 
         switch (face) {
@@ -298,20 +295,20 @@ function rotateFace(face, clockwise = true) {
                 resolve();
                 return;
         }
-    
+
         scene.add(pivot);
         targetCubelets.forEach(c => pivot.attach(c));
-    
+
         const targetQuaternion = new THREE.Quaternion().setFromAxisAngle(axis, angle);
         const startTime = performance.now();
         const duration = 200; // Animation duration in milliseconds
-    
+
         function animateRotation() {
             const now = performance.now();
             const progress = Math.min(1, (now - startTime) / duration);
-            
+
             pivot.quaternion.slerp(targetQuaternion, progress);
-    
+
             if (progress < 1) {
                 requestAnimationFrame(animateRotation);
             } else {
@@ -336,18 +333,15 @@ async function animate3DSolution(moves, delay = 200) {
     if (animating) return;
     for (const move of moves) {
         if (animating) return;
-        
+
         // Visual animation
         const face = move[0];
         const clockwise = !move.includes("'");
         await rotateFace(face, clockwise);
-        
-        // Logical move AFTER animation
-        cube.move(move);
 
         // Update state after each animation
         update3DCubeFromState(cube.asString());
-        
+
         // Add delay between moves
         await new Promise(resolve => setTimeout(resolve, delay));
     }
@@ -365,7 +359,7 @@ function scrambleCube() {
         const move = moves[Math.floor(Math.random() * moves.length)];
         scrambleMoves.push(move);
     }
-    
+
     // We can now call animate3DSolution directly and it will handle the state updates.
     animate3DSolution(scrambleMoves);
 }
@@ -376,7 +370,7 @@ function scrambleCube() {
  */
 function solveCube(newStateString) {
     if (animating) return;
-    
+
     // Reset the visual cube instantly
     update3DCubeFromState(newStateString);
 }

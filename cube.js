@@ -25,7 +25,7 @@ worker.onmessage = function (e) {
   }
 
   if (e.data.type === 'solution') {
-    return;
+    //return;
     document.getElementById("res").innerHTML =
       "Solution: " + e.data.solution;
 
@@ -35,7 +35,7 @@ worker.onmessage = function (e) {
     animateSolution(moves, "cubeCanvas", 600);
 
     // 3D animation
-    animate3DSolution(moves, 600);
+    animate3DSolution(moves, 500);
     /*document.getElementById('res').innerHTML = 'Solution: ' + e.data.solution;
 
     const moves = e.data.solution.trim().split(/\s+/);
