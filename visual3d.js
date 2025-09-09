@@ -308,10 +308,6 @@ function faceConfig(face, clockwise) {
  */
 function rotateFace(face, clockwise = true) {
     return new Promise((resolve) => {
-        if (animating) {
-            resolve();
-            return;
-        }
         animating = true;
 
         const { axis, selector, pivotPos, angle } = faceConfig(face, clockwise);
