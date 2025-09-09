@@ -79,7 +79,7 @@ function reset2() {
                 return;
         }
         console.log("Inverse Move:", rmov);
-        moves.push(rmov)
+        moves.push([rmov])
     });
     window.animate3DSolution(moves);
 }
