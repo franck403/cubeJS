@@ -81,7 +81,7 @@ function reset2() {
         console.log("Inverse Move:", rmov);
         moves.push([rmov])
     });
-    window.animate3DSolution(moves);
+    window.resetCube(moves);
 }
 
 const reversedMoves = new Set(["D", "L"]);

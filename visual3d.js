@@ -367,6 +367,22 @@ async function animate3DSolution(moves, delay = 200) {
     }
 }
 
+async function animate3DSolution2(moves, delay = 200) {
+    for (const move of moves) {
+        const face = move;
+        let times = 1;
+        let clockwise = true;
+
+        if (move.contains("2")) times = 2;
+        if (move.contains("'")) clockwise = false;
+
+        for (let i = 0; i < times; i++) {
+            await rotateFace(face, clockwise);
+            await new Promise(r => setTimeout(r, delay));
+        }
+    }
+}
+
 
 
 /**
@@ -427,3 +443,4 @@ window.animate3DSolution = animate3DSolution;
 window.scrambleCube = scrambleCube;
 window.solveCube = solveCube;
 window.animate3D = animate3D
+window.resetCube = animate3DSolution2()
