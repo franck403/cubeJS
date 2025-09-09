@@ -430,3 +430,4 @@ window.update3DCubeFromState = update3DCubeFromState;
 window.animate3DSolution = animate3DSolution;
 window.scrambleCube = scrambleCube;
 window.solveCube = solveCube;
+window.animate3D = animate3D

@@ -36,9 +36,10 @@ document.getElementById('cube-view').onload = function () {
         iframeWindow.console.log = function (...args) {
             originalLog.apply(console, args);
             if (args[1] && args[1].type === "MOVE") {
-                const move = args[1].move;
-                moves.push(move); // store as plain text
-                console.log("Stored move:", move);
+                const move1 = args[1].move;
+                moves.push(move1); // store as plain text
+                console.log("Stored move:", move1);
+                move(move1)
             }
         }
     }
@@ -84,8 +85,9 @@ function send() {
 // --- Perform moves (no colors) ---
 async function move(mov) {
     console.log("Executing move:", mov);
-    // Here you can add your actual cube-handling logic
-    cube.move(mov)
+
+    let clockwise = !mov.endsWith("'");
+    await window.rotateFace(mov.replace("'",''), clockwise);
 }
 
 var ifr = document.getElementById('cube-view')
@@ -93,4 +95,8 @@ const targetFrame = window.top.frames[0];
 
 function connect() {
     targetFrame.postMessage('connect')
+}
+
+function reset() {
+    targetFrame.postMessage('reset')
 }

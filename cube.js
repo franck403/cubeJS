@@ -4,7 +4,6 @@ document.getElementById('res').innerHTML = 'Initializing solver in worker...';
 // Draw scrambled cube immediately
 function initCube() {
   cube = new Cube();
-  cube.move("R U R' U'");
 
   // Show cube state right away
   document.getElementById('cube').innerHTML = cube.asString();
@@ -20,7 +19,7 @@ worker.onmessage = function (e) {
     document.getElementById('res').innerHTML = 'Solver ready!';
 
     // Now that solver is ready, send the cube state
-    worker.postMessage({ type: 'solve', state: cube.asString() });
+    //worker.postMessage({ type: 'solve', state: cube.asString() });
   }
 
   if (e.data.type === 'solution') {
