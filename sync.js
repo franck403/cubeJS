@@ -88,7 +88,8 @@ async function move(mov) {
 }
 
 var ifr = document.getElementById('cube-view')
+const targetFrame = window.top.frames[0];
 
 function connect() {
-    ifr.postMessage('connect')
+    targetFrame.postMessage('connect')
 }
