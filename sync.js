@@ -16,7 +16,7 @@ function copy_mac() {
 }
 
 // --- Store moves ---
-let moves = [];
+var moves = [];
 
 // Wait for the cube iframe to load
 document.getElementById('cube-view').onload = function () {
@@ -52,10 +52,15 @@ function getMoves() {
 
 // --- Send inverse moves ---
 function reset2() {
-    if (moves.length === 0) {
-        console.warn("No moves to send");
-        return;
+    try {
+        if (moves.length === 0) {
+            console.warn("No moves to send");
+            return;
+        }    
+    } catch {
+        var moves = []
     }
+    console.log(moves)
 
     const reversed = [...moves].reverse(); // non-destructive reverse
     var moves = []

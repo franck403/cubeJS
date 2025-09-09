@@ -7,13 +7,13 @@ let scene, camera, renderer, cubed = [], animating = false, controls;
 const logoTexture = new THREE.TextureLoader().load('Gan_cube_brand.webp');
 
 const colors = {
-    U: 0xFFFFFF, // White
-    D: 0xFFFF00, // Yellow
-    L: 0xFF6400, // Orange
-    R: 0xFF0000, // Red
-    F: 0x00BB00, // Green
-    B: 0x0000BB, // Blue
-};
+    "U": 0xFFFFFF, // White (no change, as it's not in the provided image)
+    "D": 0xFDFF16, // Yellow
+    "L": 0xFF8B21, // UT orange
+    "R": 0xFA2422, // Red
+    "F": 0x04D006, // Lime green
+    "B": 0x275CFE  // RISD Blue
+}
 
 // Maps the facelet position from the cube.js string to a 3D color.
 // The cube.js string order is U, R, D, L, B, F.
@@ -129,7 +129,7 @@ function init3DCube(containerId = "cube3d") {
     scene.background = new THREE.Color(0x000000);
 
     camera = new THREE.PerspectiveCamera(
-        45,
+        35,
         container.clientWidth / container.clientHeight,
         0.1,
         1000
