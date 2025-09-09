@@ -87,7 +87,7 @@ const reversedMoves = new Set(["D", "L"]);
 // --- Perform moves (no colors) ---
 async function move(mov) {
     console.log("Executing move:", mov);
-    let clockwise = mov.endsWith("'");;
+    let clockwise = !mov.endsWith("'");;
     let face = mov.replace("'", "");
     if (reversedMoves.has(face)) {
         clockwise = !clockwise;
@@ -103,7 +103,5 @@ function connect() {
 }
 
 function reset() {
-    cube = new cube()
-    update3DCubeFromState(cube.asString());
     targetFrame.postMessage('reset')
 }

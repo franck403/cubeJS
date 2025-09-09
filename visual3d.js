@@ -323,7 +323,7 @@ function rotateFace(face, clockwise = true) {
         const startQuat = pivot.quaternion.clone();
 
         const startTime = performance.now();
-        const duration = 200;
+        const duration = 5;
 
         function animateRotation() {
             const now = performance.now();
