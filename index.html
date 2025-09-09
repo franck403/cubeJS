@@ -22,10 +22,17 @@
     <!-- your main code that calls drawCube -->
     <script src="cube.js" defer></script>
     <style>
+      body {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+}
       .controls {
     display: flex;
     justify-content: center;
+    flex-direction: row;
 }
+
  
 .controls button {
     font-family: Arial, Helvetica, sans-serif;
@@ -42,9 +49,9 @@
     </style>
   </head>
   <body style="background-color: black;color:white;">
-    <div id="cube3d" style="background-color:black;width:600px;height:400px;"></div>
     <p style="display: none;" id="cube"></p>
     <p style="display: none;" id="res"></p>
+    <div id="cube3d" style="background-color:black;width:600px;height:400px;"></div>
     <div class="controls">
       <button id="connect" onclick="connect()">Connect</button>
       <button id="reset-state" onclick="reset()">Reset State</button>

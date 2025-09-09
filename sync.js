@@ -85,6 +85,7 @@ function send() {
 async function move(mov) {
     console.log("Executing move:", mov);
     // Here you can add your actual cube-handling logic
+    cube.move(mov)
 }
 
 var ifr = document.getElementById('cube-view')
