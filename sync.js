@@ -84,7 +84,7 @@ function reset2() {
     window.resetCube(moves);
 }
 
-const reversedMoves = new Set(["D", "L"]);
+const reversedMoves = new Set(["D", "L", "F"]);
 
 // --- Perform moves (no colors) ---
 async function move(mov) {
