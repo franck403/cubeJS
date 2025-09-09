@@ -361,7 +361,6 @@ class OrbitControls extends THREE.EventDispatcher {
 
         }(); // deltaX and deltaY are in pixels; right and down are positive
 
-
         const pan = function () {
 
             const offset = new THREE.Vector3();
@@ -379,7 +378,7 @@ class OrbitControls extends THREE.EventDispatcher {
                     targetDistance *= Math.tan(scope.object.fov / 2 * Math.PI / 180.0); // we use only clientHeight here so aspect ratio does not distort speed
 
                     panLeft(2 * deltaX * targetDistance / element.clientHeight, scope.object.matrix);
-                    panUp(2 * deltaY * targetDistance / element.clientHeight, scope.object.matrix);
+                    panUp(2 * deltaY * 8   / element.clientHeight, scope.object.matrix);
 
                 } else if (scope.object.isOrthographicCamera) {
 
@@ -398,6 +397,7 @@ class OrbitControls extends THREE.EventDispatcher {
             };
 
         }();
+        window.pan = pan
 
         function dollyOut(dollyScale) {
 

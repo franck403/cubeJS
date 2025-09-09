@@ -129,13 +129,15 @@ function init3DCube(containerId = "cube3d") {
     scene.background = new THREE.Color(0x000000);
 
     camera = new THREE.PerspectiveCamera(
-        35,
+        45,
         container.clientWidth / container.clientHeight,
         0.1,
         1000
     );
     camera.position.set(6, 6, 6);
     camera.lookAt(0, 0, 0);
+    camera.position.z = camera.position.z - 10 
+
 
     renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(container.clientWidth, container.clientHeight);
@@ -143,6 +145,7 @@ function init3DCube(containerId = "cube3d") {
 
     // Add OrbitControls for camera movement
     controls = new THREE.OrbitControls(camera, renderer.domElement);
+    window.pan(0,-50)
     controls.enableDamping = true;
     controls.dampingFactor = 0.25;
 
