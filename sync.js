@@ -103,5 +103,6 @@ function connect() {
 }
 
 function reset() {
+    send()
     targetFrame.postMessage('reset')
 }
