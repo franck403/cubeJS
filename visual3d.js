@@ -196,16 +196,24 @@ function init3DCube(containerId = "cube3d") {
  * @param {string} stateString The state of the cube as a 54-character string.
  */
 function update3DCubeFromState(stateString) {
+    function addCenterSticker(cubelet, index, src, rotation = 0) {
+        const texture = new THREE.TextureLoader().load(`img/${src}`);
+        texture.center.set(0.5, 0.5);   // pivot au centre
+        texture.rotation = THREE.MathUtils.degToRad(rotation); // rotation en degrés → radians
+        cubelet.material[index].map = texture;
+        cubelet.material[index].needsUpdate = true;
+    }
+ 
     window.lastStateString = stateString;
     let cubeletIndex = 0;
     const cubeletSize = 0.95;
     const offset = 1;
-
+ 
     for (let x = -1; x <= 1; x++) {
         for (let y = -1; y <= 1; y++) {
             for (let z = -1; z <= 1; z++) {
                 const cubelet = cubed[cubeletIndex];
-
+ 
                 // Update material colors based on cube.js state
                 cubelet.material[0].color.set(get3DColor('R', { x, y, z })); // right
                 cubelet.material[1].color.set(get3DColor('L', { x, y, z })); // left
@@ -213,12 +221,64 @@ function update3DCubeFromState(stateString) {
                 cubelet.material[3].color.set(get3DColor('D', { x, y, z })); // down
                 cubelet.material[4].color.set(get3DColor('F', { x, y, z })); // front
                 cubelet.material[5].color.set(get3DColor('B', { x, y, z })); // back
-
-                // Apply logo texture to center white face
-                if (x === 0 && y === 1 && z === 0) {
-                    cubelet.material[2].map = logoTexture;
+ 
+                // --- Up center ---
+                if (y === 1 && x === 0 && z === 0) addCenterSticker(cubelet, 2, "U.png", 0);
+ 
+                // --- Down center ---
+                if (y === -1 && x === 0 && z === 0) addCenterSticker(cubelet, 3, "D.png", 0);
+ 
+                // --- Front center ---
+                if (z === 1 && x === 0 && y === 0) addCenterSticker(cubelet, 4, "F.png", 0);
+ 
+                // --- Back center ---
+                if (z === -1 && x === 0 && y === 0) addCenterSticker(cubelet, 5, "B.png", 0);
+ 
+                // --- Right center ---
+                if (x === 1 && y === 0 && z === 0) addCenterSticker(cubelet, 0, "R.png", 0);
+ 
+                // --- Left center ---
+                if (x === -1 && y === 0 && z === 0) addCenterSticker(cubelet, 1, "L.png", 0);
+ 
+                if ([x, y, z].filter(v => v !== 0).length === 2) {
+ 
+                    // --- U* edges ---
+                    if (y === 1 && z === 1 && x === 0) addCenterSticker(cubelet, 2, "CU.png", 0);    // UF
+                    if (y === 1 && x === 1 && z === 0) addCenterSticker(cubelet, 2, "CU.png", 90);   // UR
+                    if (y === 1 && z === -1 && x === 0) addCenterSticker(cubelet, 2, "CU.png", 180); // UB
+                    if (y === 1 && x === -1 && z === 0) addCenterSticker(cubelet, 2, "CU.png", 270); // UL
+ 
+                    // --- D* edges ---
+                    if (y === -1 && z === 1 && x === 0) addCenterSticker(cubelet, 3, "CD.png", 180);    // DF
+                    if (y === -1 && x === 1 && z === 0) addCenterSticker(cubelet, 3, "CD.png", 90);   // DR
+                    if (y === -1 && z === -1 && x === 0) addCenterSticker(cubelet, 3, "CD.png", 0); // DB
+                    if (y === -1 && x === -1 && z === 0) addCenterSticker(cubelet, 3, "CD.png", 270); // DL
+ 
+                    // --- F* edges ---
+                    if (z === 1 && x === 1 && y === 0) addCenterSticker(cubelet, 4, "CF.png", 90);    // FR
+                    if (z === 1 && x === -1 && y === 0) addCenterSticker(cubelet, 4, "CF.png", 270); // FL
+                    if (z === 1 && y === 1 && x === 0) addCenterSticker(cubelet, 4, "CF.png", 180);  // UF
+                    if (z === 1 && y === -1 && x === 0) addCenterSticker(cubelet, 4, "CF.png", 0);  // DF
+ 
+                    // --- B* edges ---
+                    if (z === -1 && x === 1 && y === 0) addCenterSticker(cubelet, 5, "CB.png", 270); // BR
+                    if (z === -1 && x === -1 && y === 0) addCenterSticker(cubelet, 5, "CB.png", 90);  // BL
+                    if (z === -1 && y === 1 && x === 0) addCenterSticker(cubelet, 5, "CB.png", 180);  // UB
+                    if (z === -1 && y === -1 && x === 0) addCenterSticker(cubelet, 5, "CB.png", 0); // DB
+ 
+                    // --- R* edges ---
+                    if (x === 1 && y === 1 && z === 0) addCenterSticker(cubelet, 0, "CR.png", 180);    // UR
+                    if (x === 1 && y === -1 && z === 0) addCenterSticker(cubelet, 0, "CR.png", 0); // DR
+                    if (x === 1 && z === 1 && y === 0) addCenterSticker(cubelet, 0, "CR.png", 270);  // FR
+                    if (x === 1 && z === -1 && y === 0) addCenterSticker(cubelet, 0, "CR.png", 90);  // BR
+ 
+                    // --- L* edges ---
+                    if (x === -1 && y === 1 && z === 0) addCenterSticker(cubelet, 1, "CL.png", 180);    // UL
+                    if (x === -1 && y === -1 && z === 0) addCenterSticker(cubelet, 1, "CL.png", 0); // DL
+                    if (x === -1 && z === 1 && y === 0) addCenterSticker(cubelet, 1, "CL.png", 90);  // FL
+                    if (x === -1 && z === -1 && y === 0) addCenterSticker(cubelet, 1, "CL.png", 270);  // BL
                 }
-
+ 
                 cubeletIndex++;
             }
         }
