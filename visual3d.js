@@ -368,6 +368,7 @@ async function animate3DSolution(moves, delay = 200) {
 }
 
 async function animate3DSolution2(moves, delay = 200) {
+    console.log(moves)
     for (const move of moves) {
         const face = move;
         let times = 1;
@@ -443,4 +444,4 @@ window.animate3DSolution = animate3DSolution;
 window.scrambleCube = scrambleCube;
 window.solveCube = solveCube;
 window.animate3D = animate3D
-window.resetCube = animate3DSolution2()
+window.resetCube = animate3DSolution2
