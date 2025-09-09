@@ -13,3 +13,10 @@ function reset() {
         console.log('Connect First');
     }
 }
+
+window.addEventListener("message", (event) => {
+    console.log(`Received message: ${event.data}`);
+    if (event.data == 'connect') {
+        document.getElementById('connect').click()
+    }
+});

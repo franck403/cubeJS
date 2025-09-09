@@ -1,40 +1,94 @@
-document.addEventListener('DOMContentLoaded', function() {
-    let moves = [];
+async function sleep2(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
 
-    // Listen for messages from the iframe
-    window.addEventListener('message', function(event) {
-        if (event.data.type === "MOVE") {
-            moves.push(event.data.move);
-            console.log("Move detected:", event.data.move);
-        } else if (event.data === "Reset state") {
-            moves = [];
-            console.log("Reset state");
-            document.getElementById("solution").textContent = "Moves will appear here.";
-        } else if (event.data.type === "Get Moves") {
-            console.log("Got Moves");
-        } else if (event.data === "Connect First") {
-            console.log("Connect first");
+function sleep(miliseconds) {
+    const currentTime = new Date().getTime();
+    while (currentTime + miliseconds >= new Date().getTime()) {}
+}
+
+// Copy MAC address
+function copy_mac() {
+    const mac = document.getElementById("mac");
+    mac.select();
+    mac.setSelectionRange(0, 99999);
+    navigator.clipboard.writeText(mac.innerText);
+}
+
+// --- Store moves ---
+let moves = [];
+
+// Wait for the cube iframe to load
+document.getElementById('cube-view').onload = function () {
+    // Reset moves on load (clear state)
+    moves = [];
+
+    const iframeWindow = document.getElementById('cube-view').contentWindow;
+
+    const mac = 'AB:12:34:60:7E:DA';
+    iframeWindow.prompt = function (...args) {
+        console.log(...args);
+        return mac;
+    };
+
+    if (iframeWindow) {
+        const originalLog = iframeWindow.console.log;
+        iframeWindow.console.log = function (...args) {
+            originalLog.apply(console, args);
+            if (args[1] && args[1].type === "MOVE") {
+                const move = args[1].move;
+                moves.push(move); // store as plain text
+                console.log("Stored move:", move);
+            }
         }
-    });
+    }
+};
 
-    // Optional: Auto-refresh logic
-    let lastFileContent = '';
-    function checkForUpdates() {
-        fetch('solve.js')
-            .then(r => r.text())
-            .then(data => {
-                if (data !== lastFileContent && data.search('Repl') === -1) {
-                    lastFileContent = data;
-                    if (navigator.onLine) {
-                        document.getElementById('update').textContent =
-                            'Update detected! Refreshing in 2 seconds...';
-                        setTimeout(() => location.reload(), 2000);
-                    }
-                }
-            })
-            .catch(console.error);
+// Helper: get copy of moves as text array
+function getMoves() {
+    return [...moves];
+}
+
+// --- Send inverse moves ---
+function send() {
+    if (moves.length === 0) {
+        console.warn("No moves to send");
+        return;
     }
 
-    // Uncomment to enable auto-refresh
-    setInterval(checkForUpdates, 30000);
-});
+    const reversed = [...moves].reverse(); // non-destructive reverse
+    reversed.forEach(mov => {
+        let rmov;
+        switch (mov) {
+            case "R":  rmov = "R'"; break;
+            case "R'": rmov = "R"; break;
+            case "F":  rmov = "F'"; break;
+            case "F'": rmov = "F"; break;
+            case "L":  rmov = "L'"; break;
+            case "L'": rmov = "L"; break;
+            case "B":  rmov = "B'"; break;
+            case "B'": rmov = "B"; break;
+            case "D":  rmov = "D'"; break;
+            case "D'": rmov = "D"; break;
+            case "U":  rmov = "U'"; break;
+            case "U'": rmov = "U"; break;
+            default:
+                console.warn("Invalid move:", mov);
+                return;
+        }
+        console.log("Inverse Move:", rmov);
+        move(rmov);
+    });
+}
+
+// --- Perform moves (no colors) ---
+async function move(mov) {
+    console.log("Executing move:", mov);
+    // Here you can add your actual cube-handling logic
+}
+
+var ifr = document.getElementById('cube-view')
+
+function connect() {
+    ifr.postMessage('connect')
+}
