@@ -213,6 +213,7 @@ function update3DCubeFromState(stateString) {
         for (let y = -1; y <= 1; y++) {
             for (let z = -1; z <= 1; z++) {
                 const cubelet = cubed[cubeletIndex];
+
  
                 // Update material colors based on cube.js state
                 cubelet.material[0].color.set(get3DColor('R', { x, y, z })); // right
