@@ -2,21 +2,33 @@ let port = null;
 let reader = null;
 let writer = null;
 let readAbort = null;
+let SpikeState = false
 
 const startup = `from hub import port\r\nimport motor\r\n`;
 const CLP = {
-    "U" : "motor.run_for_degrees(port.A,90,1110)",
-    "U'" :"motor.run_for_degrees(port.A,-90,1110)",
-    "B" : "motor.run_for_degrees(port.B,90,1110)",
-    "B'" :"motor.run_for_degrees(port.B,-90,1110)",
-    "D" : "motor.run_for_degrees(port.D,90,1110)",
-    "D'" :"motor.run_for_degrees(port.D,-90,1110)",
-    "F" : "motor.run_for_degrees(port.F,90,1110)",
-    "F'" :"motor.run_for_degrees(port.F,-90,1110)",
-    "L" : "motor.run_for_degrees(port.E,90,1110)",
-    "L'" :"motor.run_for_degrees(port.E,-90,1110)",
-    "R" : "motor.run_for_degrees(port.C,90,1110)",
-    "R'" :"motor.run_for_degrees(port.C,-90,1110)",
+    "R":  "motor.run_for_degrees(port.A, 90, 720)",
+    "R'": "motor.run_for_degrees(port.A, -90, 720)",
+    "R2": "motor.run_for_degrees(port.A, 180, 720)",
+
+    "U":  "motor.run_for_degrees(port.B, 90, 720)",
+    "U'": "motor.run_for_degrees(port.B, -90, 720)",
+    "U2": "motor.run_for_degrees(port.B, 180, 720)",
+
+    "L":  "motor.run_for_degrees(port.C, 90, 720)",
+    "L'": "motor.run_for_degrees(port.C, -90, 720)",
+    "L2": "motor.run_for_degrees(port.C, 180, 720)",
+
+    "B":  "motor.run_for_degrees(port.D, 90, 720)",
+    "B'": "motor.run_for_degrees(port.D, -90, 720)",
+    "B2": "motor.run_for_degrees(port.D, 180, 720)",
+
+    "D":  "motor.run_for_degrees(port.E, 90, 720)",
+    "D'": "motor.run_for_degrees(port.E, -90, 720)",
+    "D2": "motor.run_for_degrees(port.E, 180, 720)",
+
+    "F":  "motor.run_for_degrees(port.F, 90, 720)",
+    "F'": "motor.run_for_degrees(port.F, -90, 720)",
+    "F2": "motor.run_for_degrees(port.F, 180, 720)",
 };
 
 function log(...args) {
@@ -50,6 +62,7 @@ async function requestAndOpenPort() {
     }
 
     await writer.write(new Uint8Array([3]));
+    SpikeState = true
 
     if (port.readable) {
         readAbort = new AbortController();
@@ -136,7 +149,6 @@ async function runMovement(move) {
     }
 
     log(`Running movement for '${move}'...`);
-    await sendLine(startup);
     await new Promise(resolve => setTimeout(resolve, 500)); // Delay to ensure startup commands are processed
     await sendLine(CLP[move]);
     log('Movement command sent.');
@@ -158,4 +170,15 @@ log('Ready. Click Connect.');
 
 function spike() {
     requestAndOpenPort()
+}
+
+async function SpikeCube(moves, delay = 1000) {
+    if (!SpikeState) {return;}
+    console.log(moves)
+    await sendLine(startup);
+
+    for (const move of moves) {
+        await runMovement(move);
+        await new Promise(r => setTimeout(r, delay));
+    }
 }

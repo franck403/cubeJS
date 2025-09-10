@@ -31,6 +31,9 @@ worker.onmessage = function (e) {
 
     // 3D animation
     animate3DSolution(moves, 10);
+
+    //
+    SpikeCube(moves)
     /*document.getElementById('res').innerHTML = 'Solution: ' + e.data.solution;
 
     const moves = e.data.solution.trim().split(/\s+/);
