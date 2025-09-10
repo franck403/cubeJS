@@ -17,7 +17,7 @@ const worker = new Worker('Corker.js');
 worker.onmessage = function (e) {
   if (e.data.type === 'ready') {
     document.getElementById('res').innerHTML = 'Solver ready!';
-
+    document.getElementById('load').remove()
     // Now that solver is ready, send the cube state
     //worker.postMessage({ type: 'solve', state: cube.asString() });
   }
