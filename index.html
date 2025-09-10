@@ -1,72 +1,101 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8" />
-    <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
-    <script>
-      eruda.init();
-    </script>
-    
-    <!-- Load Three.js and OrbitControls using classic script tags for compatibility -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="orbit.js"></script>
 
-    <!-- load visual.js FIRST so drawCube is defined -->
-    <script src="visual.js"></script>
-    <script src="visual3d.js"></script>
+<head>
+  <meta charset="utf-8" />
+  <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+  <script>
+    eruda.init();
+  </script>
 
-    <!-- cubejs libs -->
-    <script src="https://cdn.jsdelivr.net/gh/ldez/cubejs/lib/cube.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/ldez/cubejs/lib/solve.js"></script>
+  <!-- Load Three.js and OrbitControls using classic script tags for compatibility -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="orbit.js"></script>
 
-    <!-- your main code that calls drawCube -->
-    <script src="cube.js" defer></script>
-    <style>
-      body {
-    display: flex;
-    justify-content: center;
-    flex-direction: column;
-    overflow: hidden;
-}
-      .controls {
-    display: flex;
-    justify-content: center;
-    flex-direction: row;
-}
+  <!-- load visual.js FIRST so drawCube is defined -->
+  <script src="visual.js"></script>
+  <script src="visual3d.js"></script>
 
- 
-.controls button {
-    font-family: Arial, Helvetica, sans-serif;
-    color: #fff;
-    background-color: #333;
-    border: none;
-    margin: 15px;
-    font-size: 2rem;
-    width: 200px;
-    font-weight: 700;
-    cursor: pointer;
-    line-height: 0;
-    padding: 16px;
-    border-radius: 10px;
-}
-.wow {
-  position: fixed;
-  bottom: 50px;
-  left: 50%;
-  transform: translate(-50%,-0%);
-}
-    </style>
-  </head>
-  <body style="background-color: black;color:white;">
-    <p style="display: none;" id="cube"></p>
-    <p style="display: none;" id="res"></p>
-    <div id="cube3d" style="background-color:black;width:100vw;height:100vh;margin:auto;"></div>
-    <div class="controls wow">
-      <button id="connect" onclick="connect()">Connect</button>
-      <button id="reset-state" onclick="reset()">Reset</button>
-      <button id="get-moves" onclick="getMoves()">Start</button>
-    </div>
-    <iframe style="display:none;" src="gan/index.html" frameborder="0" class="cube-view" id="cube-view" allow="bluetooth"></iframe>
-    <script src="sync.js"></script>
-  </body>
+  <!-- cubejs libs -->
+  <script src="https://cdn.jsdelivr.net/gh/ldez/cubejs/lib/cube.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/ldez/cubejs/lib/solve.js"></script>
+
+  <!-- your main code that calls drawCube -->
+  <script src="cube.js" defer></script>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: center;
+      flex-direction: row;
+    }
+
+
+    .controls button {
+      font-family: Arial, Helvetica, sans-serif;
+      color: #fff;
+      background-color: #333;
+      border: none;
+      margin: 15px;
+      font-size: 2rem;
+      width: 200px;
+      font-weight: 700;
+      cursor: pointer;
+      line-height: 0;
+      padding: 16px;
+      border-radius: 10px;
+    }
+
+    .wow {
+      position: fixed;
+      bottom: 50px;
+      left: 50%;
+      transform: translate(-50%, -0%);
+    }
+
+    #load {
+      position: fixed;
+      top: 0px;
+      left: 0px;
+      z-index: 10;
+      width: 100vw;
+      height: 100vh;
+      background: #ffd500;
+    }
+
+    #load img {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 11;
+      height: 50%;
+      border-radius: 30px;
+    }
+  </style>
+</head>
+
+<body style="background-color: black;color:white;">
+  <div id="load">
+    <img src="img/Logo 2.png" />
+  </div>
+  <p style="display: none;" id="cube"></p>
+  <p style="display: none;" id="res"></p>
+  <div id="cube3d" style="background-color:black;width:100vw;height:100vh;margin:auto;"></div>
+  <div class="controls wow">
+    <button id="connect" onclick="connect()">Connect</button>
+    <button id="reset-state" onclick="reset()">Reset</button>
+    <button id="get-moves" onclick="getMoves()">Start</button>
+  </div>
+  <iframe style="display:none;" src="gan/index.html" frameborder="0" class="cube-view" id="cube-view"
+    allow="bluetooth"></iframe>
+  <script src="sync.js"></script>
+</body>
+
 </html>
