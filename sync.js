@@ -45,10 +45,6 @@ document.getElementById('cube-view').onload = function () {
     }
 };
 
-// Helper: get copy of moves as text array
-function getMoves() {
-    return [...moves];
-}
 
 // --- Send inverse moves ---
 function reset2() {

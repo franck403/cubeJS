@@ -172,7 +172,7 @@ function spike() {
     requestAndOpenPort()
 }
 
-async function SpikeCube(moves, delay = 1000) {
+async function SpikeCube(moves, delay = 2000) {
     if (!SpikeState) {return;}
     console.log(moves)
     await sendLine(startup);
@@ -181,4 +181,8 @@ async function SpikeCube(moves, delay = 1000) {
         await runMovement(move);
         await new Promise(r => setTimeout(r, delay));
     }
+}
+
+function sc() {
+    worker.postMessage({ type: 'solve', state: cube.asString() });
 }
