@@ -4,7 +4,7 @@ document.getElementById('res').innerHTML = 'Initializing solver in worker...';
 // Draw scrambled cube immediately
 function initCube() {
   cube = new Cube();
-
+  cube.randomize()
   // Show cube state right away
   document.getElementById('cube').innerHTML = cube.asString();
   init3DCube("cube3d"); // start 3D cube
