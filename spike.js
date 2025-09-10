@@ -1,37 +1,36 @@
-
 let port = null;
 let reader = null;
 let writer = null;
 let readAbort = null;
 
-// motor.run(port.A, 1000)
-const startup = `from hub import port\r\nimport motor\r\n`
-const CLP = { /* Look up table for what to run*/
-    "U" : "motor.run_for_degrees(Port.A,90,1110)",
-    "U'" :"motor.run_for_degrees(Port.A,-90,1110)",
-    "B" : "motor.run_for_degrees(Port.B,90,1110)",
-    "B'" :"motor.run_for_degrees(Port.B,-90,1110)",
-    "D" : "motor.run_for_degrees(Port.D,90,1110)",
-    "D'" :"motor.run_for_degrees(Port.D,-90,1110)",
-    "F" : "motor.run_for_degrees(Port.F,90,1110)",
-    "F'" :"motor.run_for_degrees(Port.F,-90,1110)",
-    "L" : "motor.run_for_degrees(Port.E,90,1110)",
-    "L'" :"motor.run_for_degrees(Port.E,-90,1110)",
-    "R" : "motor.run_for_degrees(Port.C,90,1110)",
-    "R'" :"motor.run_for_degrees(Port.C,-90,1110)",
-}
+const startup = `from hub import port\r\nimport motor\r\n`;
+const CLP = {
+    "U" : "motor.run_for_degrees(port.A,90,1110)",
+    "U'" :"motor.run_for_degrees(port.A,-90,1110)",
+    "B" : "motor.run_for_degrees(port.B,90,1110)",
+    "B'" :"motor.run_for_degrees(port.B,-90,1110)",
+    "D" : "motor.run_for_degrees(port.D,90,1110)",
+    "D'" :"motor.run_for_degrees(port.D,-90,1110)",
+    "F" : "motor.run_for_degrees(port.F,90,1110)",
+    "F'" :"motor.run_for_degrees(port.F,-90,1110)",
+    "L" : "motor.run_for_degrees(port.E,90,1110)",
+    "L'" :"motor.run_for_degrees(port.E,-90,1110)",
+    "R" : "motor.run_for_degrees(port.C,90,1110)",
+    "R'" :"motor.run_for_degrees(port.C,-90,1110)",
+};
 
 function log(...args) {
     console.log(...args);
-    logEl.textContent += args.map(a => (typeof a === 'string' ? a : JSON.stringify(a))).join(' ') + '\n';
-    logEl.scrollTop = logEl.scrollHeight;
+    const logEl = document.getElementById('log');
+    if (logEl) {
+        logEl.textContent += args.map(a => (typeof a === 'string' ? a : JSON.stringify(a))).join(' ') + '\n';
+        logEl.scrollTop = logEl.scrollHeight;
+    }
 }
 
 async function requestAndOpenPort() {
-    // Optional: filter by LEGO vendor id (decimal 1684), but filter may prevent the picker showing other ports
-    // const filters = [{ usbVendorId: 1684 }];
     try {
-        port = await navigator.serial.requestPort(); // or: requestPort({ filters })
+        port = await navigator.serial.requestPort();
     } catch (err) {
         log('Port request cancelled or not allowed:', err?.message || err);
         return;
@@ -46,24 +45,24 @@ async function requestAndOpenPort() {
         return;
     }
 
-    // Setup writer
     if (port.writable) {
         writer = port.writable.getWriter();
     }
 
-    // Setup reader loop (text decoding)
+    await writer.write(new Uint8Array([3]));
+
     if (port.readable) {
         readAbort = new AbortController();
         const decoder = new TextDecoderStream();
-        const readableStreamClosed = port.readable.pipeTo(decoder.writable, { signal: readAbort.signal }).catch(e => {/*ignore*/ });
+        port.readable.pipeTo(decoder.writable, { signal: readAbort.signal }).catch(e => {/*ignore*/});
         reader = decoder.readable.getReader();
         readLoop();
     }
 
-    // UI state
-    connectBtn.disabled = true;
-    disconnectBtn.disabled = false;
-    sendBtn.disabled = false;
+    const connectBtn = document.getElementById('connectBtn');
+    const disconnectBtn = document.getElementById('disconnectBtn');
+    if (connectBtn) connectBtn.disabled = true;
+    if (disconnectBtn) disconnectBtn.disabled = false;
 }
 
 async function readLoop() {
@@ -75,27 +74,22 @@ async function readLoop() {
                 break;
             }
             if (value) {
-                // value is a chunk of text
                 log('RX:', value);
             }
         }
     } catch (err) {
         log('Read error:', err?.message || err);
-    } finally {
-        // cleanup handled elsewhere
     }
 }
 
-// Send a line (ensures \r\n line endings)
 async function sendLine(text) {
     if (!writer) {
         log('Not connected. Call Connect first.');
         return;
     }
-    // Normalize endings to CRLF, because Spike REPL often expects CRLF
     const normalized = text.replace(/\r?\n/g, '\r\n');
     const encoder = new TextEncoder();
-    const bytes = encoder.encode(normalized + '\r\n'); // ensure a final CRLF
+    const bytes = encoder.encode(normalized + '\r\n');
     try {
         await writer.write(bytes);
         log('TX:', text);
@@ -128,24 +122,40 @@ async function disconnectPort() {
     } catch (err) {
         log('Error during disconnect:', err);
     } finally {
-        connectBtn.disabled = false;
-        disconnectBtn.disabled = true;
-        sendBtn.disabled = true;
+        const connectBtn = document.getElementById('connectBtn');
+        const disconnectBtn = document.getElementById('disconnectBtn');
+        if (connectBtn) connectBtn.disabled = false;
+        if (disconnectBtn) disconnectBtn.disabled = true;
     }
 }
 
-// Hook UI
+async function runMovement(move) {
+    if (!CLP[move]) {
+        log(`Error: Movement '${move}' not found in CLP.`);
+        return;
+    }
+
+    log(`Running movement for '${move}'...`);
+    await sendLine(startup);
+    await new Promise(resolve => setTimeout(resolve, 500)); // Delay to ensure startup commands are processed
+    await sendLine(CLP[move]);
+    log('Movement command sent.');
+}
+
 window.addEventListener("message", (event) => {
     if (event.data == 'STrue') {
-        requestAndOpenPort()
+        requestAndOpenPort();
     }
 });
-//sendBtn.addEventListener('click', () => sendLine(lineInput.value));
 
-// Expose sendLine globally so you can call it from console:
 window.sendLine = sendLine;
 window.disconnectSerial = disconnectPort;
-window._spikePort = () => port; // debug helper
+window.runMovement = runMovement;
+window._spikePort = () => port;
 
-// Small note in UI:
-log('Ready. Click Connect. After connecting you can call sendLine("your text") from console or use the input above.');
+log('Ready. Click Connect.');
+
+
+function spike() {
+    requestAndOpenPort()
+}

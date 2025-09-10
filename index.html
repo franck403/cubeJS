@@ -86,11 +86,10 @@
       height: 200px;
       animation: spinner-y0fdc1 2s infinite ease;
       transform-style: preserve-3d;
-      position: fixed;
-      top: 25%;
-      left: 25%;
+      position: fixed;  
+      top: calc(50% - 100px);
+      left: calc(50% - 100px);
       z-index: 11;
-      height: 50%;
     }
 
     .spinner > div {
@@ -166,6 +165,7 @@
   <div id="cube3d" style="background-color:black;width:100vw;height:100vh;margin:auto;"></div>
   <div class="controls wow">
     <button id="connect" onclick="connect()">Connect</button>
+    <button id="get-moves" onclick="spike()">Spike</button>
     <button id="reset-state" onclick="reset()">Reset</button>
     <button id="get-moves" onclick="getMoves()">Start</button>
   </div>
