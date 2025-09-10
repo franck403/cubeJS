@@ -1,0 +1,186 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Spike Serial Console</title>
+  <style>
+    body { margin:0; background:#111; color:#eee; font-family: monospace; }
+    #toolbar { background:#222; padding:6px; }
+    #console {
+      height: calc(100vh - 40px);
+      padding: 8px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      outline: none;
+      user-select: text; /* allow copy selection */
+    }
+    .out { color:#eee; }
+    .in { color:#0f0; }
+    .sys { color:#0ff; }
+    .err { color:#f55; }
+  </style>
+</head>
+<body>
+  <div id="toolbar">
+    <button id="connectBtn">Connect</button>
+    <button id="disconnectBtn" disabled>Disconnect</button>
+  </div>
+  <div id="console" tabindex="0"></div>
+
+<script>
+(async () => {
+  let port, reader, writer, readAbort;
+  let inputBuffer = "";
+  let history = [], histIdx = -1;
+  const consoleEl = document.getElementById("console");
+  const connectBtn = document.getElementById("connectBtn");
+  const disconnectBtn = document.getElementById("disconnectBtn");
+
+  function print(msg, cls="out") {
+    const span = document.createElement("span");
+    span.className = cls;
+    span.textContent = msg;
+    consoleEl.appendChild(span);
+    consoleEl.scrollTop = consoleEl.scrollHeight;
+  }
+  function newLine() { print("\n"); }
+  function prompt() {
+    //print(">>> ", "in");
+    inputBuffer = "";
+  }
+
+  async function connectPort() {
+    try {
+      port = await navigator.serial.requestPort();
+      await port.open({ baudRate: 115200 });
+      writer = port.writable.getWriter();
+
+      // Send CTRL-C immediately
+      await writer.write(new Uint8Array([3]));
+      print("[Sent CTRL-C]\n", "sys");
+
+      if (port.readable) {
+        readAbort = new AbortController();
+        const decoder = new TextDecoderStream();
+        port.readable.pipeTo(decoder.writable, { signal: readAbort.signal });
+        reader = decoder.readable.getReader();
+        readLoop();
+      }
+
+      connectBtn.disabled = true;
+      disconnectBtn.disabled = false;
+      print("Connected\n", "sys");
+      prompt();
+    } catch (e) {
+      print("Error: " + e + "\n", "err");
+    }
+  }
+
+  async function readLoop() {
+    try {
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        if (value) print(value, "out");
+      }
+    } catch (e) {
+      print("Read error: " + e + "\n", "err");
+    }
+  }
+
+  async function sendLine(text) {
+    if (!writer) return;
+    const normalized = text.replace(/\r?\n/g, "\r\n") + "\r\n";
+    await writer.write(new TextEncoder().encode(normalized));
+    //print(">>> " + text + "\n", "in");
+  }
+
+  async function disconnectPort() {
+    if (reader) { await reader.cancel(); reader.releaseLock(); }
+    if (readAbort) readAbort.abort();
+    if (writer) { await writer.close(); writer.releaseLock(); }
+    if (port) { await port.close(); }
+    port = null;
+    connectBtn.disabled = false;
+    disconnectBtn.disabled = true;
+    print("Disconnected\n", "sys");
+  }
+
+  connectBtn.onclick = connectPort;
+  disconnectBtn.onclick = disconnectPort;
+
+  // Handle key input like a terminal
+  consoleEl.addEventListener("keydown", async (e) => {
+    if (!writer) return; // not connected
+
+    // Ctrl+C: send 0x03 if nothing selected
+    if (e.ctrlKey && e.key.toLowerCase() === "c") {
+      if (window.getSelection().toString()) {
+        return; // let browser copy work
+      }
+      e.preventDefault();
+      await writer.write(new Uint8Array([3]));
+      print("[CTRL-C sent]\n", "sys");
+      return;
+    }
+
+    // Ctrl+V: paste text
+    if (e.ctrlKey && e.key.toLowerCase() === "v") {
+      e.preventDefault();
+      try {
+        const clip = await navigator.clipboard.readText();
+        if (clip) {
+          inputBuffer += clip;
+          consoleEl.lastChild.textContent = ">>> " + inputBuffer;
+        }
+      } catch (err) {
+        print("[Clipboard error: " + err + "]\n", "err");
+      }
+      return;
+    }
+
+    if (e.key === "Enter") {
+      e.preventDefault();
+      newLine();
+      if (inputBuffer.trim() !== "") {
+        history.unshift(inputBuffer);
+        histIdx = -1;
+        await sendLine(inputBuffer);
+      }
+      prompt();
+    } else if (e.key === "Backspace") {
+      e.preventDefault();
+      if (inputBuffer.length > 0) {
+        inputBuffer = inputBuffer.slice(0, -1);
+        consoleEl.lastChild.textContent = "\n>>> " + inputBuffer;
+      }
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      if (history.length > 0) {
+        histIdx = Math.min(histIdx + 1, history.length - 1);
+        inputBuffer = history[histIdx];
+        consoleEl.lastChild.textContent = "\n>>> " + inputBuffer;
+      }
+    } else if (e.key === "ArrowDown") {
+      e.preventDefault();
+      if (histIdx > 0) {
+        histIdx--;
+        inputBuffer = history[histIdx];
+      } else {
+        histIdx = -1;
+        inputBuffer = "\n";
+      }
+      consoleEl.lastChild.textContent = ">>> " + inputBuffer;
+    } else if (e.key.length === 1 && !e.ctrlKey && !e.metaKey) {
+      e.preventDefault();
+      inputBuffer += e.key;
+      consoleEl.lastChild.textContent = "\n>>> " + inputBuffer;
+    }
+  });
+
+  // auto focus console
+  consoleEl.focus();
+})();
+</script>
+</body>
+</html>

@@ -80,33 +80,27 @@
       border-radius: 30px;
     }
 
-    .spinner {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 11;
-      height: 50%;
-      border-radius: 30px;
-
-    }
 
     .spinner {
-      width: 70.4px;
-      height: 70.4px;
+      width: 200px;
+      height: 200px;
       animation: spinner-y0fdc1 2s infinite ease;
       transform-style: preserve-3d;
+      position: fixed;
+      top: 25%;
+      left: 25%;
+      z-index: 11;
+      height: 50%;
     }
 
-    .spinner>div {
+    .spinner > div {
       height: 100%;
       position: absolute;
       width: 100%;
-      border: 2px solid #fff;
     }
 
     .spinner div:nth-of-type(1) {
-      transform: translateZ(-35.2px) rotateY(180deg);
+      transform: translateZ(-100px) rotateY(180deg);
     }
 
     .spinner div:nth-of-type(2) {
@@ -130,7 +124,7 @@
     }
 
     .spinner div:nth-of-type(6) {
-      transform: translateZ(35.2px);
+      transform: translateZ(100px);
     }
 
     @keyframes spinner-y0fdc1 {
@@ -157,12 +151,12 @@
 
 <body style="background-color: black;color:white;">
   <div id="load">
-    <img src="img/Logo 2.png" />
+    <!--<img src="img/Logo 2.png" /> -->
     <div class="spinner">
-      <div><img src="img/UU.jpg" class="cubeImage" /></div>
+      <div><img src="img/LU.jpg" class="cubeImage" /></div>
       <div><img src="img/RU.jpg" class="cubeImage" /></div>
       <div><img src="img/BU.jpg" class="cubeImage" /></div>
-      <div><img src="img/LU.jpg" class="cubeImage" /></div>
+      <div><img src="img/UU.jpg" class="cubeImage" /></div>
       <div><img src="img/FU.jpg" class="cubeImage" /></div>
       <div><img src="img/DU.jpg" class="cubeImage" /></div>
     </div>
