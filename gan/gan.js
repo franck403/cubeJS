@@ -20,5 +20,7 @@ window.addEventListener("message", (event) => {
         document.getElementById('connect').click()
     } else if (event.data == 'reset') {
         document.getElementById('reset-state').click()
+    }else if (event.data == 'state') {
+        window.parent.postMessage('S' + document.getElementById("connect").innerHTML === "Disconnect")
     }
 });
