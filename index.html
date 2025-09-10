@@ -69,7 +69,7 @@
       background: #ffd500;
     }
 
-    #load img {
+    #load>img {
       position: fixed;
       top: 50%;
       left: 50%;
@@ -78,12 +78,93 @@
       height: 50%;
       border-radius: 30px;
     }
+
+    .spinner {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 11;
+      height: 50%;
+      border-radius: 30px;
+
+    }
+
+    .spinner {
+      width: 70.4px;
+      height: 70.4px;
+      animation: spinner-y0fdc1 2s infinite ease;
+      transform-style: preserve-3d;
+    }
+
+    .spinner>div {
+      height: 100%;
+      position: absolute;
+      width: 100%;
+      border: 2px solid #fff;
+    }
+
+    .spinner div:nth-of-type(1) {
+      transform: translateZ(-35.2px) rotateY(180deg);
+    }
+
+    .spinner div:nth-of-type(2) {
+      transform: rotateY(-270deg) translateX(50%);
+      transform-origin: top right;
+    }
+
+    .spinner div:nth-of-type(3) {
+      transform: rotateY(270deg) translateX(-50%);
+      transform-origin: center left;
+    }
+
+    .spinner div:nth-of-type(4) {
+      transform: rotateX(90deg) translateY(-50%);
+      transform-origin: top center;
+    }
+
+    .spinner div:nth-of-type(5) {
+      transform: rotateX(-90deg) translateY(50%);
+      transform-origin: bottom center;
+    }
+
+    .spinner div:nth-of-type(6) {
+      transform: translateZ(35.2px);
+    }
+
+    @keyframes spinner-y0fdc1 {
+      0% {
+        transform: rotate(45deg) rotateX(-25deg) rotateY(25deg);
+      }
+
+      50% {
+        transform: rotate(45deg) rotateX(-385deg) rotateY(25deg);
+      }
+
+      100% {
+        transform: rotate(45deg) rotateX(-385deg) rotateY(385deg);
+      }
+    }
+
+    .cubeImage {
+      border-radius: 0px;
+      height: 100%;
+      width: 100%;
+    }
   </style>
 </head>
 
 <body style="background-color: black;color:white;">
   <div id="load">
     <img src="img/Logo 2.png" />
+    <div class="spinner">
+      <div><img src="img/U.png" class="cubeImage" /></div>
+      <div><img src="img/R.png" class="cubeImage" /></div>
+      <div><img src="img/B.png" class="cubeImage" /></div>
+      <div><img src="img/L.png" class="cubeImage" /></div>
+      <div><img src="img/F.png" class="cubeImage" /></div>
+      <div><img src="img/D.png" class="cubeImage" /></div>
+    </div>
   </div>
   <p style="display: none;" id="cube"></p>
   <p style="display: none;" id="res"></p>
