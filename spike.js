@@ -174,6 +174,13 @@ function spike() {
     requestAndOpenPort()
 }
 
+async function SpikeMove(move, delay = 2000) {
+    if (!SpikeState) {return;}
+    await sendLine(startup);
+    await runMovement(move);
+    await new Promise(r => setTimeout(r, delay));
+}
+
 async function SpikeCube(moves, delay = 2000) {
     if (!SpikeState) {return;}
     console.log(moves)
