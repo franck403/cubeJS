@@ -271,8 +271,8 @@ function update3DCubeFromState(stateString) {
                     if (x === 1 && y === 1 && z === 0) addCenterSticker(cubelet, 0, "CR.png", 180);    // UR
                     if (x === 1 && y === -1 && z === 0) addCenterSticker(cubelet, 0, "CR.png", 0); // DR
                     if (x === 1 && z === 1 && y === 0) addCenterSticker(cubelet, 0, "CR.png", 270);  // FR
-                    if (x === 1 && z === -1 && y === 0) addCenterSticker(cubelet, 0, "CR.png", 90);  // BR
- 
+                    if (x === 1 && z === -1 && y === 0) addCenterSticker(cubelet, 0, "CR.png", 90);  // B
+                    
                     // --- L* edges ---
                     if (x === -1 && y === 1 && z === 0) addCenterSticker(cubelet, 1, "CL.png", 180);    // UL
                     if (x === -1 && y === -1 && z === 0) addCenterSticker(cubelet, 1, "CL.png", 0); // DL

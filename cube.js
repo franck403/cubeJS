@@ -4,7 +4,7 @@ document.getElementById('res').innerHTML = 'Initializing solver in worker...';
 // Draw scrambled cube immediately
 function initCube() {
   cube = new Cube();
-  cube.randomize()
+  //cube.randomize()
   // Show cube state right away
   document.getElementById('cube').innerHTML = cube.asString();
   init3DCube("cube3d"); // start 3D cube
@@ -30,7 +30,7 @@ worker.onmessage = function (e) {
     const moves = e.data.solution.trim().split(/\s+/);
 
     // 3D animation
-    animate3DSolution(moves, 10);
+    //animate3DSolution(moves, 10);
 
     //
     SpikeCube(moves)

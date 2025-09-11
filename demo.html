@@ -2,99 +2,176 @@
 <html>
 
 <head>
-    <meta charset="utf-8" />
-    <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
-    <script>
-        eruda.init();
-    </script>
+  <meta charset="utf-8" />
+  <script src="spike.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+  <script>
+    eruda.init();
+  </script>
 
-    <!-- Load Three.js and OrbitControls using classic script tags for compatibility -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="orbit.js"></script>
+  <!-- Load Three.js and OrbitControls using classic script tags for compatibility -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="orbit.js"></script>
 
-    <!-- load visual.js FIRST so drawCube is defined -->
-    <script src="visual.js"></script>
-    <script src="visual3d.js"></script>
+  <!-- load visual.js FIRST so drawCube is defined -->
+  <script src="visual.js"></script>
+  <script src="visual3d.js"></script>
 
-    <!-- cubejs libs -->
-    <script src="https://cdn.jsdelivr.net/gh/ldez/cubejs/lib/cube.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/ldez/cubejs/lib/solve.js"></script>
+  <!-- cubejs libs -->
+  <script src="https://cdn.jsdelivr.net/gh/ldez/cubejs/lib/cube.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/ldez/cubejs/lib/solve.js"></script>
 
-    <!-- your main code that calls drawCube -->
-    <script src="cube.js" defer></script>
-    <style>
-        body {
-            display: flex;
-            justify-content: center;
-            flex-direction: column;
-            overflow: hidden;
-        }
+  <!-- your main code that calls drawCube -->
+  <script src="cube.js" defer></script>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      flex-direction: column;
+      overflow: hidden;
+    }
 
-        .controls {
-            display: flex;
-            justify-content: center;
-            flex-direction: row;
-        }
+    .controls {
+      display: flex;
+      justify-content: center;
+      flex-direction: row;
+    }
 
 
-        .controls button {
-            font-family: Arial, Helvetica, sans-serif;
-            color: #fff;
-            background-color: #333;
-            border: none;
-            margin: 15px;
-            font-size: 2rem;
-            width: 200px;
-            font-weight: 700;
-            cursor: pointer;
-            line-height: 0;
-            padding: 16px;
-            border-radius: 10px;
-        }
+    .controls button {
+      font-family: Arial, Helvetica, sans-serif;
+      color: #fff;
+      background-color: #333;
+      border: none;
+      margin: 15px;
+      font-size: 2rem;
+      width: 200px;
+      font-weight: 700;
+      cursor: pointer;
+      line-height: 0;
+      padding: 16px;
+      border-radius: 10px;
+    }
 
-        .wow {
-            position: fixed;
-            bottom: 50px;
-            left: 50%;
-            transform: translate(-50%, -0%);
-        }
+    .wow {
+      position: fixed;
+      bottom: 50px;
+      left: 50%;
+      transform: translate(-50%, -0%);
+    }
 
-        #load {
-            position: fixed;
-            top: 0px;
-            left: 0px;
-            z-index: 10;
-            width: 100vw;
-            height: 100vh;
-            background: #ffd500;
-        }
-        #load img {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 11;
-            height: 50%;
-            border-radius: 30px;
-        }
-    </style>
+    #load {
+      position: fixed;
+      top: 0px;
+      left: 0px;
+      z-index: 10;
+      width: 100vw;
+      height: 100vh;
+      background: #ffd500;
+    }
+
+    #load>img {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 11;
+      height: 50%;
+      border-radius: 30px;
+    }
+
+
+    .spinner {
+      width: 200px;
+      height: 200px;
+      animation: spinner-y0fdc1 2s infinite ease;
+      transform-style: preserve-3d;
+      position: fixed;  
+      top: calc(50% - 100px);
+      left: calc(50% - 100px);
+      z-index: 11;
+    }
+
+    .spinner > div {
+      height: 100%;
+      position: absolute;
+      width: 100%;
+    }
+
+    .spinner div:nth-of-type(1) {
+      transform: translateZ(-100px) rotateY(180deg);
+    }
+
+    .spinner div:nth-of-type(2) {
+      transform: rotateY(-270deg) translateX(50%);
+      transform-origin: top right;
+    }
+
+    .spinner div:nth-of-type(3) {
+      transform: rotateY(270deg) translateX(-50%);
+      transform-origin: center left;
+    }
+
+    .spinner div:nth-of-type(4) {
+      transform: rotateX(90deg) translateY(-50%);
+      transform-origin: top center;
+    }
+
+    .spinner div:nth-of-type(5) {
+      transform: rotateX(-90deg) translateY(50%);
+      transform-origin: bottom center;
+    }
+
+    .spinner div:nth-of-type(6) {
+      transform: translateZ(100px);
+    }
+
+    @keyframes spinner-y0fdc1 {
+      0% {
+        transform: rotate(45deg) rotateX(-25deg) rotateY(25deg);
+      }
+
+      50% {
+        transform: rotate(45deg) rotateX(-385deg) rotateY(25deg);
+      }
+
+      100% {
+        transform: rotate(45deg) rotateX(-385deg) rotateY(385deg);
+      }
+    }
+
+    .cubeImage {
+      border-radius: 0px;
+      height: 100%;
+      width: 100%;
+    }
+  </style>
 </head>
 
 <body style="background-color: black;color:white;">
-    <div id="load">
-        <img src="img/Logo 2.png" />
+  <div id="load">
+    <!--<img src="img/Logo 2.png" /> -->
+    <div class="spinner">
+      <div><img src="img/LU.jpg" class="cubeImage" /></div>
+      <div><img src="img/RU.jpg" class="cubeImage" /></div>
+      <div><img src="img/BU.jpg" class="cubeImage" /></div>
+      <div><img src="img/UU.jpg" class="cubeImage" /></div>
+      <div><img src="img/DU.jpg" class="cubeImage" /></div>
+      <div><img src="img/FU.jpg" class="cubeImage" /></div>
     </div>
-    <p style="display: none;" id="cube"></p>
-    <p style="display: none;" id="res"></p>
-    <div id="cube3d" style="background-color:black;width:100vw;height:100vh;margin:auto;"></div>
-    <div class="controls wow">
-        <button id="connect" onclick="connect()">Connect</button>
-        <button id="reset-state" onclick="reset()">Reset</button>
-        <button id="get-moves" onclick="sc()">Start</button>
-    </div>
-    <iframe style="display:none;" src="gan/index.html" frameborder="0" class="cube-view" id="cube-view"
-        allow="bluetooth"></iframe>
-    <script src="sync.js"></script>
+  </div>
+  <p style="display: none;" id="cube"></p>
+  <p style="display: none;" id="res"></p>
+  <div id="cube3d" style="background-color:black;width:100vw;height:100vh;margin:auto;"></div>
+  <div class="controls wow">
+    <button id="connect" onclick="connect()">Gan Cube</button>
+    <button id="get-moves" onclick="spike()">Spike</button>
+    <button id="reset-state" onclick="reset()">Reset</button>
+    <button id="get-moves" onclick="sc()">Start</button>
+  </div>
+  <iframe style="display:none;" src="gan/index.html" frameborder="0" class="cube-view" id="cube-view"
+    allow="bluetooth"></iframe>
+  <script src="sync.js"></script>
 </body>
 
 </html>

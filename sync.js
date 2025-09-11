@@ -89,6 +89,8 @@ const reversedMoves = new Set(["D", "L", "F"]);
 
 // --- Perform moves (no colors) ---
 async function move(mov) {
+    moves.push(mov)
+    cube.move(mov)
     console.log("Executing move:", mov);
     let clockwise = !mov.endsWith("'");;
     let face = mov.replace("'", "");
