@@ -370,7 +370,7 @@ function faceConfig(face, clockwise) {
 /**
  * Rotation animée d'une face.
  */
-function rotateFace(face, clockwise = true) {
+function rotateFace(face, clockwise = true,delay=10) {
     return new Promise((resolve) => {
         animating = true;
 
@@ -387,7 +387,7 @@ function rotateFace(face, clockwise = true) {
         const startQuat = pivot.quaternion.clone();
 
         const startTime = performance.now();
-        const duration = 5;
+        const duration = delay;
 
         function animateRotation() {
             const now = performance.now();
@@ -425,7 +425,7 @@ async function animate3DSolution(moves, delay = 200) {
         if (move.includes("'")) clockwise = false;
 
         for (let i = 0; i < times; i++) {
-            await rotateFace(face, clockwise);
+            await rotateFace(face, clockwise,delay);
             await new Promise(r => setTimeout(r, delay));
         }
     }
