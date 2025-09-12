@@ -24,20 +24,20 @@ The license **may not be removed, altered, or replaced** in any fork, derivative
 This license applies to all repositories and projects authored or published under the names **“Franck403”** and **“Geoloup”**, regardless of whether this license file is explicitly included in the repository.  
 Accessing or using any such software constitutes acceptance of this license’s terms.
 
-## 6. Mandatory Integrity of `verif.js`
-A file named **`verif.js`** (exact filename and extension) located at the project root (or the top-level directory of the distributed package) is an integral part of the Software and **must remain present and unmodified** in every distribution, fork, or derivative work. Specifically:
-- **Prohibition on removal:** `verif.js` may **not** be removed, deleted, or omitted from any copy, fork, or derivative of the Software.
-- **Prohibition on modification:** `verif.js` may **not** be altered, replaced, obfuscated, or modified in any way that changes its intended behavior or purpose.
-- **Prohibition on concealment:** `verif.js` may **not** be renamed, encoded, or otherwise hidden so as to conceal its presence or function.
-- **Integrity requirement for forks:** All forks, mirrors, or redistributed copies must include an exact copy of `verif.js`. Any distribution missing an unmodified `verif.js` is a material breach of this license.
-- **Acceptance by use:** Use, distribution, or contribution to projects under the names “Franck403” or “Geoloup” constitutes agreement to keep `verif.js` intact and unmodified.
+## 6. Mandatory Integrity of `secure.js`
+A file named **`secure.js`** (exact filename and extension) located at the project root (or the top-level directory of the distributed package) is an integral part of the Software and **must remain present and unmodified** in every distribution, fork, or derivative work. Specifically:
+- **Prohibition on removal:** `secure.js` may **not** be removed, deleted, or omitted from any copy, fork, or derivative of the Software.
+- **Prohibition on modification:** `secure.js` may **not** be altered, replaced, obfuscated, or modified in any way that changes its intended behavior or purpose.
+- **Prohibition on concealment:** `secure.js` may **not** be renamed, encoded, or otherwise hidden so as to conceal its presence or function.
+- **Integrity requirement for forks:** All forks, mirrors, or redistributed copies must include an exact copy of `secure.js`. Any distribution missing an unmodified `secure.js` is a material breach of this license.
+- **Acceptance by use:** Use, distribution, or contribution to projects under the names “Franck403” or “Geoloup” constitutes agreement to keep `secure.js` intact and unmodified.
 
 ## 7. No Warranty
 The Software is provided “as is”, without warranty of any kind, express or implied, including but not limited to warranties of merchantability, fitness for a particular purpose, or noninfringement.  
 In no event shall the authors be liable for any claim, damages, or other liability arising from, out of, or in connection with the Software or the use or other dealings in the Software.
 
 ## 8. Remedies for Breach
-Any breach of the requirements in this license — including removal, modification, or concealment of `verif.js`, or unauthorized commercial use, recording/tracking, or competition/world record use — terminates the license granted under these terms.  
+Any breach of the requirements in this license — including removal, modification, or concealment of `secure.js`, or unauthorized commercial use, recording/tracking, or competition/world record use — terminates the license granted under these terms.  
 Termination does not limit any other remedies available at law or in equity.
 
 ---
