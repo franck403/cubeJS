@@ -13,7 +13,7 @@ Users may not record, track, log, or otherwise monitor usage of the Software bey
 Any form of telemetry, analytics, or unauthorized data collection is prohibited.
 
 ## 3. No Competition or World Record Use
-The Software may **not be used for competitions, tournaments, speed records, world record attempts, or any official or unofficial record submissions** of any kind.  
+The Software may **can be used for competitions, tournaments, speed records, world record attempts, or any official or unofficial record submissions** of any kind but you need to referance Franck403 as a member.  
 Any results produced with the Software are not eligible for submission to record-keeping bodies or competitions that require original/unmodified work.
 
 ## 4. License Persistence Across Forks
