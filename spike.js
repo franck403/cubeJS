@@ -14,9 +14,9 @@ const CLP = {
     "U'": "motor.run_for_degrees(port.B, -90, 1110)",
     "U2": "motor.run_for_degrees(port.B, 180, 1110)",
 
-    "L":  "motor.run_for_degrees(port.C, 90, 1110)",
-    "L'": "motor.run_for_degrees(port.C, -90, 1110)",
-    "L2": "motor.run_for_degrees(port.C, 180, 1110)",
+    "L":  "motor.run_for_degrees(port.A, 90, 1110)",
+    "L'": "motor.run_for_degrees(port.A, -90, 1110)",
+    "L2": "motor.run_for_degrees(port.A, 180, 1110)",
 
     "B":  "motor.run_for_degrees(port.D, 90, 1110)",
     "B'": "motor.run_for_degrees(port.D, -90, 1110)",
@@ -181,7 +181,7 @@ async function SpikeMove(move, delay = 2000) {
     await new Promise(r => setTimeout(r, delay));
 }
 
-async function SpikeCube(moves, delay = 2000) {
+async function SpikeCube(moves, delay = 500) {
     if (!SpikeState) {return;}
     console.log(moves)
     await sendLine(startup);
