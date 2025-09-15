@@ -1,6 +1,6 @@
 # Geoloup Non-Commercial License (GNCL) v1.2
 
-**Copyright © [year] Franck403 & Geoloup**
+**Copyright © 2025 Franck403 & Geoloup**
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated files (the “Software”), to use, copy, modify, and distribute the Software, subject to the following conditions:
 
@@ -42,7 +42,7 @@ Termination does not limit any other remedies available at law or in equity.
 
 ---
 
-**Obligatyory repository practice:** include this file exactly as `LICENSE` or `LICENSE.md` at the repository root, and include an unmodified copy of `secure.js` at the repository root.
+**Obligatyory repository practice:** include this file exactly as `LICENSE` and `LICENSE.md` at the repository root, and include an unmodified copy of `secure.js` at the repository root.
 
 ---
 
