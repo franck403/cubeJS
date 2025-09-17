@@ -1,35 +1,24 @@
-let port = null;
-let reader = null;
-let writer = null;
-let readAbort = null;
-let SpikeState = false
+let port1 = null;
+let port2 = null;
 
-const startup = `from hub import port\r\nimport motor\r\n`;
-const CLP = {
-    "R":  "motor.run_for_degrees(port.A, 90, 1110)",
-    "R'": "motor.run_for_degrees(port.A, -90, 1110)",
-    "R2": "motor.run_for_degrees(port.A, 180, 1110)",
+let reader1 = null;
+let reader2 = null;
 
-    "U":  "motor.run_for_degrees(port.B, 90, 1110)",
-    "U'": "motor.run_for_degrees(port.B, -90, 1110)",
-    "U2": "motor.run_for_degrees(port.B, 180, 1110)",
+let spike1 = null;
+let spike2 = null;
 
-    "L":  "motor.run_for_degrees(port.A, 90, 1110)",
-    "L'": "motor.run_for_degrees(port.A, -90, 1110)",
-    "L2": "motor.run_for_degrees(port.A, 180, 1110)",
+let readAbort1 = null;
+let readAbort2 = null;
 
-    "B":  "motor.run_for_degrees(port.D, 90, 1110)",
-    "B'": "motor.run_for_degrees(port.D, -90, 1110)",
-    "B2": "motor.run_for_degrees(port.D, 180, 1110)",
+let Spike1State = false;
+let Spike2State = false;
 
-    "D":  "motor.run_for_degrees(port.E, 90, 1110)",
-    "D'": "motor.run_for_degrees(port.E, -90, 1110)",
-    "D2": "motor.run_for_degrees(port.E, 180, 1110)",
-
-    "F":  "motor.run_for_degrees(port.F, 90, 1110)",
-    "F'": "motor.run_for_degrees(port.F, -90, 1110)",
-    "F2": "motor.run_for_degrees(port.F, 180, 1110)",
-};
+const startup = `from hub import port, light_matrix\r\nimport motor\r\n`;
+const hub1 = ['A', 'B', 'C'];
+const hub2 = ['D', 'E', 'F'];
+const hub1Moves = ['R', 'U', 'L'];
+const hub2Moves = ['B', 'D', 'F'];
+const speed = 1110;
 
 function log(...args) {
     console.log(...args);
@@ -42,35 +31,55 @@ function log(...args) {
 
 async function requestAndOpenPort() {
     try {
-        port = await navigator.serial.requestPort();
+        port1 = await navigator.serial.requestPort();
+        port2 = await navigator.serial.requestPort();
     } catch (err) {
         log('Port request cancelled or not allowed:', err?.message || err);
         return;
     }
 
     try {
-        await port.open({ baudRate: 115200 });
-        log('Port opened at 115200');
+        await port1.open({ baudRate: 115200 });
+        await port2.open({ baudRate: 115200 });
+        log('Ports opened at 115200');
     } catch (err) {
-        log('Failed to open port:', err);
-        port = null;
+        log('Failed to open ports:', err);
+        port1 = null;
+        port2 = null;
         return;
     }
 
-    if (port.writable) {
-        writer = port.writable.getWriter();
+    if (port1.writable) {
+        spike1 = port1.writable.getWriter();
+    }
+    if (port2.writable) {
+        spike2 = port2.writable.getWriter();
     }
 
-    await writer.write(new Uint8Array([3]));
-    SpikeState = true
+    await spike1.write(new Uint8Array([3]));
+    Spike1State = true;
+    await spike2.write(new Uint8Array([3]));
+    Spike2State = true;
 
-    if (port.readable) {
-        readAbort = new AbortController();
+    if (port1.readable) {
+        readAbort1 = new AbortController();
         const decoder = new TextDecoderStream();
-        port.readable.pipeTo(decoder.writable, { signal: readAbort.signal }).catch(e => {/*ignore*/});
-        reader = decoder.readable.getReader();
-        readLoop();
+        port1.readable.pipeTo(decoder.writable, { signal: readAbort1.signal }).catch(() => {});
+        reader1 = decoder.readable.getReader();
+        readLoop(reader1);
     }
+
+    if (port2.readable) {
+        readAbort2 = new AbortController();
+        const decoder = new TextDecoderStream();
+        port2.readable.pipeTo(decoder.writable, { signal: readAbort2.signal }).catch(() => {});
+        reader2 = decoder.readable.getReader();
+        readLoop(reader2);
+    }
+
+    // Send startup code to both hubs once
+    await sendLine(startup, spike1);
+    await sendLine(startup, spike2);
 
     const connectBtn = document.getElementById('connectBtn');
     const disconnectBtn = document.getElementById('disconnectBtn');
@@ -78,7 +87,7 @@ async function requestAndOpenPort() {
     if (disconnectBtn) disconnectBtn.disabled = false;
 }
 
-async function readLoop() {
+async function readLoop(reader) {
     try {
         while (true) {
             const { value, done } = await reader.read();
@@ -95,8 +104,8 @@ async function readLoop() {
     }
 }
 
-async function sendLine(text) {
-    if (!writer) {
+async function sendLine(text, spike) {
+    if (!spike) {
         log('Not connected. Call Connect first.');
         return;
     }
@@ -105,8 +114,8 @@ async function sendLine(text) {
     const bytes = encoder.encode(normalized);
 
     try {
-        await writer.write(bytes);
-        await writer.write(encoder.encode('\r\n'));
+        await spike.write(bytes);
+        await spike.write(encoder.encode('\r\n'));
         log('TX:', text);
     } catch (err) {
         log('Write error:', err?.message || err);
@@ -115,25 +124,48 @@ async function sendLine(text) {
 
 async function disconnectPort() {
     try {
-        if (reader) {
-            await reader.cancel();
-            reader.releaseLock();
-            reader = null;
+        // Spike 1
+        if (reader1) {
+            await reader1.cancel();
+            reader1.releaseLock();
+            reader1 = null;
         }
-        if (readAbort) {
-            try { readAbort.abort(); } catch (e) { }
-            readAbort = null;
+        if (readAbort1) {
+            try { readAbort1.abort(); } catch (e) {}
+            readAbort1 = null;
         }
-        if (writer) {
-            try { await writer.close(); } catch (e) { }
-            writer.releaseLock();
-            writer = null;
+        if (spike1) {
+            spike1.releaseLock();
+            spike1 = null;
         }
-        if (port) {
-            try { await port.close(); } catch (e) { }
-            log('Port closed');
-            port = null;
+        if (port1) {
+            try { await port1.close(); } catch (e) {}
+            log('Spike 1 port closed');
+            port1 = null;
         }
+        Spike1State = false;
+
+        // Spike 2
+        if (reader2) {
+            await reader2.cancel();
+            reader2.releaseLock();
+            reader2 = null;
+        }
+        if (readAbort2) {
+            try { readAbort2.abort(); } catch (e) {}
+            readAbort2 = null;
+        }
+        if (spike2) {
+            spike2.releaseLock();
+            spike2 = null;
+        }
+        if (port2) {
+            try { await port2.close(); } catch (e) {}
+            log('Spike 2 port closed');
+            port2 = null;
+        }
+        Spike2State = false;
+
     } catch (err) {
         log('Error during disconnect:', err);
     } finally {
@@ -145,19 +177,43 @@ async function disconnectPort() {
 }
 
 async function runMovement(move) {
-    if (!CLP[move]) {
-        log(`Error: Movement '${move}' not found in CLP.`);
-        return;
+    const base = move[0];          // e.g. "R"
+    const modifier = move.slice(1); // "", "2", or "'"
+
+    let port, spike;
+    if (hub1Moves.includes(base)) {
+        port = hub1[hub1Moves.indexOf(base)];
+        spike = 1;
+    } else if (hub2Moves.includes(base)) {
+        port = hub2[hub2Moves.indexOf(base)];
+        spike = 2;
     }
 
-    log(`Running movement for '${move}'...`);
-    await new Promise(resolve => setTimeout(resolve, 500)); // Delay to ensure startup commands are processed
-    await sendLine(CLP[move]);
-    log('Movement command sent.');
+    if (!port) return;
+
+    let degrees = 0;
+    if (modifier === "") degrees = 90;
+    else if (modifier === "2") degrees = 180;
+    else if (modifier === "'") degrees = -90;
+
+    const cmd = `motor.run_for_degrees(port.${port}, ${degrees}, ${speed})`;
+    const matrix = `light_matrix.write("${base}${modifier}")`;
+
+    if (spike === 1) {
+        log(`Running '${move}' on Spike 1`);
+        await new Promise(r => setTimeout(r, 300));
+        await sendLine(matrix, spike1);
+        await sendLine(cmd, spike1);
+    } else if (spike === 2) {
+        log(`Running '${move}' on Spike 2`);
+        await new Promise(r => setTimeout(r, 300));
+        await sendLine(matrix, spike2);
+        await sendLine(cmd, spike2);
+    }
 }
 
 window.addEventListener("message", (event) => {
-    if (event.data == 'STrue') {
+    if (event.data === 'STrue') {
         requestAndOpenPort();
     }
 });
@@ -165,26 +221,22 @@ window.addEventListener("message", (event) => {
 window.sendLine = sendLine;
 window.disconnectSerial = disconnectPort;
 window.runMovement = runMovement;
-window._spikePort = () => port;
+window._spikePorts = () => ({ port1, port2 });
 
 log('Ready. Click Connect.');
 
-
 function spike() {
-    requestAndOpenPort()
+    requestAndOpenPort();
 }
 
 async function SpikeMove(move, delay = 2000) {
-    if (!SpikeState) {return;}
-    await sendLine(startup);
+    if (!Spike1State || !Spike2State) return;
     await runMovement(move);
     await new Promise(r => setTimeout(r, delay));
 }
 
 async function SpikeCube(moves, delay = 500) {
-    if (!SpikeState) {return;}
-    console.log(moves)
-    await sendLine(startup);
+    if (!Spike1State && !Spike2State) return;
 
     for (const move of moves) {
         await runMovement(move);
