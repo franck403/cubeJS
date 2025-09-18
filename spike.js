@@ -8,11 +8,14 @@ let leftAbort = null;
 let rightAbort = null;
 let SpikeState = { left: false, right: false };
 
-// One-line startup + connect sound
-const startup = "from hub import port, motor, sound, time;sound.beep(392,120);time.sleep_ms(120);sound.beep(494,120);time.sleep_ms(120);sound.beep(587,150);time.sleep_ms(150);sound.beep(784,200)";
+// Imports only
+const startup = "import motor\n\nfrom hub import port, light_matrix, sound\n import time";
 
-// Original long music (kept!)
-const music = "from hub import sound\nimport time\n\nsound.beep(196, 800) ; time.sleep_ms(850)  # G3\nsound.beep(262, 1000) ; time.sleep_ms(1050)  # C4\nsound.beep(220, 900) ; time.sleep_ms(950)  # A3\nsound.beep(294, 1200) ; time.sleep_ms(1250)  # D4\nsound.beep(247, 1000) ; time.sleep_ms(1050)  # B3\nsound.beep(196, 1500) ; time.sleep_ms(1550)  # G3\nsound.beep(330, 800) ; time.sleep_ms(850)  # E4\nsound.beep(262, 1400) ; time.sleep_ms(1450)  # C4";
+// Connect sound (separate, like before)
+const connectSound = "sound.beep(392,120);time.sleep_ms(120);sound.beep(494,120);time.sleep_ms(120);sound.beep(587,150);time.sleep_ms(150);sound.beep(784,200)";
+
+// Your long music (kept untouched)
+const music = "sound.beep(196, 800) ; time.sleep_ms(850)  # G3\nsound.beep(262, 1000) ; time.sleep_ms(1050)  # C4\nsound.beep(220, 900) ; time.sleep_ms(950)  # A3\nsound.beep(294, 1200) ; time.sleep_ms(1250)  # D4\nsound.beep(247, 1000) ; time.sleep_ms(1050)  # B3\nsound.beep(196, 1500) ; time.sleep_ms(1550)  # G3\nsound.beep(330, 800) ; time.sleep_ms(850)  # E4\nsound.beep(262, 1400) ; time.sleep_ms(1450)  # C4";
 
 // LEFT side ports: A, C, E
 const CLP_LEFT = {
@@ -77,8 +80,9 @@ async function openSpike(which) {
             SpikeState.right = true;
         }
 
-        // send startup+connect sound once
+        // send imports + then connect sound separately
         await sendLine(writer, startup);
+        await sendLine(writer, connectSound);
 
         log(`${which} Spike connected`);
     } catch (err) {
