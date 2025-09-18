@@ -13,39 +13,39 @@ const connectSound = "sound.beep(392,120);time.sleep_ms(120);sound.beep(494,120)
 const music = "sound.beep(196, 800) ; time.sleep_ms(850)  # G3\nsound.beep(262, 1000) ; time.sleep_ms(1050)  # C4\nsound.beep(220, 900) ; time.sleep_ms(950)  # A3\nsound.beep(294, 1200) ; time.sleep_ms(1250)  # D4\nsound.beep(247, 1000) ; time.sleep_ms(1050)  # B3\nsound.beep(196, 1500) ; time.sleep_ms(1550)  # G3\nsound.beep(330, 800) ; time.sleep_ms(850)  # E4\nsound.beep(262, 1400) ; time.sleep_ms(1450)  # C4";
 
 // python/Spike1matrix.py
-const spike1matrixPy = `from hub import light_matrix, port\nimport motor\nlights={port.A:[(0,y)for y in range(5)],port.C:[(x,0)for x in range(5)],port.E:[(i,i)for i in range(5)]}\ndef layer(motor_port,rotation,speed):motor.run_for_degrees(motor_port,rotation,speed);[light_matrix.set_pixel(x,y,0)for(x,y)in lights.get(motor_port,[])];[light_matrix.set_pixel(x,y,100)for(x,y)in lights.get(motor_port,[])]`
+const spike1matrixPy = `from hub import light_matrix, port\nimport motor\nlights={port.A:[(0,y)for y in range(5)],port.C:[(x,0)for x in range(5)],port.E:[(i,i)for i in range(5)]}\ndef layer(motor_port,rotation,speed):motor(motor_port,rotation,speed);[light_matrix.set_pixel(x,y,0)for(x,y)in lights.get(motor_port,[])];[light_matrix.set_pixel(x,y,100)for(x,y)in lights.get(motor_port,[])]`
 
 // python/Spike2matrix.py
-const spike2matrixPy = `from hub import light_matrix, port\nimport motor\nlights={port.B:[(4,y)for y in range(5)],port.D:[(x,4)for x in range(5)],port.F:[(x,4-x)for x in range(5)]}\ndef layer(motor_port,rotation,speed):motor.run_for_degrees(motor_port,rotation,speed);[light_matrix.set_pixel(x,y,0)for(x,y)in lights.get(motor_port,[])];[light_matrix.set_pixel(x,y,100)for(x,y)in lights.get(motor_port,[])]`
+const spike2matrixPy = `from hub import light_matrix, port\nimport motor\nlights={port.B:[(4,y)for y in range(5)],port.D:[(x,4)for x in range(5)],port.F:[(x,4-x)for x in range(5)]}\ndef layer(motor_port,rotation,speed):motor(motor_port,rotation,speed);[light_matrix.set_pixel(x,y,0)for(x,y)in lights.get(motor_port,[])];[light_matrix.set_pixel(x,y,100)for(x,y)in lights.get(motor_port,[])]`
 
 // LEFT side ports: A, C, E
 const CLP_LEFT = {
-    "U":  "motor.run_for_degrees(port.E, 90, 500)",
-    "U'": "motor.run_for_degrees(port.E, -90, 500)",
-    "U2": "motor.run_for_degrees(port.E, 180, 500)",
+    "U":  "layer(port.E, 90, 500)",
+    "U'": "layer(port.E, -90, 500)",
+    "U2": "layer(port.E, 180, 500)",
 
-    "L":  "motor.run_for_degrees(port.C, 90, 500)",
-    "L'": "motor.run_for_degrees(port.C, -90, 500)",
-    "L2": "motor.run_for_degrees(port.C, 180, 500)",
+    "L":  "layer(port.C, 90, 500)",
+    "L'": "layer(port.C, -90, 500)",
+    "L2": "layer(port.C, 180, 500)",
 
-    "F":  "motor.run_for_degrees(port.A, 90, 500)",
-    "F'": "motor.run_for_degrees(port.A, -90, 500)",
-    "F2": "motor.run_for_degrees(port.A, 180, 500)",
+    "F":  "layer(port.A, 90, 500)",
+    "F'": "layer(port.A, -90, 500)",
+    "F2": "layer(port.A, 180, 500)",
 };
 
 // RIGHT side ports: B, D, F
 const CLP_RIGHT = {
-    "R":  "motor.run_for_degrees(port.D, 90, 500)",
-    "R'": "motor.run_for_degrees(port.D, -90, 500)",
-    "R2": "motor.run_for_degrees(port.D, 180, 500)",
+    "R":  "layer(port.D, 90, 500)",
+    "R'": "layer(port.D, -90, 500)",
+    "R2": "layer(port.D, 180, 500)",
 
-    "B":  "motor.run_for_degrees(port.F, 90, 500)",
-    "B'": "motor.run_for_degrees(port.F, -90, 500)",
-    "B2": "motor.run_for_degrees(port.F, 180, 500)",
+    "B":  "layer(port.F, 90, 500)",
+    "B'": "layer(port.F, -90, 500)",
+    "B2": "layer(port.F, 180, 500)",
 
-    "D":  "motor.run_for_degrees(port.B, 90, 500)",
-    "D'": "motor.run_for_degrees(port.B, -90, 500)",
-    "D2": "motor.run_for_degrees(port.B, 180, 500)",
+    "D":  "layer(port.B, 90, 500)",
+    "D'": "layer(port.B, -90, 500)",
+    "D2": "layer(port.B, 180, 500)",
 };
 
 function log(...args) {
