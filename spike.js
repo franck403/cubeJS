@@ -13,7 +13,7 @@ let readAbort2 = null;
 let Spike1State = false;
 let Spike2State = false;
 
-const startup = `from hub import port, light_matrix\r\nimport motor\r\n`;
+const startup = `from hub import port light_matrix\r\nimport motor\r\n`;
 const hub1 = ['A', 'B', 'C'];
 const hub2 = ['D', 'E', 'F'];
 const hub1Moves = ['R', 'U', 'L'];
@@ -197,18 +197,28 @@ async function runMovement(move) {
     else if (modifier === "'") degrees = -90;
 
     const cmd = `motor.run_for_degrees(port.${port}, ${degrees}, ${speed})`;
-    const matrix = `light_matrix.write("${base}${modifier}")`;
+    const matrix1 = `light_matrix.show("${base}")`;
+    const matrix2 = `light_matrix.show("${modifier}")`;
+    const clearMatrix = `light_matrix.clear()`;
 
     if (spike === 1) {
         log(`Running '${move}' on Spike 1`);
         await new Promise(r => setTimeout(r, 300));
-        await sendLine(matrix, spike1);
+        await sendLine(matrix1, spike1);
+        await sendLine(matrix2, spike2);
         await sendLine(cmd, spike1);
+        log('Movement command sent.');
+        await sendLine(clearMatrix, spike1);
+        await sendLine(clearMatrix, spike2);
     } else if (spike === 2) {
         log(`Running '${move}' on Spike 2`);
         await new Promise(r => setTimeout(r, 300));
-        await sendLine(matrix, spike2);
+        await sendLine(matrix1, spike1);
+        await sendLine(matrix2, spike2);
         await sendLine(cmd, spike2);
+        log('Movement command sent.');
+        await sendLine(clearMatrix, spike1);
+        await sendLine(clearMatrix, spike2);
     }
 }
 
