@@ -155,7 +155,8 @@ function init3DCube(containerId = "cube3d") {
 
     // Build cubelets (3x3x3)
     const cubeletSize = 0.95;
-    const offset = 1;
+    const offset = 1;  // x y z offsets
+    const offCenterFix = 0 //cubeletSize*1.5
 
     for (let x = -1; x <= 1; x++) {
         for (let y = -1; y <= 1; y++) {
@@ -171,7 +172,7 @@ function init3DCube(containerId = "cube3d") {
 
                 const geo = new THREE.BoxGeometry(cubeletSize, cubeletSize, cubeletSize);
                 const cubelet = new THREE.Mesh(geo, materials);
-                cubelet.position.set(x * offset, y * offset, z * offset);
+                cubelet.position.set(x * offset + offCenterFix, y * offset + offCenterFix, z * offset + offCenterFix);
                 scene.add(cubelet);
                 cubed.push(cubelet);
 
