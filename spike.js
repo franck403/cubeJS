@@ -94,6 +94,11 @@ async function openSpike(which) {
     }
 }
 
+async function spike() {
+    await openSpike('Left')
+    await openSpike('Right')
+}
+
 async function sendLine(writer, text) {
     if (!writer) return;
     const normalized = text.replace(/\r?\n/g, '\r\n');
