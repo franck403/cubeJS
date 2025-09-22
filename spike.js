@@ -8,15 +8,9 @@ let leftAbort = null;
 let rightAbort = null;
 let SpikeState = { left: false, right: false };
 
-const startup = "import motor\n\nfrom hub import port, light_matrix, sound\n\n import time";
+const startup = "import motor\n\nfrom hub import port, light_matrix, sound\n\n import time\n\nlayer = motor.run_for_degrees";
 const connectSound = "sound.beep(392,120);time.sleep_ms(120);sound.beep(494,120);time.sleep_ms(120);sound.beep(587,150);time.sleep_ms(150);sound.beep(784,200)";
-const music = "sound.beep(196, 800) ; time.sleep_ms(850)  # G3\nsound.beep(262, 1000) ; time.sleep_ms(1050)  # C4\nsound.beep(220, 900) ; time.sleep_ms(950)  # A3\nsound.beep(294, 1200) ; time.sleep_ms(1250)  # D4\nsound.beep(247, 1000) ; time.sleep_ms(1050)  # B3\nsound.beep(196, 1500) ; time.sleep_ms(1550)  # G3\nsound.beep(330, 800) ; time.sleep_ms(850)  # E4\nsound.beep(262, 1400) ; time.sleep_ms(1450)  # C4";
-
-// python/Spike1matrix.py
-const spike1matrixPy = `from hub import light_matrix, port\nimport motor\nlights={port.A:[(0,y)for y in range(5)],port.C:[(x,0)for x in range(5)],port.E:[(i,i)for i in range(5)]}\ndef layer(motor_port,rotation,speed):motor(motor_port,rotation,speed);[light_matrix.set_pixel(x,y,0)for(x,y)in lights.get(motor_port,[])];[light_matrix.set_pixel(x,y,100)for(x,y)in lights.get(motor_port,[])]`
-
-// python/Spike2matrix.py
-const spike2matrixPy = `from hub import light_matrix, port\nimport motor\nlights={port.B:[(4,y)for y in range(5)],port.D:[(x,4)for x in range(5)],port.F:[(x,4-x)for x in range(5)]}\ndef layer(motor_port,rotation,speed):motor(motor_port,rotation,speed);[light_matrix.set_pixel(x,y,0)for(x,y)in lights.get(motor_port,[])];[light_matrix.set_pixel(x,y,100)for(x,y)in lights.get(motor_port,[])]`
+//const music = "sound.beep(196, 800) ; time.sleep_ms(850)  # G3\nsound.beep(262, 1000) ; time.sleep_ms(1050)  # C4\nsound.beep(220, 900) ; time.sleep_ms(950)  # A3\nsound.beep(294, 1200) ; time.sleep_ms(1250)  # D4\nsound.beep(247, 1000) ; time.sleep_ms(1050)  # B3\nsound.beep(196, 1500) ; time.sleep_ms(1550)  # G3\nsound.beep(330, 800) ; time.sleep_ms(850)  # E4\nsound.beep(262, 1400) ; time.sleep_ms(1450)  # C4";
 
 // LEFT side ports: A, C, E
 const CLP_LEFT = {
@@ -62,8 +56,14 @@ async function openSpike(which) {
     try {
         port = await navigator.serial.requestPort({ filters: [{ usbVendorId: 0x0694 }] });
         await port.open({ baudRate: 115200 });
-        writer = port.writable.getWriter();
+
         reader = port.readable.pipeThrough(new TextDecoderStream()).getReader();
+        if (port.writable) {
+            writer = port.writable.getWriter();
+        }
+    
+        await writer.write(new Uint8Array([3]));
+
         abortCtrl = new AbortController();
 
         // save depending on side
@@ -73,20 +73,16 @@ async function openSpike(which) {
             leftReader = reader;
             leftAbort = abortCtrl;
             SpikeState.left = true;
-            await sendPythonCode(await loadPy('spike!matrix.py'))
         } else {
             rightPort = port;
             rightWriter = writer;
             rightReader = reader;
             rightAbort = abortCtrl;
             SpikeState.right = true;
-            await sendPythonCode(await loadPy('spike2matrix.py'))
         }
 
-        // send imports + then connect sound separately
         await sendLine(writer, startup);
-        await sendLine(writer, connectSound);
-
+        //await sendLine(writer, connectSound);
 
         log(`${which} Spike connected`);
     } catch (err) {
@@ -95,8 +91,8 @@ async function openSpike(which) {
 }
 
 async function spike() {
-    await openSpike('Left')
-    await openSpike('Right')
+    await openSpike('left')
+    await openSpike('right')
 }
 
 async function sendLine(writer, text) {
