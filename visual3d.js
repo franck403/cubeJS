@@ -137,7 +137,7 @@ function init3DCube(containerId = "cube3d") {
     camera.position.set(6, 6, 6);
     camera.lookAt(0, 0, 0);
     camera.translateZ(-3) 
-    camera.translateY(1)
+    camera.translateY(2)
     camera.translateX(4)
 
 
