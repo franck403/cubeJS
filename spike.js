@@ -10,35 +10,36 @@ let SpikeState = { left: false, right: false };
 
 const startup = "import motor\n\nfrom hub import port, light_matrix, sound\n\nimport time\n\nlayer = motor.run_for_degrees\n\nlight_matrix.clear()";
 const connectSound = "sound.beep(392,120);time.sleep_ms(120);sound.beep(494,120);time.sleep_ms(120);sound.beep(587,150);time.sleep_ms(150);sound.beep(784,200)";
-//const music = "sound.beep(196, 800) ; time.sleep_ms(850)  # G3\nsound.beep(262, 1000) ; time.sleep_ms(1050)  # C4\nsound.beep(220, 900) ; time.sleep_ms(950)  # A3\nsound.beep(294, 1200) ; time.sleep_ms(1250)  # D4\nsound.beep(247, 1000) ; time.sleep_ms(1050)  # B3\nsound.beep(196, 1500) ; time.sleep_ms(1550)  # G3\nsound.beep(330, 800) ; time.sleep_ms(850)  # E4\nsound.beep(262, 1400) ; time.sleep_ms(1450)  # C4";
+const music = "sound.beep(196, 800) ; time.sleep_ms(850)  # G3\nsound.beep(262, 1000) ; time.sleep_ms(1050)  # C4\nsound.beep(220, 900) ; time.sleep_ms(950)  # A3\nsound.beep(294, 1200) ; time.sleep_ms(1250)  # D4\nsound.beep(247, 1000) ; time.sleep_ms(1050)  # B3\nsound.beep(196, 1500) ; time.sleep_ms(1550)  # G3\nsound.beep(330, 800) ; time.sleep_ms(850)  # E4\nsound.beep(262, 1400) ; time.sleep_ms(1450)  # C4";
 
+// LEFT side ports: A, C, E
 const CLP_LEFT = {
-    "U":  "layer(port.E, 90, 500);light_matrix.set_pixel(0, 0, 100);time.sleep_ms(1000);light_matrix.set_pixel(0, 0, 0)\n\n",
-    "U'": "layer(port.E, -90, 500);light_matrix.set_pixel(0, 0, 100);light_matrix.set_pixel(1, 0, 100);time.sleep_ms(1000);light_matrix.set_pixel(0, 0, 0);light_matrix.set_pixel(1, 0, 0)\n\n",
-    "U2": "layer(port.E, 180, 500);light_matrix.set_pixel(0, 0, 100);light_matrix.set_pixel(1, 0, 100);light_matrix.set_pixel(2, 0, 100);time.sleep_ms(1000);light_matrix.set_pixel(0, 0, 0);light_matrix.set_pixel(1, 0, 0);light_matrix.set_pixel(2, 0, 0)\n\n",
+    "U":  "motor.run_for_degrees(port.E, 90, 500)",
+    "U'": "motor.run_for_degrees(port.E, -90, 500)",
+    "U2": "motor.run_for_degrees(port.E, 180, 500)",
 
-    "L":  "layer(port.C, 90, 500);light_matrix.set_pixel(0, 2, 100);time.sleep_ms(1000);light_matrix.set_pixel(0, 2, 0)\n\n",
-    "L'": "layer(port.C, -90, 500);light_matrix.set_pixel(0, 2, 100);light_matrix.set_pixel(1, 2, 100);light_matrix.set_pixel(2, 2, 100);time.sleep_ms(1000);light_matrix.set_pixel(0, 2, 0);light_matrix.set_pixel(1, 2, 0);light_matrix.set_pixel(2, 2, 0)\n\n",
-    "L2": "layer(port.C, 180, 500);light_matrix.set_pixel(0, 2, 100);light_matrix.set_pixel(1, 2, 100);light_matrix.set_pixel(2, 2, 100);time.sleep_ms(1000);light_matrix.set_pixel(0, 2, 0);light_matrix.set_pixel(1, 2, 0);light_matrix.set_pixel(2, 2, 0)\n\n",
+    "L":  "motor.run_for_degrees(port.C, 90, 500)",
+    "L'": "motor.run_for_degrees(port.C, -90, 500)",
+    "L2": "motor.run_for_degrees(port.C, 180, 500)",
 
-    "F":  "layer(port.A, 90, 500);light_matrix.set_pixel(0, 4, 100);time.sleep_ms(1000);light_matrix.set_pixel(0, 4, 0)\n\n",
-    "F'": "layer(port.A, -90, 500);light_matrix.set_pixel(0, 4, 100);light_matrix.set_pixel(1, 4, 100);time.sleep_ms(1000);light_matrix.set_pixel(0, 4, 0);light_matrix.set_pixel(1, 4, 0)\n\n",
-    "F2": "layer(port.A, 180, 500);light_matrix.set_pixel(0, 4, 100);light_matrix.set_pixel(1, 4, 100);light_matrix.set_pixel(2, 4, 100);time.sleep_ms(1000);light_matrix.set_pixel(0, 4, 0);light_matrix.set_pixel(1, 4, 0);light_matrix.set_pixel(2, 4, 0)\n\n",
+    "F":  "motor.run_for_degrees(port.A, 90, 500)",
+    "F'": "motor.run_for_degrees(port.A, -90, 500)",
+    "F2": "motor.run_for_degrees(port.A, 180, 500)",
 };
 
 // RIGHT side ports: B, D, F
 const CLP_RIGHT = {
-    "R":  "layer(port.D, 90, 500);light_matrix.set_pixel(0, 0, 100);time.sleep_ms(1000);light_matrix.set_pixel(0, 0, 0)\n\n",
-    "R'": "layer(port.D, -90, 500);light_matrix.set_pixel(0, 0, 100);light_matrix.set_pixel(1, 0, 100);time.sleep_ms(1000);light_matrix.set_pixel(0, 0, 0);light_matrix.set_pixel(1, 0, 0)\n\n",
-    "R2": "layer(port.D, 180, 500);light_matrix.set_pixel(0, 0, 100);light_matrix.set_pixel(1, 0, 100);light_matrix.set_pixel(2, 0, 100);time.sleep_ms(1000);light_matrix.set_pixel(0, 0, 0);light_matrix.set_pixel(1, 0, 0);light_matrix.set_pixel(2, 0, 0)\n\n",
+    "R":  "motor.run_for_degrees(port.D, 90, 500)",
+    "R'": "motor.run_for_degrees(port.D, -90, 500)",
+    "R2": "motor.run_for_degrees(port.D, 180, 500)",
 
-    "B":  "layer(port.F, 90, 500);light_matrix.set_pixel(0, 2, 100);time.sleep_ms(1000);light_matrix.set_pixel(0, 2, 0)\n\n",
-    "B'": "layer(port.F, -90, 500);light_matrix.set_pixel(0, 2, 100);light_matrix.set_pixel(1, 2, 100);time.sleep_ms(1000);light_matrix.set_pixel(0, 2, 0);light_matrix.set_pixel(1, 2, 0)\n\n",
-    "B2": "layer(port.F, 180, 500);light_matrix.set_pixel(0, 2, 100);light_matrix.set_pixel(1, 2, 100);light_matrix.set_pixel(2, 2, 100);time.sleep_ms(1000);light_matrix.set_pixel(0, 2, 0);light_matrix.set_pixel(1, 2, 0);light_matrix.set_pixel(2, 2, 0)\n\n",
+    "B":  "motor.run_for_degrees(port.F, 90, 500)",
+    "B'": "motor.run_for_degrees(port.F, -90, 500)",
+    "B2": "motor.run_for_degrees(port.F, 180, 500)",
 
-    "D":  "layer(port.B, 90, 500);light_matrix.set_pixel(0, 4, 100);time.sleep_ms(1000);light_matrix.set_pixel(0, 4, 0)\n\n",
-    "D'": "layer(port.B, -90, 500);light_matrix.set_pixel(0, 4, 100);light_matrix.set_pixel(1, 4, 100);time.sleep_ms(1000);light_matrix.set_pixel(0, 4, 0);light_matrix.set_pixel(1, 4, 0)\n\n",
-    "D2": "layer(port.B, 180, 500);light_matrix.set_pixel(0, 4, 100);light_matrix.set_pixel(1, 4, 100);light_matrix.set_pixel(2, 4, 100);time.sleep_ms(1000);light_matrix.set_pixel(0, 4, 0);light_matrix.set_pixel(1, 4, 0);light_matrix.set_pixel(2, 4, 0)\n\n",
+    "D":  "motor.run_for_degrees(port.B, 90, 500)",
+    "D'": "motor.run_for_degrees(port.B, -90, 500)",
+    "D2": "motor.run_for_degrees(port.B, 180, 500)",
 };
 
 // run all
@@ -70,7 +71,6 @@ async function openSpike(which) {
 
         abortCtrl = new AbortController();
 
-        // save depending on side
         if (which === "left") {
             leftPort = port;
             leftWriter = writer;
@@ -85,8 +85,11 @@ async function openSpike(which) {
             SpikeState.right = true;
         }
 
+        // start listening for RX
+        startReading(which, reader);
+
         await sendLine(writer, startup);
-        //await sendLine(writer, connectSound);
+        await sendLine(writer, connectSound);
 
         log(`${which} Spike connected`);
     } catch (err) {
@@ -141,6 +144,25 @@ async function disconnectSpike(which) {
     }
 }
 
+async function startReading(which, reader) {
+    if (!reader) return;
+
+    (async () => {
+        try {
+            while (true) {
+                const { value, done } = await reader.read();
+                if (done) break;
+                if (value) {
+                    log(`RX [${which}]:`, value);
+                }
+            }
+        } catch (err) {
+            log(`RX error [${which}]:`, err?.message || err);
+        }
+    })();
+}
+
+
 async function runMovement(move) {
     let cmd = null;
     let writer = null;
@@ -160,12 +182,17 @@ async function runMovement(move) {
 
     log(`Running move '${move}'`);
     await sendLine(writer, cmd);
+    sendLine(leftWriter,`light_matrix.write("${move.charAt(0)}",100)`)
+
     if (move.endsWith("'")) {
+        sendLine(rightWriter,'light_matrix.write("\'",100)') 
         await new Promise(r => setTimeout(r, 900));
     } else if (move.endsWith("2")) {
+        sendLine(rightWriter,'light_matrix.write("2",100)') 
         await new Promise(r => setTimeout(r, 1100));
     } else {
-        await new Promise(r => setTimeout(r, 700));
+        sendLine(rightWriter,'light_matrix.write("",100)') 
+        await new Promise(r => setTimeout(r, 800));
     }
 }
 
