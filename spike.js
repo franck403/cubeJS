@@ -161,11 +161,11 @@ async function runMovement(move) {
     log(`Running move '${move}'`);
     await sendLine(writer, cmd);
     if (move.endsWith("'")) {
-        new Promise(r => setTimeout(r, 800));
+        await new Promise(r => setTimeout(r, 900));
     } else if (move.endsWith("2")) {
-        new Promise(r => setTimeout(r, 1100));
+        await new Promise(r => setTimeout(r, 1100));
     } else {
-        new Promise(r => setTimeout(r, 500));
+        await new Promise(r => setTimeout(r, 700));
     }
 }
 
