@@ -8,39 +8,43 @@ let leftAbort = null;
 let rightAbort = null;
 let SpikeState = { left: false, right: false };
 
-const startup = "import motor\n\nfrom hub import port, light_matrix, sound\n\n import time\n\nlayer = motor.run_for_degrees";
+const startup = "import motor\n\nfrom hub import port, light_matrix, sound\n\nimport time\n\nlayer = motor.run_for_degrees\n\nlight_matrix.clear()";
 const connectSound = "sound.beep(392,120);time.sleep_ms(120);sound.beep(494,120);time.sleep_ms(120);sound.beep(587,150);time.sleep_ms(150);sound.beep(784,200)";
 //const music = "sound.beep(196, 800) ; time.sleep_ms(850)  # G3\nsound.beep(262, 1000) ; time.sleep_ms(1050)  # C4\nsound.beep(220, 900) ; time.sleep_ms(950)  # A3\nsound.beep(294, 1200) ; time.sleep_ms(1250)  # D4\nsound.beep(247, 1000) ; time.sleep_ms(1050)  # B3\nsound.beep(196, 1500) ; time.sleep_ms(1550)  # G3\nsound.beep(330, 800) ; time.sleep_ms(850)  # E4\nsound.beep(262, 1400) ; time.sleep_ms(1450)  # C4";
 
-// LEFT side ports: A, C, E
 const CLP_LEFT = {
-    "U":  "layer(port.E, 90, 500)",
-    "U'": "layer(port.E, -90, 500)",
-    "U2": "layer(port.E, 180, 500)",
+    "U":  "layer(port.E, 90, 500);light_matrix.set_pixel(0, 0, 100);time.sleep_ms(1000);light_matrix.set_pixel(0, 0, 0)\n\n",
+    "U'": "layer(port.E, -90, 500);light_matrix.set_pixel(0, 0, 100);light_matrix.set_pixel(1, 0, 100);time.sleep_ms(1000);light_matrix.set_pixel(0, 0, 0);light_matrix.set_pixel(1, 0, 0)\n\n",
+    "U2": "layer(port.E, 180, 500);light_matrix.set_pixel(0, 0, 100);light_matrix.set_pixel(1, 0, 100);light_matrix.set_pixel(2, 0, 100);time.sleep_ms(1000);light_matrix.set_pixel(0, 0, 0);light_matrix.set_pixel(1, 0, 0);light_matrix.set_pixel(2, 0, 0)\n\n",
 
-    "L":  "layer(port.C, 90, 500)",
-    "L'": "layer(port.C, -90, 500)",
-    "L2": "layer(port.C, 180, 500)",
+    "L":  "layer(port.C, 90, 500);light_matrix.set_pixel(0, 2, 100);time.sleep_ms(1000);light_matrix.set_pixel(0, 2, 0)\n\n",
+    "L'": "layer(port.C, -90, 500);light_matrix.set_pixel(0, 2, 100);light_matrix.set_pixel(1, 2, 100);light_matrix.set_pixel(2, 2, 100);time.sleep_ms(1000);light_matrix.set_pixel(0, 2, 0);light_matrix.set_pixel(1, 2, 0);light_matrix.set_pixel(2, 2, 0)\n\n",
+    "L2": "layer(port.C, 180, 500);light_matrix.set_pixel(0, 2, 100);light_matrix.set_pixel(1, 2, 100);light_matrix.set_pixel(2, 2, 100);time.sleep_ms(1000);light_matrix.set_pixel(0, 2, 0);light_matrix.set_pixel(1, 2, 0);light_matrix.set_pixel(2, 2, 0)\n\n",
 
-    "F":  "layer(port.A, 90, 500)",
-    "F'": "layer(port.A, -90, 500)",
-    "F2": "layer(port.A, 180, 500)",
+    "F":  "layer(port.A, 90, 500);light_matrix.set_pixel(0, 4, 100);time.sleep_ms(1000);light_matrix.set_pixel(0, 4, 0)\n\n",
+    "F'": "layer(port.A, -90, 500);light_matrix.set_pixel(0, 4, 100);light_matrix.set_pixel(1, 4, 100);time.sleep_ms(1000);light_matrix.set_pixel(0, 4, 0);light_matrix.set_pixel(1, 4, 0)\n\n",
+    "F2": "layer(port.A, 180, 500);light_matrix.set_pixel(0, 4, 100);light_matrix.set_pixel(1, 4, 100);light_matrix.set_pixel(2, 4, 100);time.sleep_ms(1000);light_matrix.set_pixel(0, 4, 0);light_matrix.set_pixel(1, 4, 0);light_matrix.set_pixel(2, 4, 0)\n\n",
 };
 
 // RIGHT side ports: B, D, F
 const CLP_RIGHT = {
-    "R":  "layer(port.D, 90, 500)",
-    "R'": "layer(port.D, -90, 500)",
-    "R2": "layer(port.D, 180, 500)",
+    "R":  "layer(port.D, 90, 500);light_matrix.set_pixel(0, 0, 100);time.sleep_ms(1000);light_matrix.set_pixel(0, 0, 0)\n\n",
+    "R'": "layer(port.D, -90, 500);light_matrix.set_pixel(0, 0, 100);light_matrix.set_pixel(1, 0, 100);time.sleep_ms(1000);light_matrix.set_pixel(0, 0, 0);light_matrix.set_pixel(1, 0, 0)\n\n",
+    "R2": "layer(port.D, 180, 500);light_matrix.set_pixel(0, 0, 100);light_matrix.set_pixel(1, 0, 100);light_matrix.set_pixel(2, 0, 100);time.sleep_ms(1000);light_matrix.set_pixel(0, 0, 0);light_matrix.set_pixel(1, 0, 0);light_matrix.set_pixel(2, 0, 0)\n\n",
 
-    "B":  "layer(port.F, 90, 500)",
-    "B'": "layer(port.F, -90, 500)",
-    "B2": "layer(port.F, 180, 500)",
+    "B":  "layer(port.F, 90, 500);light_matrix.set_pixel(0, 2, 100);time.sleep_ms(1000);light_matrix.set_pixel(0, 2, 0)\n\n",
+    "B'": "layer(port.F, -90, 500);light_matrix.set_pixel(0, 2, 100);light_matrix.set_pixel(1, 2, 100);time.sleep_ms(1000);light_matrix.set_pixel(0, 2, 0);light_matrix.set_pixel(1, 2, 0)\n\n",
+    "B2": "layer(port.F, 180, 500);light_matrix.set_pixel(0, 2, 100);light_matrix.set_pixel(1, 2, 100);light_matrix.set_pixel(2, 2, 100);time.sleep_ms(1000);light_matrix.set_pixel(0, 2, 0);light_matrix.set_pixel(1, 2, 0);light_matrix.set_pixel(2, 2, 0)\n\n",
 
-    "D":  "layer(port.B, 90, 500)",
-    "D'": "layer(port.B, -90, 500)",
-    "D2": "layer(port.B, 180, 500)",
+    "D":  "layer(port.B, 90, 500);light_matrix.set_pixel(0, 4, 100);time.sleep_ms(1000);light_matrix.set_pixel(0, 4, 0)\n\n",
+    "D'": "layer(port.B, -90, 500);light_matrix.set_pixel(0, 4, 100);light_matrix.set_pixel(1, 4, 100);time.sleep_ms(1000);light_matrix.set_pixel(0, 4, 0);light_matrix.set_pixel(1, 4, 0)\n\n",
+    "D2": "layer(port.B, 180, 500);light_matrix.set_pixel(0, 4, 100);light_matrix.set_pixel(1, 4, 100);light_matrix.set_pixel(2, 4, 100);time.sleep_ms(1000);light_matrix.set_pixel(0, 4, 0);light_matrix.set_pixel(1, 4, 0);light_matrix.set_pixel(2, 4, 0)\n\n",
 };
+
+// run all
+// SpikeCube(['U','L','F','R','B','D'])
+
+// SpikeCube(['U2','L2','F2','R2','B2','D2'])
 
 function log(...args) {
     console.info(...args);
@@ -156,12 +160,18 @@ async function runMovement(move) {
 
     log(`Running move '${move}'`);
     await sendLine(writer, cmd);
+    if (move.endsWith("'")) {
+        new Promise(r => setTimeout(r, 800));
+    } else if (move.endsWith("2")) {
+        new Promise(r => setTimeout(r, 1100));
+    } else {
+        new Promise(r => setTimeout(r, 500));
+    }
 }
 
 async function SpikeMove(move, delay = 2000) {
     if (!SpikeState.left && !SpikeState.right) return;
     await runMovement(move);
-    await new Promise(r => setTimeout(r, delay));
 }
 
 async function SpikeCube(moves, delay = 500) {
@@ -169,7 +179,6 @@ async function SpikeCube(moves, delay = 500) {
     console.log(moves);
     for (const move of moves) {
         await runMovement(move);
-        await new Promise(r => setTimeout(r, delay));
     }
 }
 
