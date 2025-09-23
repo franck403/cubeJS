@@ -169,12 +169,12 @@ async function runMovement(move) {
     }
 }
 
-async function SpikeMove(move, delay = 2000) {
+async function SpikeMove(move) {
     if (!SpikeState.left && !SpikeState.right) return;
     await runMovement(move);
 }
 
-async function SpikeCube(moves, delay = 500) {
+async function SpikeCube(moves) {
     if (!SpikeState.left && !SpikeState.right) return;
     console.log(moves);
     for (const move of moves) {
