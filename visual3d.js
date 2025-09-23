@@ -193,10 +193,10 @@ function init3DCube(containerId = "cube3d") {
 }
 
 /**
- * Updates the 3D cube's visual representation based on the logical state string.
- * This function rebuilds the cube to reflect a given state.
- * @param {string} stateString The state of the cube as a 54-character string.
- */
+* Updates the 3D cube's visual representation based on the logical state string.
+* This function rebuilds the cube to reflect a given state.
+* @param {string} stateString The state of the cube as a 54-character string.
+*/
 function update3DCubeFromState(stateString) {
     function addCenterSticker(cubelet, index, src, rotation = 0) {
         const texture = new THREE.TextureLoader().load(`img/${src}`);
@@ -215,7 +215,6 @@ function update3DCubeFromState(stateString) {
         for (let y = -1; y <= 1; y++) {
             for (let z = -1; z <= 1; z++) {
                 const cubelet = cubed[cubeletIndex];
-
  
                 // Update material colors based on cube.js state
                 cubelet.material[0].color.set(get3DColor('R', { x, y, z })); // right
@@ -224,6 +223,14 @@ function update3DCubeFromState(stateString) {
                 cubelet.material[3].color.set(get3DColor('D', { x, y, z })); // down
                 cubelet.material[4].color.set(get3DColor('F', { x, y, z })); // front
                 cubelet.material[5].color.set(get3DColor('B', { x, y, z })); // back
+ 
+                addCenterSticker(cubelet, 0, "RC.jpg")
+                addCenterSticker(cubelet, 1, "LC.jpg")
+                addCenterSticker(cubelet, 2, "UC.jpg")
+                addCenterSticker(cubelet, 3, "DC.jpg")
+                addCenterSticker(cubelet, 4, "FC.jpg")
+                addCenterSticker(cubelet, 5, "BC.jpg")
+ 
  
                 // --- Up center ---
                 if (y === 1 && x === 0 && z === 0) addCenterSticker(cubelet, 2, "U.png", 0);
@@ -287,6 +294,7 @@ function update3DCubeFromState(stateString) {
         }
     }
 }
+ 
 
 /**
  * The main animation loop for the 3D scene.
