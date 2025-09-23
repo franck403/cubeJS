@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Python Code Test</title>
+</head>
+<body>
+    <h1>Test sendPythonCodeString + loadPy</h1>
+
+    <textarea id="codeInput" rows="10" cols="50">
+def test():
+\tprint("hello")
+    </textarea>
+    <br><br>
+
+    <button onclick="runTest()">Process Textarea Code</button>
+    <br><br>
+
+    <input type="text" id="filename" placeholder="Enter filename (e.g. test.py)" value="Spike!matrix.py">
+    <button onclick="loadTestFile()">Load File</button>
+
+    <h2>Output:</h2>
+    <pre id="output"></pre>
+
+    <script>
+        function sendPythonCodeString(code) {
+            // Split into lines
+            const lines = code.replace(/[\t]?#[\w \/\\()’'"→-]*\n/g,'').split('\n');
+            let result = "";
+
+            for (let line of lines) {
+                line = line.replace(/\t+/g,';') + ';'
+                line = line.replace(/({);|(\[);|(\)):;/g,'$1')
+                line = line.replaceAll('\t','')
+                while (true) {
+                    line = line.replaceAll(';;',';')
+                    if (line == line.replaceAll(';;',';')) {
+                        break
+                    }
+                }
+                result += line;
+            }
+            while (true) {
+                    result = result.replaceAll(';;',';')
+                    if (result == result.replaceAll(';;',';')) {
+                        break
+                    }
+            }
+            return result;
+        }
+
+        async function loadPy(file) {
+            try {
+                const response = await fetch(`/python/${file}`);
+                if (!response.ok) {
+                    throw new Error(`Failed to load ${file}: ${response.status} ${response.statusText}`);
+                }
+                const code = await response.text();
+                return code;
+            } catch (err) {
+                console.error(err);
+                return null;
+            }
+        }
+
+        function runTest() {
+            const code = document.getElementById("codeInput").value;
+            const result = sendPythonCodeString(code);
+            document.getElementById("output").textContent = result;
+        }
+
+        async function loadTestFile() {
+            const file = document.getElementById("filename").value.trim();
+            if (!file) {
+                alert("Please enter a filename.");
+                return;
+            }
+
+            const code = await loadPy(file);
+            if (code !== null) {
+                const result = sendPythonCodeString(code);
+                document.getElementById("output").textContent = result;
+                document.getElementById("codeInput").value = result 
+            } else {
+                document.getElementById("output").textContent = "Failed to load file. " + file;
+            }
+        }
+    </script>
+</body>
+</html>

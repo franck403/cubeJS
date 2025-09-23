@@ -4,25 +4,24 @@ async function sendPythonCode(port, code) {
     const encoder = new TextEncoder();
 
     // Split into lines
-    const lines = code.split('\n');
-    var tabLeft = 0
+    const lines = code.replace(/[\t]?#[\w \/\\()’'"→-]*\n/g,'').split('\n');
     var data = ""
+    let result = ""    
 
-    for (const line of lines) {
-        // Skip lines with only whitespace? No, send them to end block
-        if (line.split('\t').length <= tabLeft) {
-            data = encoder.encode(line + '\n');
-            tabLeft = line.split('\t').length
-        } else {
-            data = encoder.encode(line + "\r".repeat(tabLeft) + '\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n');
-            tabLeft = line.split('\t').length
-        }
-        console.log(line)
-        await writer.write(data);
-
-        // Small delay helps MicroPython parse correctly
-        await new Promise(resolve => setTimeout(resolve, 50));
+    for (var line of lines) {
+        line = line.replace(/\n\t+/g,';') + ';'
+        line = line.replace(/({);|(\[);|(\)):;/g,'$1')
+        line = line.replaceAll(';;',';')
+        data = encoder.encode(line);
+        result += line;
     }
+    while (true) {
+        result = result.replaceAll(';;',';')
+        if (result == result.replaceAll(';;',';')) {
+            break
+        }
+    }
+    await writer.write(result);
 
     writer.releaseLock();
     console.log('Code sent!');
