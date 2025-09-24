@@ -47,6 +47,9 @@ const CLP_RIGHT = {
 
 // SpikeCube(['U2','L2','F2','R2','B2','D2'])
 
+// SpikeCube(["U", "L2", "F'", "R", "D2", "B", "U'", "R2", "L", "D", "F2", "B'", "U2", "L'", "D", "R2", "F'", "B2", "U'", "D'"])
+
+
 function log(...args) {
     console.info(...args);
     const logEl = document.getElementById('log');
@@ -204,6 +207,9 @@ async function SpikeMove(move) {
 async function SpikeCube(moves) {
     if (!SpikeState.left && !SpikeState.right) return;
     console.log(moves);
+    sendLine(leftWriter,`light_matrix.write("${String(moves.length).charAt(0)}",100)`)
+    sendLine(rightWriter,`light_matrix.write("${String(moves.length).charAt(1)}",100)`)
+    await new Promise(r => setTimeout(r, 2000));
     for (const move of moves) {
         await runMovement(move);
     }
