@@ -47,17 +47,18 @@
       border: none;
       margin: 15px;
       font-size: 2rem;
-      width: 200px;
+      min-width: 125px;
       font-weight: 700;
       cursor: pointer;
       line-height: 0;
+      height: 50px;
       padding: 16px;
       border-radius: 10px;
     }
 
     .wow {
       position: fixed;
-      bottom: 50px;
+      bottom: 20px;
       left: 50%;
       transform: translate(-50%, -0%);
     }
@@ -167,9 +168,9 @@
   <p style="display: none;" id="res"></p>
   <div id="cube3d" style="background-color:black;width:100vw;height:100vh;margin:auto;"></div>
   <div class="controls wow">
-    <button id="connect" onclick="connect()">Gan Cube</button>
     <button id="get-moves" onclick="spike()">Spike</button>
-    <button id="reset-state" onclick="reset()">Reset</button>
+    <button id="connect" onclick="connect()">Gan Cube</button>
+    <!--<button id="reset-state" onclick="reset()">Reset</button>-->
     <button id="get-moves" onclick="sc()">Start</button>
   </div>
   <iframe style="display:none;" src="gan/index.html" frameborder="0" class="cube-view" id="cube-view"

@@ -66,8 +66,8 @@ class OrbitControls extends THREE.EventDispatcher {
         // Set to true to automatically rotate around the target
         // If auto-rotate is enabled, you must call controls.update() in your animation loop
 
-        this.autoRotate = false;
-        this.autoRotateSpeed = 2.0; // 30 seconds per orbit when fps is 60
+        window.autoRotate = false;
+        window.autoRotateSpeed = 2.0; // 30 seconds per orbit when fps is 60
         // The four arrow keys
 
         this.keys = {
@@ -154,7 +154,7 @@ class OrbitControls extends THREE.EventDispatcher {
 
                 spherical.setFromVector3(offset);
 
-                if (scope.autoRotate && state === STATE.NONE) {
+                if (window.autoRotate && state === STATE.NONE) {
 
                     rotateLeft(getAutoRotationAngle());
 
@@ -302,7 +302,7 @@ class OrbitControls extends THREE.EventDispatcher {
 
         function getAutoRotationAngle() {
 
-            return 2 * Math.PI / 60 / 60 * scope.autoRotateSpeed;
+            return 2 * Math.PI / 60 / 60 * window.autoRotateSpeed;
 
         }
 

@@ -8,13 +8,22 @@ const logoTexture = new THREE.TextureLoader().load('Gan_cube_brand.webp');
 
 const colors = {
     "U": 0xFFFFFF, // White (no change, as it's not in the provided image)
+    "D": 0xFFFFFF, // Yellow
+    "L": 0xFFFFFF, // UT orange
+    "R": 0xFFFFFF, // Red
+    "F": 0xFFFFFF, // Lime green
+    "B": 0xFFFFFF  // RISD Blue
+}
+/*
+
+const colors = {
+    "U": 0xFFFFFF, // White (no change, as it's not in the provided image)
     "D": 0xFDFF16, // Yellow
     "L": 0xFF8B21, // UT orange
     "R": 0xFA2422, // Red
     "F": 0x04D006, // Lime green
     "B": 0x275CFE  // RISD Blue
-}
-
+}*/ 
 // Maps the facelet position from the cube.js string to a 3D color.
 // The cube.js string order is U, R, D, L, B, F.
 // This function determines the color for a specific face of a given cubelet.
