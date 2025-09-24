@@ -389,7 +389,7 @@ function faceConfig(face, clockwise) {
 /**
  * Rotation animée d'une face.
  */
-function rotateFace(face, clockwise = true,delay=1) {
+function rotateFace(face, clockwise = true) {
     return new Promise((resolve) => {
         animating = true;
 
@@ -402,32 +402,19 @@ function rotateFace(face, clockwise = true,delay=1) {
         scene.add(pivot);
         targetCubelets.forEach(c => pivot.attach(c));
 
+        // Directly apply the final rotation (no animation)
         const targetQuaternion = new THREE.Quaternion().setFromAxisAngle(axis, angle);
-        const startQuat = pivot.quaternion.clone();
+        pivot.quaternion.copy(targetQuaternion);
 
-        const startTime = performance.now();
-        const duration = delay;
+        // Reattach cubelets back to the scene with corrected transforms
+        targetCubelets.forEach(c => {
+            scene.attach(c);
+            fixCubelet(c); // corrige position/rotation
+        });
 
-        function animateRotation() {
-            const now = performance.now();
-            const t = Math.min(1, (now - startTime) / duration);
-
-            pivot.quaternion.slerpQuaternions(startQuat, targetQuaternion, t);
-
-            if (t < 1) {
-                requestAnimationFrame(animateRotation);
-            } else {
-                pivot.quaternion.copy(targetQuaternion);
-                targetCubelets.forEach(c => {
-                    scene.attach(c);
-                    fixCubelet(c); // corrige position/rotation
-                });
-                scene.remove(pivot);
-                animating = false;
-                resolve();
-            }
-        }
-        animateRotation();
+        scene.remove(pivot);
+        animating = false;
+        resolve();
     });
 }
 
