@@ -25,17 +25,10 @@ document.getElementById('cube-view').onload = function () {
 
     const iframeWindow = document.getElementById('cube-view').contentWindow;
 
-    var macs = ['AB:12:34:60:7E:DA',"D6:B4:0A:E0:62:72"];
-    var times = 0
+    var macs = "D6:B4:0A:E0:62:72";
     iframeWindow.prompt = function (...args) {
         console.log(...args);
-        if (times == 0) {
-            times + 1
-            return macs[0];
-        } else {
-            times = 0
-            return macs[1];
-        }
+        return macs
     };
 
     if (iframeWindow) {
