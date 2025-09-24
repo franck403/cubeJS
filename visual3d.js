@@ -389,7 +389,7 @@ function faceConfig(face, clockwise) {
 /**
  * Rotation animée d'une face.
  */
-function rotateFace(face, clockwise = true,delay=0) {
+function rotateFace(face, clockwise = true,delay=1) {
     return new Promise((resolve) => {
         animating = true;
 
