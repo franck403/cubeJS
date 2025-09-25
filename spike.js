@@ -92,7 +92,7 @@ async function openSpike(which) {
         startReading(which, reader);
 
         await sendLine(writer, startup);
-        await sendLine(writer, connectSound);
+        //await sendLine(writer, connectSound);
 
         log(`${which} Spike connected`);
     } catch (err) {
