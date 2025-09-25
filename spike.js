@@ -14,33 +14,35 @@ const music = "sound.beep(196, 800) ; time.sleep_ms(850)  # G3\nsound.beep(262, 
 
 // LEFT side ports: A, C, E
 const CLP_LEFT = {
-    "U":  "motor.run_for_degrees(port.E, 90, 500)",
-    "U'": "motor.run_for_degrees(port.E, -90, 500)",
-    "U2": "motor.run_for_degrees(port.E, 180, 500)",
+    "U":  "motor.run_for_degrees(port.E, -90, 1100)",
+    "U'": "motor.run_for_degrees(port.E, 90, 1100)",
+    "U2": "motor.run_for_degrees(port.E, 180, 1100)",
 
-    "L":  "motor.run_for_degrees(port.C, 90, 500)",
-    "L'": "motor.run_for_degrees(port.C, -90, 500)",
-    "L2": "motor.run_for_degrees(port.C, 180, 500)",
+    "L":  "motor.run_for_degrees(port.C, -90, 1100)",
+    "L'": "motor.run_for_degrees(port.C, 90, 1100)",
+    "L2": "motor.run_for_degrees(port.C, 180, 1100)",
 
-    "F":  "motor.run_for_degrees(port.A, 90, 500)",
-    "F'": "motor.run_for_degrees(port.A, -90, 500)",
-    "F2": "motor.run_for_degrees(port.A, 180, 500)",
+    "F":  "motor.run_for_degrees(port.A, -90, 1100)",
+    "F'": "motor.run_for_degrees(port.A, 90, 1100)",
+    "F2": "motor.run_for_degrees(port.A, 180, 1100)",
 };
 
 // RIGHT side ports: B, D, F
 const CLP_RIGHT = {
-    "R":  "motor.run_for_degrees(port.D, 90, 500)",
-    "R'": "motor.run_for_degrees(port.D, -90, 500)",
+    "R":  "motor.run_for_degrees(port.D, -90, 500)",
+    "R'": "motor.run_for_degrees(port.D, 90, 500)",
     "R2": "motor.run_for_degrees(port.D, 180, 500)",
 
-    "B":  "motor.run_for_degrees(port.F, 90, 500)",
-    "B'": "motor.run_for_degrees(port.F, -90, 500)",
+    "B":  "motor.run_for_degrees(port.F, -90, 500)",
+    "B'": "motor.run_for_degrees(port.F, 90, 500)",
     "B2": "motor.run_for_degrees(port.F, 180, 500)",
 
-    "D":  "motor.run_for_degrees(port.B, 90, 500)",
-    "D'": "motor.run_for_degrees(port.B, -90, 500)",
-    "D2": "motor.run_for_degrees(port.B, 180, 500)",
+    "D":  "motor.run_for_degrees(port.B, -95, 600)",
+    "D'": "motor.run_for_degrees(port.B, 95, 600)",
+    "D2": "motor.run_for_degrees(port.B, 180, 600)",
 };
+// Merge into one pool
+const ALL_MOVES = Object.keys({ ...CLP_LEFT, ...CLP_RIGHT });
 
 // run all
 // SpikeCube(['U','L','F','R','B','D'])
@@ -49,6 +51,26 @@ const CLP_RIGHT = {
 
 // SpikeCube(["U", "L2", "F'", "R", "D2", "B", "U'", "R2", "L", "D", "F2", "B'", "U2", "L'", "D", "R2", "F'", "B2", "U'", "D'"])
 
+/**
+ * Generate a random scramble table
+ * @param {number} count - number of moves
+ * @returns {string[]} - array of move notations
+ */
+function generateScramble(count = 20) {
+    const scramble = [];
+
+    for (let i = 0; i < count; i++) {
+        let move;
+        do {
+            move = ALL_MOVES[Math.floor(Math.random() * ALL_MOVES.length)];
+        } while (i > 0 && move[0] === scramble[i - 1][0]); 
+        // avoids repeating same face twice in a row (e.g., "U" then "U'")
+        
+        scramble.push(move);
+    }
+
+    return scramble;
+}
 
 function log(...args) {
     console.info(...args);
@@ -85,7 +107,7 @@ async function openSpike(which) {
             rightWriter = writer;
             rightReader = reader;
             rightAbort = abortCtrl;
-            SpikeState.right = true;
+            SpikeState.right = true;            
         }
 
         // start listening for RX
@@ -166,7 +188,7 @@ async function startReading(which, reader) {
 }
 
 
-async function runMovement(move) {
+async function runMovement(move,sleep=220) {
     let cmd = null;
     let writer = null;
 
@@ -184,18 +206,36 @@ async function runMovement(move) {
     }
 
     log(`Running move '${move}'`);
+    if (move.startsWith('D')) { // fix issue with the D motor
+        await sendLine(
+            rightWriter,
+            "motor.reset_relative_position(port.B, 0)"
+        );
+    }
     await sendLine(writer, cmd);
-    sendLine(leftWriter,`light_matrix.write("${move.charAt(0)}",100)`)
-
+    await sendLine(leftWriter,`light_matrix.write("${move.charAt(0)}",100)`)
+    var waitTimer = sleep
     if (move.endsWith("'")) {
-        sendLine(rightWriter,'light_matrix.write("\'",100)') 
-        await new Promise(r => setTimeout(r, 900));
+        await sendLine(rightWriter,'light_matrix.write("\'",100)') 
+        await new Promise(r => setTimeout(r, waitTimer));
     } else if (move.endsWith("2")) {
-        sendLine(rightWriter,'light_matrix.write("2",100)') 
-        await new Promise(r => setTimeout(r, 1100));
+        await sendLine(rightWriter,'light_matrix.write("2",100)') 
+        await new Promise(r => setTimeout(r, waitTimer*2));
     } else {
-        sendLine(rightWriter,'light_matrix.write("",100)') 
-        await new Promise(r => setTimeout(r, 800));
+        await sendLine(rightWriter,'light_matrix.write("",100)') 
+        await new Promise(r => setTimeout(r, waitTimer));
+    }
+    if (move.startsWith('D')) { // fix issue with the D motor
+        await sendLine(
+            rightWriter,
+            "pos=motor.relative_position(port.B)\n" +
+            "snapped=round(pos/90)*90\n" +
+            "clamped=(snapped%360+360)%360\n" +
+            "offset=clamped-pos\n" +
+            "if abs(offset)!=0:\n" +
+            "    motor.run_for_degrees(port.B,offset,800)"
+        );
+        await new Promise(r => setTimeout(r, waitTimer));
     }
 }
 
@@ -204,14 +244,14 @@ async function SpikeMove(move) {
     await runMovement(move);
 }
 
-async function SpikeCube(moves) {
+async function SpikeCube(moves,sleep=220) {
     if (!SpikeState.left && !SpikeState.right) return;
     console.log(moves);
     sendLine(leftWriter,`light_matrix.write("${String(moves.length).charAt(0)}",100)`)
     sendLine(rightWriter,`light_matrix.write("${String(moves.length).charAt(1)}",100)`)
     await new Promise(r => setTimeout(r, 2000));
     for (const move of moves) {
-        await runMovement(move);
+        await runMovement(move,sleep);
     }
 }
 
@@ -221,3 +261,23 @@ function sc() {
 }
 
 log("Ready. Use openSpike('left') and openSpike('right') to connect.");
+
+async function scramble() {
+    var moves = generateScramble(20)
+    SpikeCube(moves,450)
+}
+
+function StartCube() {
+    SpikeCube(['U','U','U','U'],450)
+}
+
+let SpinState = true
+async function spin() {
+    if (SpinState) {
+        SpinState = false
+        await sendLine(leftWriter,'motor.run(port.E, 150)')
+    } else {
+        SpinState = true
+        await sendLine(leftWriter,'motor.stop(port.E)')
+    }
+}
