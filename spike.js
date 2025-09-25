@@ -8,9 +8,10 @@ let leftAbort = null;
 let rightAbort = null;
 let SpikeState = { left: false, right: false };
 
-const startup = "import motor\n\nfrom hub import port, light_matrix, sound\n\nimport time\n\nlayer = motor.run_for_degrees\n\nlight_matrix.clear()";
+const startup = "import motor\n\nfrom hub import port, light_matrix, sound\n\nimport time\n\nlayer = motor.run_for_degrees\n\nlight_matrix.clear()\n\nmotor.motor_set_high_resolution_mode(port.A, True)\n\nmotor.motor_set_high_resolution_mode(port.B, True)\n\nmotor.motor_set_high_resolution_mode(port.C, True)\n\nmotor.motor_set_high_resolution_mode(port.D, True)\n\nmotor.motor_set_high_resolution_mode(port.E, True)\n\nmotor.motor_set_high_resolution_mode(port.F, True)";
 const connectSound = "sound.beep(392,120);time.sleep_ms(120);sound.beep(494,120);time.sleep_ms(120);sound.beep(587,150);time.sleep_ms(150);sound.beep(784,200)";
 const music = "sound.beep(196, 800) ; time.sleep_ms(850)  # G3\nsound.beep(262, 1000) ; time.sleep_ms(1050)  # C4\nsound.beep(220, 900) ; time.sleep_ms(950)  # A3\nsound.beep(294, 1200) ; time.sleep_ms(1250)  # D4\nsound.beep(247, 1000) ; time.sleep_ms(1050)  # B3\nsound.beep(196, 1500) ; time.sleep_ms(1550)  # G3\nsound.beep(330, 800) ; time.sleep_ms(850)  # E4\nsound.beep(262, 1400) ; time.sleep_ms(1450)  # C4";
+const getBattery = `import hub\n\nhub.battery_voltage()`
 
 // LEFT side ports: A, C, E
 const CLP_LEFT = {
@@ -206,12 +207,6 @@ async function runMovement(move,sleep=220) {
     }
 
     log(`Running move '${move}'`);
-    if (move.startsWith('D')) { // fix issue with the D motor
-        await sendLine(
-            rightWriter,
-            "motor.reset_relative_position(port.B, 0)"
-        );
-    }
     await sendLine(writer, cmd);
     await sendLine(leftWriter,`light_matrix.write("${move.charAt(0)}",100)`)
     var waitTimer = sleep
@@ -223,18 +218,6 @@ async function runMovement(move,sleep=220) {
         await new Promise(r => setTimeout(r, waitTimer*2));
     } else {
         await sendLine(rightWriter,'light_matrix.write("",100)') 
-        await new Promise(r => setTimeout(r, waitTimer));
-    }
-    if (move.startsWith('D')) { // fix issue with the D motor
-        await sendLine(
-            rightWriter,
-            "pos=motor.relative_position(port.B)\n" +
-            "snapped=round(pos/90)*90\n" +
-            "clamped=(snapped%360+360)%360\n" +
-            "offset=clamped-pos\n" +
-            "if abs(offset)!=0:\n" +
-            "    motor.run_for_degrees(port.B,offset,800)"
-        );
         await new Promise(r => setTimeout(r, waitTimer));
     }
 }

@@ -26,8 +26,6 @@ body {
     -webkit-box-pack: center;
     -ms-flex-pack: center;
     justify-content: center;
-    width: 1000px;
-    height: 70px;
     border-radius: 30px;
 }
 
