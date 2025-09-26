@@ -12,6 +12,7 @@ const startup = "import motor\n\nfrom hub import port, light_matrix, sound\n\nim
 const connectSound = "sound.beep(392,120);time.sleep_ms(120);sound.beep(494,120);time.sleep_ms(120);sound.beep(587,150);time.sleep_ms(150);sound.beep(784,200)";
 const music = "sound.beep(196, 800) ; time.sleep_ms(850)  # G3\nsound.beep(262, 1000) ; time.sleep_ms(1050)  # C4\nsound.beep(220, 900) ; time.sleep_ms(950)  # A3\nsound.beep(294, 1200) ; time.sleep_ms(1250)  # D4\nsound.beep(247, 1000) ; time.sleep_ms(1050)  # B3\nsound.beep(196, 1500) ; time.sleep_ms(1550)  # G3\nsound.beep(330, 800) ; time.sleep_ms(850)  # E4\nsound.beep(262, 1400) ; time.sleep_ms(1450)  # C4";
 const getBattery = `import hub\n\nprint("Ba" + str(hub.battery_voltage()))`
+const clearDisplay = `light_matrix.clear()\n\n`
 
 // LEFT side ports: A, C, E
 const CLP_LEFT = {
@@ -92,7 +93,7 @@ function log(...args) {
 function batteryPercentage(voltage, minVolt, maxVolt) {
     if (voltage <= minVolt) return 0;
     if (voltage >= maxVolt) return 100;
-    return ((voltage - minVolt) / (maxVolt - minVolt)) * 100;
+    return Math.round(((voltage - minVolt) / (maxVolt - minVolt)) * 100);
 }
   
 
@@ -248,6 +249,8 @@ async function updateBatteries() {
     await new Promise(r => setTimeout(r, 200));
     await sendLine(leftWriter,getBattery) 
     await new Promise(r => setTimeout(r, 200));
+    await sendLine(leftWriter,clearDisplay)
+    await sendLine(rightWriter,clearDisplay)
     const targetFrame = window.top.frames[0];    
     targetFrame.postMessage('batteryLevel')
 } 
@@ -258,18 +261,26 @@ async function SpikeMove(move) {
     updateBatteries()
 }
 
-async function SpikeCube(moves,sleep=220) {
-    updateBatteries()
+async function SpikeCube(moves, sleep = 180) {
+    var timerStarted = new Date();
     if (!SpikeState.left && !SpikeState.right) return;
     console.log(moves);
-    sendLine(leftWriter,`light_matrix.write("${String(moves.length).charAt(0)}",100)`)
-    sendLine(rightWriter,`light_matrix.write("${String(moves.length).charAt(1)}",100)`)
+
+    sendLine(leftWriter, `light_matrix.write("${String(moves.length).charAt(0)}",100)`);
+    sendLine(rightWriter, `light_matrix.write("${String(moves.length).charAt(1)}",100)`);
+
     await new Promise(r => setTimeout(r, 2000));
+
     for (const move of moves) {
-        await runMovement(move,sleep);
+        await runMovement(move, sleep);
     }
-    updateBatteries()
+
+    updateBatteries();
+
+    let elapsed = (new Date() - timerStarted) / 1000; // convert ms → seconds
+    alert(elapsed.toFixed(2) + "s"); // keep 2 decimals
 }
+
 
 // hook for cube solver worker
 function sc() {
@@ -280,7 +291,16 @@ log("Ready. Use openSpike('left') and openSpike('right') to connect.");
 
 async function scramble() {
     var moves = generateScramble(20)
-    SpikeCube(moves,450)
+    SpikeCube(moves,450)    
+}
+
+async function leb() {
+    for (let i;i<=15;i++) {
+        await scramble()
+        await new Promise(r => setTimeout(r, 200));
+        sc()
+        await new Promise(r => setTimeout(r, 10000));
+    }
 }
 
 function StartCube() {
