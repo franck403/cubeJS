@@ -92,8 +92,6 @@ body {
     z-index: -1;
     inset: 0;
     border-radius: 9999px;
-    -webkit-backdrop-filter: blur(0px);
-    backdrop-filter: blur(0px);
     -webkit-filter: url(#btn-glass);
     filter: url(#btn-glass);
     overflow: hidden;
