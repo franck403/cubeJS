@@ -11,7 +11,7 @@ let SpikeState = { left: false, right: false };
 const startup = "import motor\n\nfrom hub import port, light_matrix, sound\n\nimport time\n\nlayer = motor.run_for_degrees\n\nlight_matrix.clear()\n\nmotor.motor_set_high_resolution_mode(port.A, True)\n\nmotor.motor_set_high_resolution_mode(port.B, True)\n\nmotor.motor_set_high_resolution_mode(port.C, True)\n\nmotor.motor_set_high_resolution_mode(port.D, True)\n\nmotor.motor_set_high_resolution_mode(port.E, True)\n\nmotor.motor_set_high_resolution_mode(port.F, True)";
 const connectSound = "sound.beep(392,120);time.sleep_ms(120);sound.beep(494,120);time.sleep_ms(120);sound.beep(587,150);time.sleep_ms(150);sound.beep(784,200)";
 const music = "sound.beep(196, 800) ; time.sleep_ms(850)  # G3\nsound.beep(262, 1000) ; time.sleep_ms(1050)  # C4\nsound.beep(220, 900) ; time.sleep_ms(950)  # A3\nsound.beep(294, 1200) ; time.sleep_ms(1250)  # D4\nsound.beep(247, 1000) ; time.sleep_ms(1050)  # B3\nsound.beep(196, 1500) ; time.sleep_ms(1550)  # G3\nsound.beep(330, 800) ; time.sleep_ms(850)  # E4\nsound.beep(262, 1400) ; time.sleep_ms(1450)  # C4";
-const getBattery = `import hub\n\nhub.battery_voltage()`
+const getBattery = `import hub\n\nprint("Ba" + str(hub.battery_voltage()))`
 
 // LEFT side ports: A, C, E
 const CLP_LEFT = {
@@ -81,6 +81,20 @@ function log(...args) {
         logEl.scrollTop = logEl.scrollHeight;
     }
 }
+
+/**
+ * Calculate battery percentage given current voltage.
+ * @param {number} voltage Current voltage (e.g. in millivolts or volts)
+ * @param {number} minVolt Voltage corresponding to 0% (dead)
+ * @param {number} maxVolt Voltage corresponding to 100% (full)
+ * @returns {number} Battery percentage (clamped between 0 and 100)
+ */
+function batteryPercentage(voltage, minVolt, maxVolt) {
+    if (voltage <= minVolt) return 0;
+    if (voltage >= maxVolt) return 100;
+    return ((voltage - minVolt) / (maxVolt - minVolt)) * 100;
+}
+  
 
 async function openSpike(which) {
     let port, writer, reader, abortCtrl;
@@ -181,6 +195,9 @@ async function startReading(which, reader) {
                 if (value) {
                     log(`RX [${which}]:`, value);
                 }
+                if (value.startsWith('Ba')) {
+                    document.getElementById(which).innerText = batteryPercentage(parseFloat(value.replace('Ba','')), 6.0, 8.4)
+                }
             }
         } catch (err) {
             log(`RX error [${which}]:`, err?.message || err);
@@ -221,6 +238,14 @@ async function runMovement(move,sleep=220) {
         await new Promise(r => setTimeout(r, waitTimer));
     }
 }
+
+async function updateBatteries() {
+    await sendLine(rightWriter,getBattery) 
+    await new Promise(r => setTimeout(r, 200));
+    await sendLine(leftWriter,getBattery) 
+    await new Promise(r => setTimeout(r, 200));
+
+} 
 
 async function SpikeMove(move) {
     if (!SpikeState.left && !SpikeState.right) return;
