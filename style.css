@@ -126,13 +126,31 @@ body {
     bottom:25px;
     left:25px;
     display: flex;
-    flex-direction: column-reverse;
+    flex-direction: column;
     padding:5px;
-    width: 150px;
-    height: 80px;
+    width: 130px;
+    height: 60px;
+    font-size: 1.2rem;
 }
 
-.stats {
+.stats p {
     padding:0px;
     margin:0px
+}
+
+.stats::before {
+    border-radius:15px !important;
+}
+
+.timer {
+    position: fixed;
+    top:50%;
+    left:25px;
+    transform: translate(0%,-50%);
+    padding:10px;
+    font-size: 2rem;
+}
+
+.timer::before {
+    border-radius:15px !important;
 }

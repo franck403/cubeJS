@@ -261,6 +261,23 @@ async function SpikeMove(move) {
     updateBatteries()
 }
 
+let timerInterval = null;
+
+function startTimer(startTime) {
+    if (timerInterval) clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+        let elapsed = ((new Date() - startTime) / 1000).toFixed(2);
+        document.getElementById('timer').innerText = 'Time : ' + elapsed + 'S';
+    }, 10);
+}
+
+function stopTimer() {
+    if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+    }
+}
+
 async function SpikeCube(moves, sleep = 180) {
     var timerStarted = new Date();
     if (!SpikeState.left && !SpikeState.right) return;
@@ -271,14 +288,17 @@ async function SpikeCube(moves, sleep = 180) {
 
     await new Promise(r => setTimeout(r, 2000));
 
+    // Start live timer
+    startTimer(timerStarted);
+
     for (const move of moves) {
         await runMovement(move, sleep);
     }
 
     updateBatteries();
 
-    let elapsed = (new Date() - timerStarted) / 1000; // convert ms → seconds
-    alert(elapsed.toFixed(2) + "s"); // keep 2 decimals
+    // Stop live timer once done
+    stopTimer();
 }
 
 
