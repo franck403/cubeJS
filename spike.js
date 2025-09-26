@@ -38,8 +38,8 @@ const CLP_RIGHT = {
     "B'": "motor.run_for_degrees(port.F, 90, 500)",
     "B2": "motor.run_for_degrees(port.F, 180, 500)",
 
-    "D":  "motor.run_for_degrees(port.B, -95, 600)",
-    "D'": "motor.run_for_degrees(port.B, 95, 600)",
+    "D":  "motor.run_for_degrees(port.B, -90, 600)",
+    "D'": "motor.run_for_degrees(port.B, 90, 600)",
     "D2": "motor.run_for_degrees(port.B, 180, 600)",
 };
 // Merge into one pool
@@ -195,9 +195,13 @@ async function startReading(which, reader) {
                 if (value) {
                     log(`RX [${which}]:`, value);
                 }
-                if (value.startsWith('Ba')) {
-                    document.getElementById(which).innerText = batteryPercentage(parseFloat(value.replace('Ba','')), 6.0, 8.4)
-                }
+                value.split('\n').forEach(element => {
+                    console.log(element)
+                    if (element.startsWith('Ba')) {
+                        console.log('got battery update', value.replace('Ba',''))
+                        document.getElementById(which).innerText = (batteryPercentage(parseFloat(value.replace('Ba',''))/1000, 6.0, 8.4)) + '%'
+                    }                        
+                });
             }
         } catch (err) {
             log(`RX error [${which}]:`, err?.message || err);
@@ -244,15 +248,18 @@ async function updateBatteries() {
     await new Promise(r => setTimeout(r, 200));
     await sendLine(leftWriter,getBattery) 
     await new Promise(r => setTimeout(r, 200));
-
+    const targetFrame = window.top.frames[0];    
+    targetFrame.postMessage('batteryLevel')
 } 
 
 async function SpikeMove(move) {
     if (!SpikeState.left && !SpikeState.right) return;
     await runMovement(move);
+    updateBatteries()
 }
 
 async function SpikeCube(moves,sleep=220) {
+    updateBatteries()
     if (!SpikeState.left && !SpikeState.right) return;
     console.log(moves);
     sendLine(leftWriter,`light_matrix.write("${String(moves.length).charAt(0)}",100)`)
@@ -261,6 +268,7 @@ async function SpikeCube(moves,sleep=220) {
     for (const move of moves) {
         await runMovement(move,sleep);
     }
+    updateBatteries()
 }
 
 // hook for cube solver worker

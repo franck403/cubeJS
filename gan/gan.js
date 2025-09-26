@@ -22,5 +22,7 @@ window.addEventListener("message", (event) => {
         document.getElementById('reset-state').click()
     } else if (event.data == 'state') {
         window.parent.postMessage('S' + document.getElementById("connect").innerHTML === "Disconnect")
+    } else if (event.data == 'batteryLevel') {
+        window.parent.postMessage(document.getElementById('batteryLevel').innerHTML)
     }
 });
