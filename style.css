@@ -15,24 +15,17 @@ body {
     top: 25px;
     left: 50%;
     transform: translate(-50%, 0%);
+    border-radius: 51px;
+    line-height: 0;
+    background: #494949;
+    align-content: center;
+    align-items: center;
 }
-
 
 .controls button {
-    font-family: Arial, Helvetica, sans-serif;
-    color: #fff;
-    border: none;
-    margin: 5px;
     font-size: 2rem;
-    min-width: 125px;
-    font-weight: 700;
-    cursor: pointer;
     line-height: 0;
-    height: 50px;
-    padding: 16px;
-    border-radius: 15px;
 }
-
 
 #load {
     position: fixed;
@@ -153,4 +146,18 @@ body {
 
 .timer::before {
     border-radius:15px !important;
+}
+
+.btn, .controls button {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #fff;
+    border: none;
+    margin: 5px;
+    min-width: 125px;
+    font-weight: 700;
+    background: #020202;
+    cursor: pointer;
+    height: 50px;
+    padding: 16px;
+    border-radius: 60px;
 }

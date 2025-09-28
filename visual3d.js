@@ -149,6 +149,7 @@ function init3DCube(containerId = "cube3d") {
     camera.translateY(2)
     camera.translateX(4)
     camera.position.z = camera.position.z + 10
+    camera.position.x = 4
 
 
     renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
