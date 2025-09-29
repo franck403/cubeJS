@@ -93,6 +93,8 @@ function log(...args) {
 function batteryPercentage(voltage, minVolt, maxVolt) {
     if (voltage <= minVolt) return 0;
     if (voltage >= maxVolt) return 100;
+    console.warn(voltage)
+    console.warn(Math.round(((voltage - minVolt) / (maxVolt - minVolt)) * 100))
     return Math.round(((voltage - minVolt) / (maxVolt - minVolt)) * 100);
 }
   
@@ -130,7 +132,7 @@ async function openSpike(which) {
         startReading(which, reader);
 
         await sendLine(writer, startup);
-        //await sendLine(writer, connectSound);
+        await sendLine(writer, connectSound);
 
         log(`${which} Spike connected`);
     } catch (err) {
@@ -295,6 +297,7 @@ async function SpikeCube(moves, sleep = 180) {
         await runMovement(move, sleep);
     }
 
+    await new Promise(r => setTimeout(r, 100));
     updateBatteries();
 
     // Stop live timer once done
