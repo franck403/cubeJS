@@ -145,8 +145,10 @@ body {
     padding:10px;
     font-size: 2rem;
     display: flex;
+    line-height: 1.5;
     justify-content: center;
     flex-direction: row;
+    justify-content:center;
 }
 
 .timer::before {
