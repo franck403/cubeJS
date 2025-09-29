@@ -119,6 +119,8 @@ body {
     bottom:25px;
     left:25px;
     display: flex;
+    justify-content: center;
+    display: flex;
     flex-direction: column;
     padding:5px;
     width: 130px;
@@ -142,6 +144,9 @@ body {
     transform: translate(0%,-50%);
     padding:10px;
     font-size: 2rem;
+    display: flex;
+    justify-content: center;
+    flex-direction: row;
 }
 
 .timer::before {
@@ -161,3 +166,9 @@ body {
     padding: 16px;
     border-radius: 60px;
 }
+
+.dark { background: #000000; }
+.dark-red { background: #420C0F; }
+.lightDark-red { background: #ded4d5; }
+.lightlight_green { color: #A0BFB0; }
+.light_green { color: #A8E0CE; }
