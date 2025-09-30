@@ -7,6 +7,8 @@ let rightReader = null;
 let leftAbort = null;
 let rightAbort = null;
 let SpikeState = { left: false, right: false };
+let scSecure = false
+let SolveSecure = false
 
 const startup = "import motor\n\nfrom hub import port, light_matrix, sound\n\nimport time\n\nlayer = motor.run_for_degrees\n\nlight_matrix.clear()\n\nmotor.motor_set_high_resolution_mode(port.A, True)\n\nmotor.motor_set_high_resolution_mode(port.B, True)\n\nmotor.motor_set_high_resolution_mode(port.C, True)\n\nmotor.motor_set_high_resolution_mode(port.D, True)\n\nmotor.motor_set_high_resolution_mode(port.E, True)\n\nmotor.motor_set_high_resolution_mode(port.F, True)";
 const connectSound = "sound.beep(392,120);time.sleep_ms(120);sound.beep(494,120);time.sleep_ms(120);sound.beep(587,150);time.sleep_ms(150);sound.beep(784,200)";
@@ -245,6 +247,10 @@ async function runMovement(move,sleep=220) {
         await new Promise(r => setTimeout(r, waitTimer));
     }
 }
+  
+document.getElementById('cube-view').contentWindow.batterie = (batteriePourcentage) => {
+    document.getElementById('ganBatterie').innerText = batteriePourcentage
+}
 
 async function updateBatteries() {
     await sendLine(rightWriter,getBattery) 
@@ -252,8 +258,7 @@ async function updateBatteries() {
     await sendLine(leftWriter,getBattery) 
     await new Promise(r => setTimeout(r, 200));
     await sendLine(leftWriter,clearDisplay)
-    await sendLine(rightWriter,clearDisplay)
-    const targetFrame = window.top.frames[0];    
+    await sendLine(rightWriter,clearDisplay)  
     targetFrame.postMessage('batteryLevel')
 } 
 
@@ -280,7 +285,7 @@ function stopTimer() {
     }
 }
 
-async function SpikeCube(moves, sleep = 180) {
+async function SpikeCube(moves, sleep = 200) {
     var timerStarted = new Date();
     if (!SpikeState.left && !SpikeState.right) return;
     console.log(moves);
@@ -307,27 +312,39 @@ async function SpikeCube(moves, sleep = 180) {
 
 // hook for cube solver worker
 function sc() {
-    worker.postMessage({ type: 'solve', state: cube.asString() });
+    if (!SolveSecure) {
+        SolveSecure = true 
+        worker.postMessage({ type: 'solve', state: cube.asString() });
+        setTimeout(()=> {
+            SolveSecure = false
+        },10000)
+    }
 }
 
 log("Ready. Use openSpike('left') and openSpike('right') to connect.");
 
 async function scramble() {
-    var moves = generateScramble(20)
-    SpikeCube(moves,450)    
+    if (!scSecure) {
+        scSecure = true
+        var moves = generateScramble(20)
+        SpikeCube(moves,300)
+        setTimeout(()=> {
+            scSecure = false
+        },10000)
+    } 
 }
 
 async function leb() {
-    for (let i;i<=15;i++) {
+    for (let i = 0;i<=15;i++) {
         await scramble()
-        await new Promise(r => setTimeout(r, 200));
+        await new Promise(r => setTimeout(r, 15000));
         sc()
         await new Promise(r => setTimeout(r, 10000));
     }
 }
 
 function StartCube() {
-    SpikeCube(['U','U','U','U'],450)
+    SpikeCube(['U','U','U','U'],300)
 }
 
 let SpinState = true

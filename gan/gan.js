@@ -23,6 +23,7 @@ window.addEventListener("message", (event) => {
     } else if (event.data == 'state') {
         window.parent.postMessage('S' + document.getElementById("connect").innerHTML === "Disconnect")
     } else if (event.data == 'batteryLevel') {
-        window.parent.postMessage(document.getElementById('batteryLevel').innerHTML)
+        alert(document.getElementById('batteryLevel').innerHTML)
+        window.updateBatteries(document.getElementById('batteryLevel').innerHTML)
     }
 });
