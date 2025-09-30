@@ -248,10 +248,10 @@ async function runMovement(move,sleep=220) {
     }
 }
   
-document.getElementById('cube-view').contentWindow.batterie = (batteriePourcentage) => {
-    document.getElementById('ganBatterie').innerText = batteriePourcentage
+function ganB() {
+    var b = document.getElementById('cube-view').contentWindow
+    document.getElementById('ganBatterie').innerText = b.document.getElementById('batteryLevel').value
 }
-
 async function updateBatteries() {
     await sendLine(rightWriter,getBattery) 
     await new Promise(r => setTimeout(r, 200));
@@ -259,7 +259,7 @@ async function updateBatteries() {
     await new Promise(r => setTimeout(r, 200));
     await sendLine(leftWriter,clearDisplay)
     await sendLine(rightWriter,clearDisplay)  
-    targetFrame.postMessage('batteryLevel')
+    ganB()
 } 
 
 async function SpikeMove(move) {
