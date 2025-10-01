@@ -30,7 +30,7 @@ const CLP_LEFT = {
     "F'": "motor.run_for_degrees(port.A, 90, 1100)",
     "F2": "motor.run_for_degrees(port.A, 180, 1100)",
 };
-
+/*
 // RIGHT side ports: B, D, F
 const CLP_RIGHT = {
     "R":  "motor.run_for_degrees(port.D, -90, 500)",
@@ -45,6 +45,40 @@ const CLP_RIGHT = {
     "D'": "motor.run_for_degrees(port.B, 90, 600)",
     "D2": "motor.run_for_degrees(port.B, 180, 600)",
 };
+const CLP_LEFT = {
+    // Face U
+    "U":  "await motor.run_to_relative_position(port.E, -90, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000)",
+    "U'": "await motor.run_to_relative_position(port.E, 90, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000)",
+    "U2": "await motor.run_to_relative_position(port.E, 180, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000)",
+
+    // Face L
+    "L":  "await motor.run_to_relative_position(port.C, -90, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000)",
+    "L'": "await motor.run_to_relative_position(port.C, 90, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000)",
+    "L2": "await motor.run_to_relative_position(port.C, 180, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000)",
+
+    // Face F
+    "F":  "await motor.run_to_relative_position(port.A, -90, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000)",
+    "F'": "await motor.run_to_relative_position(port.A, 90, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000)",
+    "F2": "await motor.run_to_relative_position(port.A, 180, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000)",
+};*/
+
+const CLP_RIGHT = {
+    // Face R
+    "R":  "await motor.run_to_relative_position(port.D, -90, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000)",
+    "R'": "await motor.run_to_relative_position(port.D, 90, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000)",
+    "R2": "await motor.run_to_relative_position(port.D, 180, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000)",
+
+    // Face B
+    "B":  "await motor.run_to_relative_position(port.F, -90, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000)",
+    "B'": "await motor.run_to_relative_position(port.F, 90, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000)",
+    "B2": "await motor.run_to_relative_position(port.F, 180, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000)",
+
+    // Face D
+    "D":  "await motor.run_to_relative_position(port.B, -90, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000)",
+    "D'": "await motor.run_to_relative_position(port.B, 90, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000)",
+    "D2": "await motor.run_to_relative_position(port.B, 180, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000)",
+};
+
 // Merge into one pool
 const ALL_MOVES = Object.keys({ ...CLP_LEFT, ...CLP_RIGHT });
 
@@ -235,7 +269,11 @@ async function runMovement(move,sleep=220) {
     log(`Running move '${move}'`);
     await sendLine(writer, cmd);
     await sendLine(leftWriter,`light_matrix.write("${move.charAt(0)}",100)`)
-    var waitTimer = sleep
+    if (move.startsWith('B') || move.startsWith('D')) {
+        var waitTimer = sleep + 20
+    } else {
+        var waitTimer = sleep
+    }
     if (move.endsWith("'")) {
         await sendLine(rightWriter,'light_matrix.write("\'",100)') 
         await new Promise(r => setTimeout(r, waitTimer));
@@ -285,7 +323,7 @@ function stopTimer() {
     }
 }
 
-async function SpikeCube(moves, sleep = 200) {
+async function SpikeCube(moves, sleep = 170) {
     var timerStarted = new Date();
     if (!SpikeState.left && !SpikeState.right) return;
     console.log(moves);
@@ -302,7 +340,7 @@ async function SpikeCube(moves, sleep = 200) {
         await runMovement(move, sleep);
     }
 
-    await new Promise(r => setTimeout(r, 100));
+    await new Promise(r => setTimeout(r, 200));
     updateBatteries();
 
     // Stop live timer once done
@@ -328,9 +366,6 @@ async function scramble() {
         scSecure = true
         var moves = generateScramble(20)
         SpikeCube(moves,300)
-        setTimeout(()=> {
-            scSecure = false
-        },10000)
     } 
 }
 

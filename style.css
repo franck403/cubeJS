@@ -117,7 +117,7 @@ body {
 .stats {
     position: fixed;
     bottom:25px;
-    left:25px;
+    right:25px;
     display: flex;
     justify-content: center;
     display: flex;
@@ -170,7 +170,7 @@ body {
 }
 
 .dark { background: #000000; }
-.dark-red { background: #420C0F; }
-.lightDark-red { background: #ded4d5; }
-.lightlight_green { color: #A0BFB0; }
-.light_green { color: #A8E0CE; }
+.topBar { background: #114B5F;}
+.topBar button {background:#39ADAD;}
+.btn  {background:#114B5F;}
+.bat {background: #7A306C;color: #FF84E8;}

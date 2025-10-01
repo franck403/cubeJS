@@ -12,6 +12,9 @@ function initCube() {
 initCube();
 
 // Start the worker
+setTimeout(()=> {
+  document.getElementById('load').remove()
+},10000)
 const worker = new Worker('Corker.js');
 
 worker.onmessage = function (e) {
@@ -33,7 +36,10 @@ worker.onmessage = function (e) {
     //animate3DSolution(moves, 10);
 
     //
-    SpikeCube(moves)
+    (async () => {
+      await SpikeCube(moves)
+      scSecure = false
+    })()
     /*document.getElementById('res').innerHTML = 'Solution: ' + e.data.solution;
 
     const moves = e.data.solution.trim().split(/\s+/);
