@@ -9,11 +9,13 @@ body {
     display: flex;
     justify-content: center;
     flex-direction: row;
-    width: 1000px;
+    width: auto;
     height: 70px;
     position: fixed;
     top: 25px;
     left: 50%;
+    padding-left:10px;
+    padding-right:10px;
     transform: translate(-50%, 0%);
     border-radius: 51px;
     line-height: 0;
@@ -24,7 +26,9 @@ body {
 
 .controls button {
     font-size: 2rem;
+    width:max-content;
     line-height: 0;
+    padding:0px!important;
 }
 
 #load {

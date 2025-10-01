@@ -181,6 +181,11 @@ async function spike() {
     await openSpike('right')
 }
 
+async function FullConnect() {
+    await spike()
+    connect()
+}
+
 async function sendLine(writer, text) {
     if (!writer) return;
     const normalized = text.replace(/\r?\n/g, '\r\n');
