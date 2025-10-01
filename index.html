@@ -45,13 +45,14 @@
   </div>
   <div class="controls topBar">
     <button onclick="FullConnect()"><i class="fa-solid fa-plug"></i></button>
-    <!--<button id="get-moves" onclick="spike()" class="">Spike</button>
-    <button id="connect" onclick="connect()" class="">Gan Cube</button>-->
-    <button id="reset-state" onclick="reset()"><i class="fa-solid fa-cubes-stacked"></i></button>
-    <button id="get-moves2" onclick="sc()" class=""><i class="fa-solid fa-arrow-rotate-left"></i></button>
-    <button id="get-moves3" onclick="scramble()" class=""><i class="fa-solid fa-shuffle"></i></button>
-    <button id="get-moves4" onclick="StartCube()" class=""><i class="fa-solid fa-power-off"></i></button>
-    <button id="get-moves5" onclick="spin()" class=""><i class="fa-solid fa-rotate-right"></i></button>
+    <!--<button id="get-moves" onclick="spike()" >Spike</button>
+    <button id="connect" onclick="connect()" >Gan Cube</button>-->
+    <button onclick="reset()"><i class="fa-solid fa-arrow-rotate-left"></i></button>
+    <button onclick="sc()" ><i class="fa-solid fa-play"></i></button>
+    <button onclick="scramble()" ><i class="fa-solid fa-shuffle"></i></button>
+    <button onclick="StartCube()" ><i class="fa-solid fa-arrows-spin"></i></button>
+    <button onclick="spin()" ><i class="fa-solid fa-spiral"></i></button>
+    <button onclick="fullscreen()" id="full"><i class="fa-solid fa-expand"></i></button>
   </div>
 
   <div class="btn bat stats">
@@ -61,7 +62,7 @@
   </div>
 
   <div class="btn dark-red timer">
-    <span id="timer">Waiting</span>
+    <span id="timer"><i class="fa-solid fa-clock"></i></span>
   </div>
 
   <p style="display: none;" id="cube"></p>

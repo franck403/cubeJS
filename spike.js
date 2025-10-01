@@ -10,13 +10,15 @@ let SpikeState = { left: false, right: false };
 let scSecure = false
 let SolveSecure = false
 
-const startup = "import motor\n\nfrom hub import port, light_matrix, sound\n\nimport time\n\nlayer = motor.run_for_degrees\n\nlight_matrix.clear()\n\nmotor.motor_set_high_resolution_mode(port.A, True)\n\nmotor.motor_set_high_resolution_mode(port.B, True)\n\nmotor.motor_set_high_resolution_mode(port.C, True)\n\nmotor.motor_set_high_resolution_mode(port.D, True)\n\nmotor.motor_set_high_resolution_mode(port.E, True)\n\nmotor.motor_set_high_resolution_mode(port.F, True)";
+const startup = "import motor\n\nfrom hub import port, light_matrix, sound\n\nimport time\n\nlayer = motor.run_for_degrees\n\nlight_matrix.clear();\nmotor.motor_set_high_resolution_mode(port.A, True);\nmotor.motor_set_high_resolution_mode(port.B, True);\nmotor.motor_set_high_resolution_mode(port.C, True);\nmotor.motor_set_high_resolution_mode(port.D, True);\nmotor.motor_set_high_resolution_mode(port.E, True);\nmotor.motor_set_high_resolution_mode(port.F, True)";
 const connectSound = "sound.beep(392,120);time.sleep_ms(120);sound.beep(494,120);time.sleep_ms(120);sound.beep(587,150);time.sleep_ms(150);sound.beep(784,200)";
 const music = "sound.beep(196, 800) ; time.sleep_ms(850)  # G3\nsound.beep(262, 1000) ; time.sleep_ms(1050)  # C4\nsound.beep(220, 900) ; time.sleep_ms(950)  # A3\nsound.beep(294, 1200) ; time.sleep_ms(1250)  # D4\nsound.beep(247, 1000) ; time.sleep_ms(1050)  # B3\nsound.beep(196, 1500) ; time.sleep_ms(1550)  # G3\nsound.beep(330, 800) ; time.sleep_ms(850)  # E4\nsound.beep(262, 1400) ; time.sleep_ms(1450)  # C4";
 const getBattery = `import hub\n\nprint("Ba" + str(hub.battery_voltage()))`
-const clearDisplay = `light_matrix.clear()\n\n`
+const clearDisplay = `light_matrix.clear();\n`
 
 // LEFT side ports: A, C, E
+
+/*
 const CLP_LEFT = {
     "U":  "motor.run_for_degrees(port.E, -90, 1100)",
     "U'": "motor.run_for_degrees(port.E, 90, 1100)",
@@ -30,7 +32,6 @@ const CLP_LEFT = {
     "F'": "motor.run_for_degrees(port.A, 90, 1100)",
     "F2": "motor.run_for_degrees(port.A, 180, 1100)",
 };
-/*
 // RIGHT side ports: B, D, F
 const CLP_RIGHT = {
     "R":  "motor.run_for_degrees(port.D, -90, 500)",
@@ -44,39 +45,39 @@ const CLP_RIGHT = {
     "D":  "motor.run_for_degrees(port.B, -90, 600)",
     "D'": "motor.run_for_degrees(port.B, 90, 600)",
     "D2": "motor.run_for_degrees(port.B, 180, 600)",
-};
+};*/
 const CLP_LEFT = {
     // Face U
-    "U":  "await motor.run_to_relative_position(port.E, -90, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000)",
-    "U'": "await motor.run_to_relative_position(port.E, 90, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000)",
-    "U2": "await motor.run_to_relative_position(port.E, 180, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000)",
+    "U":  "motor.reset_relative_position(port.A,0);motor.run_to_relative_position(port.A, -90, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000);\n",
+    "U'": "motor.reset_relative_position(port.A,0);motor.run_to_relative_position(port.A, 90, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000);\n",
+    "U2": "motor.reset_relative_position(port.A,0);motor.run_to_relative_position(port.A, 180, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000);\n",
 
     // Face L
-    "L":  "await motor.run_to_relative_position(port.C, -90, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000)",
-    "L'": "await motor.run_to_relative_position(port.C, 90, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000)",
-    "L2": "await motor.run_to_relative_position(port.C, 180, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000)",
+    "L":  "motor.reset_relative_position(port.C,0);motor.run_to_relative_position(port.C, -90, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000);\n",
+    "L'": "motor.reset_relative_position(port.C,0);motor.run_to_relative_position(port.C, 90, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000);\n",
+    "L2": "motor.reset_relative_position(port.C,0);motor.run_to_relative_position(port.C, 180, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000);\n",
 
     // Face F
-    "F":  "await motor.run_to_relative_position(port.A, -90, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000)",
-    "F'": "await motor.run_to_relative_position(port.A, 90, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000)",
-    "F2": "await motor.run_to_relative_position(port.A, 180, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000)",
-};*/
+    "F":  "motor.reset_relative_position(port.E,0);motor.run_to_relative_position(port.E, -90, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000);\n",
+    "F'": "motor.reset_relative_position(port.E,0);motor.run_to_relative_position(port.E, 90, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000);\n",
+    "F2": "motor.reset_relative_position(port.E,0);motor.run_to_relative_position(port.E, 180, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000);\n",
+};
 
 const CLP_RIGHT = {
     // Face R
-    "R":  "await motor.run_to_relative_position(port.D, -90, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000)",
-    "R'": "await motor.run_to_relative_position(port.D, 90, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000)",
-    "R2": "await motor.run_to_relative_position(port.D, 180, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000)",
+    "R":  "motor.reset_relative_position(port.D,0);motor.run_to_relative_position(port.D, -90, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000);\n",
+    "R'": "motor.reset_relative_position(port.D,0);motor.run_to_relative_position(port.D, 90, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000);\n",
+    "R2": "motor.reset_relative_position(port.D,0);motor.run_to_relative_position(port.D, 180, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000);\n",
 
     // Face B
-    "B":  "await motor.run_to_relative_position(port.F, -90, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000)",
-    "B'": "await motor.run_to_relative_position(port.F, 90, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000)",
-    "B2": "await motor.run_to_relative_position(port.F, 180, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000)",
+    "B":  "motor.reset_relative_position(port.F,0);motor.run_to_relative_position(port.F, -90, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000);\n",
+    "B'": "motor.reset_relative_position(port.F,0);motor.run_to_relative_position(port.F, 90, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000);\n",
+    "B2": "motor.reset_relative_position(port.F,0);motor.run_to_relative_position(port.F, 180, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000);\n",
 
     // Face D
-    "D":  "await motor.run_to_relative_position(port.B, -90, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000)",
-    "D'": "await motor.run_to_relative_position(port.B, 90, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000)",
-    "D2": "await motor.run_to_relative_position(port.B, 180, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000)",
+    "D":  "motor.reset_relative_position(port.B,0);motor.run_to_relative_position(port.B, -90, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000);\n",
+    "D'": "motor.reset_relative_position(port.B,0);motor.run_to_relative_position(port.B, 90, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000);\n",
+    "D2": "motor.reset_relative_position(port.B,0);motor.run_to_relative_position(port.B, 180, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000);\n",
 };
 
 // Merge into one pool
@@ -230,7 +231,6 @@ async function disconnectSpike(which) {
 
 async function startReading(which, reader) {
     if (!reader) return;
-
     (async () => {
         try {
             while (true) {
@@ -240,11 +240,42 @@ async function startReading(which, reader) {
                     log(`RX [${which}]:`, value);
                 }
                 value.split('\n').forEach(element => {
-                    console.log(element)
+                    console.log(element);
                     if (element.startsWith('Ba')) {
-                        console.log('got battery update', value.replace('Ba',''))
-                        document.getElementById(which).innerText = (batteryPercentage(parseFloat(value.replace('Ba',''))/1000, 6.0, 8.4)) + '%'
-                    }                        
+                        const batteryValue = parseFloat(element.replace('Ba', '')) / 1000;
+                        const batteryPercentageValue = batteryPercentage(batteryValue, 6.0, 8.4);
+                        console.log('got battery update', batteryPercentageValue);
+
+                        // Update the battery icon class
+                        const ganBatterie = document.getElementById('ganBatterie');
+                        if (ganBatterie) {
+                            // Remove all existing battery classes
+                            ganBatterie.classList.remove(
+                                'icon-battery-0',
+                                'icon-battery-25',
+                                'icon-battery-50',
+                                'icon-battery-75',
+                                'icon-battery-100'
+                            );
+
+                            // Map the battery level to the closest icon class
+                            let iconClass;
+                            if (batteryPercentageValue === 0) {
+                                iconClass = 'icon-battery-0';
+                            } else if (batteryPercentageValue <= 25) {
+                                iconClass = 'icon-battery-25';
+                            } else if (batteryPercentageValue <= 50) {
+                                iconClass = 'icon-battery-50';
+                            } else if (batteryPercentageValue <= 75) {
+                                iconClass = 'icon-battery-75';
+                            } else {
+                                iconClass = 'icon-battery-100';
+                            }
+
+                            // Add the appropriate battery class
+                            ganBatterie.classList.add(iconClass);
+                        }
+                    }
                 });
             }
         } catch (err) {
@@ -339,7 +370,7 @@ function startTimer(startTime) {
     if (timerInterval) clearInterval(timerInterval);
     timerInterval = setInterval(() => {
         let elapsed = ((new Date() - startTime) / 1000).toFixed(2);
-        document.getElementById('timer').innerText = 'Time : ' + elapsed + 'S';
+        document.getElementById('timer').innerHTML = '<i class="fa-solid fa-clock"></i> : ' + elapsed + 'S';
     }, 10);
 }
 
@@ -350,7 +381,7 @@ function stopTimer() {
     }
 }
 
-async function SpikeCube(moves, sleep = 170) {
+async function SpikeCube(moves, sleep = 200) {
     var timerStarted = new Date();
     if (!SpikeState.left && !SpikeState.right) return;
     console.log(moves);
@@ -362,9 +393,21 @@ async function SpikeCube(moves, sleep = 170) {
 
     // Start live timer
     startTimer(timerStarted);
-
+    let iM = 0
+    let Skip = false
+    let OpposeRight = ['U','F','L']
+    let OpposeLeft  = ['D','B','R']
     for (const move of moves) {
-        await runMovement(move, sleep);
+        iM++
+        if (OpposeLeft[OpposeRight.indexOf(move)] == moves[iM] || OpposeRight[OpposeLeft.indexOf(move)] == moves[iM]) {
+            Skip = true
+            runMovement(move, sleep);
+            await runMovement(moves[iM], sleep);
+        } else if (!Skip) {
+            await runMovement(move, sleep);
+        } else {
+            Skip = false
+        }
     }
 
     await new Promise(r => setTimeout(r, 200));
@@ -413,9 +456,34 @@ let SpinState = true
 async function spin() {
     if (SpinState) {
         SpinState = false
-        await sendLine(leftWriter,'motor.run(port.E, 150)')
+        await sendLine(leftWriter,'motor.run(port.A, 150)')
     } else {
         SpinState = true
-        await sendLine(leftWriter,'motor.stop(port.E)')
+        await sendLine(leftWriter,'motor.stop(port.A)')
     }
 }
+
+let fullscreenstate = false;
+
+function fullscreen() {
+    if (!fullscreenstate) {
+        document.body.requestFullscreen().catch(err => {
+            console.error("Error attempting to enable fullscreen:", err);
+        });
+        document.getElementById('full').innerHTML = `<i class="fa-solid fa-compress"></i>`;
+        fullscreenstate = true;
+    } else {
+        if (document.fullscreenElement) {
+            document.exitFullscreen();
+        }
+        document.getElementById('full').innerHTML = `<i class="fa-solid fa-expand"></i>`;
+        fullscreenstate = false;
+    }
+}
+
+document.addEventListener("fullscreenchange", (event) => {
+    if (!document.fullscreenElement) {
+        document.getElementById('full').innerHTML = `<i class="fa-solid fa-expand"></i>`;
+        fullscreenstate = false;
+    }
+});

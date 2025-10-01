@@ -48,41 +48,8 @@ document.getElementById('cube-view').onload = function () {
 
 // --- Send inverse moves ---
 function reset2() {
-    try {
-        if (moves.length === 0) {
-            console.warn("No moves to send");
-            return;
-        }    
-    } catch {
-        var moves = []
-    }
-    console.log(moves)
-
-    const reversed = [...moves].reverse(); // non-destructive reverse
-    var moves = []
-    reversed.forEach(mov => {
-        let rmov;
-        switch (mov) {
-            case "R":  rmov = "R'"; break;
-            case "R'": rmov = "R"; break;
-            case "F":  rmov = "F'"; break;
-            case "F'": rmov = "F"; break;
-            case "L":  rmov = "L'"; break;
-            case "L'": rmov = "L"; break;
-            case "B":  rmov = "B'"; break;
-            case "B'": rmov = "B"; break;
-            case "D":  rmov = "D'"; break;
-            case "D'": rmov = "D"; break;
-            case "U":  rmov = "U'"; break;
-            case "U'": rmov = "U"; break;
-            default:
-                console.warn("Invalid move:", mov);
-                return;
-        }
-        console.log("Inverse Move:", rmov);
-        moves.push([rmov])
-    });
-    window.resetCube(moves);
+    cube = new Cube();
+    init3DCube()
 }
 
 const reversedMoves = new Set(["D", "L", "F"]);

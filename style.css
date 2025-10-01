@@ -29,6 +29,7 @@ body {
     width:max-content;
     line-height: 0;
     padding:0px!important;
+    min-width: 80px;
 }
 
 #load {
@@ -119,17 +120,18 @@ body {
 }
 
 .stats {
+    display: flex;
     position: fixed;
     bottom:25px;
     right:25px;
-    display: flex;
     justify-content: center;
-    display: flex;
     flex-direction: column;
+    align-items: flex-end;
     padding:5px;
-    width: 130px;
+    width: 110px;
     height: 60px;
     font-size: 1.2rem;
+    border-radius: 5px !important;
 }
 
 .stats p {
@@ -153,6 +155,7 @@ body {
     justify-content: center;
     flex-direction: row;
     justify-content:center;
+    min-width: 100px;
 }
 
 .timer::before {
@@ -164,7 +167,6 @@ body {
     color: #fff;
     border: none;
     margin: 5px;
-    min-width: 125px;
     font-weight: 700;
     background: #020202;
     cursor: pointer;
