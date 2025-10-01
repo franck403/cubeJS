@@ -287,9 +287,31 @@ async function runMovement(move,sleep=220) {
 }
   
 function ganB() {
-    var b = document.getElementById('cube-view').contentWindow
-    document.getElementById('ganBatterie').innerText = b.document.getElementById('batteryLevel').value
+    var b = document.getElementById('cube-view').contentWindow;
+    var batteryLevel = parseInt(b.document.getElementById('batteryLevel').value, 10);
+    var ganBatterie = document.getElementById('ganBatterie');
+
+    // Remove all existing battery classes
+    ganBatterie.classList.remove('icon-battery-0', 'icon-battery-25', 'icon-battery-50', 'icon-battery-75', 'icon-battery-100');
+
+    // Map the battery level to the closest icon class
+    let iconClass;
+    if (batteryLevel === 0) {
+        iconClass = 'icon-battery-0';
+    } else if (batteryLevel <= 25) {
+        iconClass = 'icon-battery-25';
+    } else if (batteryLevel <= 50) {
+        iconClass = 'icon-battery-50';
+    } else if (batteryLevel <= 75) {
+        iconClass = 'icon-battery-75';
+    } else {
+        iconClass = 'icon-battery-100';
+    }
+
+    // Add the appropriate battery class
+    ganBatterie.classList.add(iconClass);
 }
+
 async function updateBatteries() {
     await sendLine(rightWriter,getBattery) 
     await new Promise(r => setTimeout(r, 200));
