@@ -372,9 +372,9 @@ let timerInterval = null;
 function startTimer(startTime) {
     if (timerInterval) clearInterval(timerInterval);
     timerInterval = setInterval(() => {
-        let elapsed = ((new Date() - startTime) / 1000).toFixed(2);
+        let elapsed = ((new Date() - startTime) / 1000).toFixed(3);
         document.getElementById('timer').innerHTML = '<i class="fa-solid fa-clock"></i> : ' + elapsed + 'S';
-    }, 10);
+    }, 1);
 }
 
 function stopTimer() {
@@ -384,7 +384,7 @@ function stopTimer() {
     }
 }
 
-async function SpikeCube(moves, sleep = 250) {
+async function SpikeCube(moves, sleep = 240) {
     var timerStarted = new Date();
     if (!SpikeState.left && !SpikeState.right) return;
     console.log(moves);
@@ -459,7 +459,7 @@ let SpinState = true
 async function spin() {
     if (SpinState) {
         SpinState = false
-        await sendLine(leftWriter,'motor.run(port.A, 150)')
+        await sendLine(leftWriter,'motor.run(port.A, 50)')
     } else {
         SpinState = true
         await sendLine(leftWriter,'motor.stop(port.A)')

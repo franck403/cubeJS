@@ -5,6 +5,7 @@ let scene, camera, renderer, cubed = [], animating = false, controls;
 
 // Image loaders for textures.
 const logoTexture = new THREE.TextureLoader().load('Gan_cube_brand.webp');
+let currentFrontFace = 'F'; // Default: front face is 'F'
 
 const colors = {
     "U": 0xFFFFFF, // White (no change, as it's not in the provided image)
@@ -464,37 +465,64 @@ function faceConfig(face, clockwise) {
     return { axis, selector, pivotPos, angle };
 }
 
+function updateCameraForThreeFaceView(frontFace) {
+    const cameraOffset = 5;
+    const cameraHeight = 3;
+    switch (frontFace) {
+        case 'F': // Front face is front
+            camera.position.set(cameraOffset, cameraHeight, cameraOffset);
+            break;
+        case 'R': // Right face is front
+            camera.position.set(0, cameraHeight, cameraOffset);
+            break;
+        case 'L': // Left face is front
+            camera.position.set(0, cameraHeight, -cameraOffset);
+            break;
+        case 'B': // Back face is front
+            camera.position.set(-cameraOffset, cameraHeight, 0);
+            break;
+        case 'U': // Up face is front
+            camera.position.set(cameraOffset, 0, cameraOffset);
+            break;
+        case 'D': // Down face is front
+            camera.position.set(cameraOffset, 0, -cameraOffset);
+            break;
+        default:
+            camera.position.set(cameraOffset, cameraHeight, cameraOffset);
+    }
+    camera.lookAt(0, 0, 0);
+    controls.update();
+}
+
+
+
 /**
  * Rotation animée d'une face.
  */
-function rotateFace(face, clockwise = true) {
+
+// Update the rotateFace function
+async function rotateFace(face, clockwise = true) {
     return new Promise((resolve) => {
         animating = true;
-
         const { axis, selector, pivotPos, angle } = faceConfig(face, clockwise);
-
         let pivot = new THREE.Object3D();
         Object.assign(pivot.position, pivotPos);
-
         const targetCubelets = cubed.filter(selector);
         scene.add(pivot);
         targetCubelets.forEach(c => pivot.attach(c));
-
-        // Directly apply the final rotation (no animation)
         const targetQuaternion = new THREE.Quaternion().setFromAxisAngle(axis, angle);
         pivot.quaternion.copy(targetQuaternion);
-
-        // Reattach cubelets back to the scene with corrected transforms
         targetCubelets.forEach(c => {
             scene.attach(c);
-            fixCubelet(c); // corrige position/rotation
+            fixCubelet(c);
         });
-
         scene.remove(pivot);
         animating = false;
+        currentFrontFace = face; // Update the current front face
         resolve();
     });
 }
+
 
 /**
  * Joue une séquence de mouvements avec animation.
