@@ -123,9 +123,11 @@ function get3DColor(face, position) {
     return 0x000000;
 }
 
+let sdr = false
+
 function resetCube() {
-    if (animating) return;
-    animating = true;
+    if (sdr) return;
+    sdr = true
 
     // Reset the global cube variable to a new solved instance
     cube = new Cube();
@@ -197,8 +199,8 @@ function resetCube() {
     
     // Re-enable animations after a short delay
     setTimeout(() => {
-        animating = false;
-    }, 500);
+        sdr = false
+    }, 2000);
 }
 
 /**
