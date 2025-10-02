@@ -184,7 +184,9 @@ async function spike() {
 
 async function FullConnect() {
     await spike()
-    connect()
+    if (document.getElementById('FC').innerHTML != '<i class="fa-solid fa-plug-circle-exclamation"></i>') {
+        connect()
+    }
 }
 
 async function sendLine(writer, text) {
@@ -224,6 +226,7 @@ async function disconnectSpike(which) {
         }
 
         log(`${which} Spike disconnected`);
+        document.getElementById('FC').innerHTML = '<i class="fa-solid fa-plug-circle-exclamation"></i>'
     } catch (err) {
         log("Disconnect error:", err);
     }
@@ -381,7 +384,7 @@ function stopTimer() {
     }
 }
 
-async function SpikeCube(moves, sleep = 220) {
+async function SpikeCube(moves, sleep = 250) {
     var timerStarted = new Date();
     if (!SpikeState.left && !SpikeState.right) return;
     console.log(moves);
@@ -449,7 +452,7 @@ async function leb() {
 }
 
 function StartCube() {
-    SpikeCube(['U','U','U','U'],300)
+    SpikeCube(['U2'],300)
 }
 
 let SpinState = true
