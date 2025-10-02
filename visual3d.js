@@ -123,27 +123,78 @@ function get3DColor(face, position) {
     return 0x000000;
 }
 
-/**
- * Resets the cube to its solved state.
- */
 function resetCube() {
     if (animating) return;
     animating = true;
+
     // Reset the global cube variable to a new solved instance
     cube = new Cube();
     const solvedState = cube.asString();
-    // Update the 3D visualization with the solved state
+
+    // Create a new scene to prevent WebGL crashes
+    while(scene.children.length > 0) {
+        scene.remove(scene.children[0]);
+    }
+
+    // Rebuild cubelets
+    cubed = []; // Clear existing cubelets array
+    
+    const cubeletSize = 0.95;
+    const offset = 1;
+    const offCenterFix = 0;
+
+    // Rebuild all cubelets in their initial positions
+    for (let x = -1; x <= 1; x++) {
+        for (let y = -1; y <= 1; y++) {
+            for (let z = -1; z <= 1; z++) {
+                const materials = [
+                    new THREE.MeshStandardMaterial({ color: 0x000000 }), // right
+                    new THREE.MeshStandardMaterial({ color: 0x000000 }), // left
+                    new THREE.MeshStandardMaterial({ color: 0x000000 }), // up
+                    new THREE.MeshStandardMaterial({ color: 0x000000 }), // down
+                    new THREE.MeshStandardMaterial({ color: 0x000000 }), // front
+                    new THREE.MeshStandardMaterial({ color: 0x000000 }), // back
+                ];
+
+                const geo = new THREE.BoxGeometry(cubeletSize, cubeletSize, cubeletSize);
+                const cubelet = new THREE.Mesh(geo, materials);
+                cubelet.position.set(
+                    x * offset + offCenterFix,
+                    y * offset + offCenterFix,
+                    z * offset + offCenterFix
+                );
+                
+                // Ensure clean rotation state
+                cubelet.rotation.set(0, 0, 0);
+                cubelet.quaternion.identity();
+                cubelet.updateMatrix();
+                
+                scene.add(cubelet);
+                cubed.push(cubelet);
+
+                // Add black wireframe for definition
+                const edges = new THREE.EdgesGeometry(geo);
+                const line = new THREE.LineSegments(
+                    edges,
+                    new THREE.LineBasicMaterial({ color: 0x000000 })
+                );
+                cubelet.add(line);
+            }
+        }
+    }
+
+    // Add lighting back
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1);
+    scene.add(ambientLight);
+
+    // Update the visual state
     update3DCubeFromState(solvedState);
     window.lastStateString = solvedState;
-    // Reset rotation and position of all cubelets
-    cubed.forEach(cubelet => {
-        cubelet.position.x = snap(cubelet.position.x);
-        cubelet.position.y = snap(cubelet.position.y);
-        cubelet.position.z = snap(cubelet.position.z);
-        cubelet.rotation.x = 0;
-        cubelet.rotation.y = 0;
-        cubelet.rotation.z = 0;
-    });
+
+    // Force a renderer clear and reset
+    renderer.clear();
+    renderer.resetState();
+    
     // Re-enable animations after a short delay
     setTimeout(() => {
         animating = false;
