@@ -48,8 +48,7 @@ document.getElementById('cube-view').onload = function () {
 
 // --- Send inverse moves ---
 function reset2() {
-    cube = new Cube();
-    init3DCube()
+    resetCube()
 }
 
 const reversedMoves = new Set(["D", "L", "F"]);

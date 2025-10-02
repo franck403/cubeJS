@@ -23,7 +23,7 @@ const colors = {
     "R": 0xFA2422, // Red
     "F": 0x04D006, // Lime green
     "B": 0x275CFE  // RISD Blue
-}*/ 
+}*/
 // Maps the facelet position from the cube.js string to a 3D color.
 // The cube.js string order is U, R, D, L, B, F.
 // This function determines the color for a specific face of a given cubelet.
@@ -124,6 +124,33 @@ function get3DColor(face, position) {
 }
 
 /**
+ * Resets the cube to its solved state.
+ */
+function resetCube() {
+    if (animating) return;
+    animating = true;
+    // Reset the global cube variable to a new solved instance
+    cube = new Cube();
+    const solvedState = cube.asString();
+    // Update the 3D visualization with the solved state
+    update3DCubeFromState(solvedState);
+    window.lastStateString = solvedState;
+    // Reset rotation and position of all cubelets
+    cubed.forEach(cubelet => {
+        cubelet.position.x = snap(cubelet.position.x);
+        cubelet.position.y = snap(cubelet.position.y);
+        cubelet.position.z = snap(cubelet.position.z);
+        cubelet.rotation.x = 0;
+        cubelet.rotation.y = 0;
+        cubelet.rotation.z = 0;
+    });
+    // Re-enable animations after a short delay
+    setTimeout(() => {
+        animating = false;
+    }, 500);
+}
+
+/**
  * Initializes the 3D cube scene, camera, and renderer.
  * @param {string} containerId The ID of the HTML container for the 3D scene.
  */
@@ -145,7 +172,7 @@ function init3DCube(containerId = "cube3d") {
     );
     camera.position.set(6, 6, 6);
     camera.lookAt(0, 0, 0);
-    camera.translateZ(-3) 
+    camera.translateZ(-3)
     camera.translateY(2)
     camera.translateX(4)
     camera.position.z = camera.position.z + 10
@@ -204,108 +231,104 @@ function init3DCube(containerId = "cube3d") {
 }
 
 /**
-* Updates the 3D cube's visual representation based on the logical state string.
-* This function rebuilds the cube to reflect a given state.
-* @param {string} stateString The state of the cube as a 54-character string.
-*/
+ * Updates the 3D cube's visual representation based on the logical state string.
+ * @param {string} stateString The state of the cube as a 54-character string.
+ */
 function update3DCubeFromState(stateString) {
-    function addCenterSticker(cubelet, index, src, rotation = 0) {
+    async function addCenterSticker(cubelet, index, src, rotation = 0) {
         const texture = new THREE.TextureLoader().load(`img/${src}`);
         texture.center.set(0.5, 0.5);   // pivot au centre
         texture.rotation = THREE.MathUtils.degToRad(rotation); // rotation en degrés → radians
         cubelet.material[index].map = texture;
         cubelet.material[index].needsUpdate = true;
     }
- 
     window.lastStateString = stateString;
     let cubeletIndex = 0;
-    const cubeletSize = 0.95;
-    const offset = 1;
- 
+
     for (let x = -1; x <= 1; x++) {
         for (let y = -1; y <= 1; y++) {
             for (let z = -1; z <= 1; z++) {
                 const cubelet = cubed[cubeletIndex];
- 
-                // Update material colors based on cube.js state
+
+                // Only update the colors of the cubelet faces
                 cubelet.material[0].color.set(get3DColor('R', { x, y, z })); // right
                 cubelet.material[1].color.set(get3DColor('L', { x, y, z })); // left
                 cubelet.material[2].color.set(get3DColor('U', { x, y, z })); // up
                 cubelet.material[3].color.set(get3DColor('D', { x, y, z })); // down
                 cubelet.material[4].color.set(get3DColor('F', { x, y, z })); // front
                 cubelet.material[5].color.set(get3DColor('B', { x, y, z })); // back
- 
+
                 addCenterSticker(cubelet, 0, "RC.jpg")
                 addCenterSticker(cubelet, 1, "LC.jpg")
                 addCenterSticker(cubelet, 2, "UC.jpg")
                 addCenterSticker(cubelet, 3, "DC.jpg")
                 addCenterSticker(cubelet, 4, "FC.jpg")
                 addCenterSticker(cubelet, 5, "BC.jpg")
- 
- 
+
                 // --- Up center ---
                 if (y === 1 && x === 0 && z === 0) addCenterSticker(cubelet, 2, "U.png", 0);
- 
+
                 // --- Down center ---
                 if (y === -1 && x === 0 && z === 0) addCenterSticker(cubelet, 3, "D.png", 0);
- 
+
                 // --- Front center ---
                 if (z === 1 && x === 0 && y === 0) addCenterSticker(cubelet, 4, "F.png", 0);
- 
+
                 // --- Back center ---
                 if (z === -1 && x === 0 && y === 0) addCenterSticker(cubelet, 5, "B.png", 0);
- 
+
                 // --- Right center ---
                 if (x === 1 && y === 0 && z === 0) addCenterSticker(cubelet, 0, "R.png", 0);
- 
+
                 // --- Left center ---
                 if (x === -1 && y === 0 && z === 0) addCenterSticker(cubelet, 1, "L.png", 0);
- 
+
                 if ([x, y, z].filter(v => v !== 0).length === 2) {
- 
+
                     // --- U* edges ---
                     if (y === 1 && z === 1 && x === 0) addCenterSticker(cubelet, 2, "CU.png", 0);    // UF
                     if (y === 1 && x === 1 && z === 0) addCenterSticker(cubelet, 2, "CU.png", 90);   // UR
                     if (y === 1 && z === -1 && x === 0) addCenterSticker(cubelet, 2, "CU.png", 180); // UB
                     if (y === 1 && x === -1 && z === 0) addCenterSticker(cubelet, 2, "CU.png", 270); // UL
- 
+
                     // --- D* edges ---
                     if (y === -1 && z === 1 && x === 0) addCenterSticker(cubelet, 3, "CD.png", 180);    // DF
                     if (y === -1 && x === 1 && z === 0) addCenterSticker(cubelet, 3, "CD.png", 90);   // DR
                     if (y === -1 && z === -1 && x === 0) addCenterSticker(cubelet, 3, "CD.png", 0); // DB
                     if (y === -1 && x === -1 && z === 0) addCenterSticker(cubelet, 3, "CD.png", 270); // DL
- 
+
                     // --- F* edges ---
                     if (z === 1 && x === 1 && y === 0) addCenterSticker(cubelet, 4, "CF.png", 90);    // FR
                     if (z === 1 && x === -1 && y === 0) addCenterSticker(cubelet, 4, "CF.png", 270); // FL
                     if (z === 1 && y === 1 && x === 0) addCenterSticker(cubelet, 4, "CF.png", 180);  // UF
                     if (z === 1 && y === -1 && x === 0) addCenterSticker(cubelet, 4, "CF.png", 0);  // DF
- 
+
                     // --- B* edges ---
                     if (z === -1 && x === 1 && y === 0) addCenterSticker(cubelet, 5, "CB.png", 270); // BR
                     if (z === -1 && x === -1 && y === 0) addCenterSticker(cubelet, 5, "CB.png", 90);  // BL
                     if (z === -1 && y === 1 && x === 0) addCenterSticker(cubelet, 5, "CB.png", 180);  // UB
                     if (z === -1 && y === -1 && x === 0) addCenterSticker(cubelet, 5, "CB.png", 0); // DB
- 
+
                     // --- R* edges ---
                     if (x === 1 && y === 1 && z === 0) addCenterSticker(cubelet, 0, "CR.png", 180);    // UR
                     if (x === 1 && y === -1 && z === 0) addCenterSticker(cubelet, 0, "CR.png", 0); // DR
                     if (x === 1 && z === 1 && y === 0) addCenterSticker(cubelet, 0, "CR.png", 270);  // FR
                     if (x === 1 && z === -1 && y === 0) addCenterSticker(cubelet, 0, "CR.png", 90);  // B
-                    
+
                     // --- L* edges ---
                     if (x === -1 && y === 1 && z === 0) addCenterSticker(cubelet, 1, "CL.png", 180);    // UL
                     if (x === -1 && y === -1 && z === 0) addCenterSticker(cubelet, 1, "CL.png", 0); // DL
                     if (x === -1 && z === 1 && y === 0) addCenterSticker(cubelet, 1, "CL.png", 90);  // FL
                     if (x === -1 && z === -1 && y === 0) addCenterSticker(cubelet, 1, "CL.png", 270);  // BL
                 }
- 
+                // Force material updates
+                cubelet.material.forEach(mat => mat.needsUpdate = true);
+
                 cubeletIndex++;
             }
         }
     }
 }
- 
 
 /**
  * The main animation loop for the 3D scene.
@@ -433,7 +456,7 @@ async function animate3DSolution(moves, delay = 200) {
         if (move.includes("'")) clockwise = false;
 
         for (let i = 0; i < times; i++) {
-            await rotateFace(face, clockwise,delay);
+            await rotateFace(face, clockwise, delay);
             await new Promise(r => setTimeout(r, delay));
         }
     }
@@ -516,4 +539,4 @@ window.animate3DSolution = animate3DSolution;
 window.scrambleCube = scrambleCube;
 window.solveCube = solveCube;
 window.animate3D = animate3D
-window.resetCube = animate3DSolution2
+window.resetCube = resetCube

@@ -381,7 +381,7 @@ function stopTimer() {
     }
 }
 
-async function SpikeCube(moves, sleep = 200) {
+async function SpikeCube(moves, sleep = 220) {
     var timerStarted = new Date();
     if (!SpikeState.left && !SpikeState.right) return;
     console.log(moves);
