@@ -48,36 +48,36 @@ const CLP_RIGHT = {
 };*/
 const CLP_LEFT = {
     // Face U
-    "U":  "motor.reset_relative_position(port.A,0);motor.run_to_relative_position(port.A, -90, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000);\n",
-    "U'": "motor.reset_relative_position(port.A,0);motor.run_to_relative_position(port.A, 90, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000);\n",
-    "U2": "motor.reset_relative_position(port.A,0);motor.run_to_relative_position(port.A, 180, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000);\n",
+    "U":  "motor.reset_relative_position(port.A,0);motor.run_to_relative_position(port.A, -90, 1100, stop=motor.SMART_BRAKE, acceleration=10000, deceleration=10000);\n",
+    "U'": "motor.reset_relative_position(port.A,0);motor.run_to_relative_position(port.A, 90, 1100, stop=motor.SMART_BRAKE, acceleration=10000, deceleration=10000);\n",
+    "U2": "motor.reset_relative_position(port.A,0);motor.run_to_relative_position(port.A, 180, 1100, stop=motor.SMART_BRAKE, acceleration=10000, deceleration=10000);\n",
 
     // Face L
-    "L":  "motor.reset_relative_position(port.C,0);motor.run_to_relative_position(port.C, -90, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000);\n",
-    "L'": "motor.reset_relative_position(port.C,0);motor.run_to_relative_position(port.C, 90, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000);\n",
-    "L2": "motor.reset_relative_position(port.C,0);motor.run_to_relative_position(port.C, 180, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000);\n",
+    "L":  "motor.reset_relative_position(port.C,0);motor.run_to_relative_position(port.C, -90, 1100, stop=motor.SMART_BRAKE, acceleration=10000, deceleration=10000);\n",
+    "L'": "motor.reset_relative_position(port.C,0);motor.run_to_relative_position(port.C, 90, 1100, stop=motor.SMART_BRAKE, acceleration=10000, deceleration=10000);\n",
+    "L2": "motor.reset_relative_position(port.C,0);motor.run_to_relative_position(port.C, 180, 1100, stop=motor.SMART_BRAKE, acceleration=10000, deceleration=10000);\n",
 
     // Face F
-    "F":  "motor.reset_relative_position(port.E,0);motor.run_to_relative_position(port.E, -90, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000);\n",
-    "F'": "motor.reset_relative_position(port.E,0);motor.run_to_relative_position(port.E, 90, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000);\n",
-    "F2": "motor.reset_relative_position(port.E,0);motor.run_to_relative_position(port.E, 180, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000);\n",
+    "F":  "motor.reset_relative_position(port.E,0);motor.run_to_relative_position(port.E, -90, 1100, stop=motor.SMART_BRAKE, acceleration=10000, deceleration=10000);\n",
+    "F'": "motor.reset_relative_position(port.E,0);motor.run_to_relative_position(port.E, 90, 1100, stop=motor.SMART_BRAKE, acceleration=10000, deceleration=10000);\n",
+    "F2": "motor.reset_relative_position(port.E,0);motor.run_to_relative_position(port.E, 180, 1100, stop=motor.SMART_BRAKE, acceleration=10000, deceleration=10000);\n",
 };
 
 const CLP_RIGHT = {
     // Face R
-    "R":  "motor.reset_relative_position(port.D,0);motor.run_to_relative_position(port.D, -90, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000);\n",
-    "R'": "motor.reset_relative_position(port.D,0);motor.run_to_relative_position(port.D, 90, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000);\n",
-    "R2": "motor.reset_relative_position(port.D,0);motor.run_to_relative_position(port.D, 180, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000);\n",
+    "R":  "motor.reset_relative_position(port.D,0);motor.run_to_relative_position(port.D, -90, 1100, stop=motor.SMART_BRAKE, acceleration=10000, deceleration=10000);\n",
+    "R'": "motor.reset_relative_position(port.D,0);motor.run_to_relative_position(port.D, 90, 1100, stop=motor.SMART_BRAKE, acceleration=10000, deceleration=10000);\n",
+    "R2": "motor.reset_relative_position(port.D,0);motor.run_to_relative_position(port.D, 180, 1100, stop=motor.SMART_BRAKE, acceleration=10000, deceleration=10000);\n",
 
     // Face B
-    "B":  "motor.reset_relative_position(port.F,0);motor.run_to_relative_position(port.F, -90, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000);\n",
-    "B'": "motor.reset_relative_position(port.F,0);motor.run_to_relative_position(port.F, 90, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000);\n",
-    "B2": "motor.reset_relative_position(port.F,0);motor.run_to_relative_position(port.F, 180, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000);\n",
+    "B":  "motor.reset_relative_position(port.F,0);motor.run_to_relative_position(port.F, -90, 1100, stop=motor.SMART_BRAKE, acceleration=10000, deceleration=10000);\n",
+    "B'": "motor.reset_relative_position(port.F,0);motor.run_to_relative_position(port.F, 90, 1100, stop=motor.SMART_BRAKE, acceleration=10000, deceleration=10000);\n",
+    "B2": "motor.reset_relative_position(port.F,0);motor.run_to_relative_position(port.F, 180, 1100, stop=motor.SMART_BRAKE, acceleration=10000, deceleration=10000);\n",
 
     // Face D
-    "D":  "motor.reset_relative_position(port.B,0);motor.run_to_relative_position(port.B, -90, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000);\n",
-    "D'": "motor.reset_relative_position(port.B,0);motor.run_to_relative_position(port.B, 90, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000);\n",
-    "D2": "motor.reset_relative_position(port.B,0);motor.run_to_relative_position(port.B, 180, 1100, stop=motor.SMART_BRAKE, acceleration=2000, deceleration=2000);\n",
+    "D":  "motor.reset_relative_position(port.B,0);motor.run_to_relative_position(port.B, -90, 1100, stop=motor.SMART_BRAKE, acceleration=10000, deceleration=10000);\n",
+    "D'": "motor.reset_relative_position(port.B,0);motor.run_to_relative_position(port.B, 90, 1100, stop=motor.SMART_BRAKE, acceleration=10000, deceleration=10000);\n",
+    "D2": "motor.reset_relative_position(port.B,0);motor.run_to_relative_position(port.B, 180, 1100, stop=motor.SMART_BRAKE, acceleration=10000, deceleration=10000);\n",
 };
 
 // Merge into one pool
@@ -392,7 +392,7 @@ async function SpikeCube(moves, sleep = 240) {
     sendLine(leftWriter, `light_matrix.write("${String(moves.length).charAt(0)}",100)`);
     sendLine(rightWriter, `light_matrix.write("${String(moves.length).charAt(1)}",100)`);
 
-    await new Promise(r => setTimeout(r, 2000));
+    await new Promise(r => setTimeout(r, 2001));
 
     // Start live timer
     startTimer(timerStarted);
