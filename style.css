@@ -119,6 +119,25 @@ body {
     width: 100%;
 }
 
+.MoveLib {
+    display: flex;
+    position: fixed;
+    bottom:25px;
+    left:25px;
+    justify-content: center;
+    flex-direction: row;
+    align-items: flex-end;
+    padding:5px;
+    width: 270px;
+    height: 60x;
+    font-size: 1.2rem;
+    border-radius: 50px !important;
+}
+
+.MoveLib button {
+    background:#fccd03 !important;
+}
+
 .stats {
     display: flex;
     position: fixed;

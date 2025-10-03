@@ -10,6 +10,10 @@ let SpikeState = { left: false, right: false };
 let scSecure = false
 let SolveSecure = false
 
+const sexyMove1 = ["R","U","R'","U'","R","U","R'","U'","R","U","R'","U'","R","U","R'","U'","R","U","R'","U'","R","U","R'","U'"];
+const sexyMove2 = ["L","F","U","F","R","F2","L","F","U","F","R","F2","L","F","U","F","R","F2","L","F","U","F","R","F2","L","F","U","F","R","F2","L","F","U","F","R","F2"];
+const sexyMove3 = ["R2","L2","U2","R2","L2","U2","R2","L2","U2","R2","L2","U2"];
+
 const startup = "import motor\n\nfrom hub import port, light_matrix, sound\n\nimport time\n\nlayer = motor.run_for_degrees\n\nlight_matrix.clear();\nmotor.motor_set_high_resolution_mode(port.A, True);\nmotor.motor_set_high_resolution_mode(port.B, True);\nmotor.motor_set_high_resolution_mode(port.C, True);\nmotor.motor_set_high_resolution_mode(port.D, True);\nmotor.motor_set_high_resolution_mode(port.E, True);\nmotor.motor_set_high_resolution_mode(port.F, True)";
 const connectSound = "sound.beep(392,120);time.sleep_ms(120);sound.beep(494,120);time.sleep_ms(120);sound.beep(587,150);time.sleep_ms(150);sound.beep(784,200)";
 const music = "sound.beep(196, 800) ; time.sleep_ms(850)  # G3\nsound.beep(262, 1000) ; time.sleep_ms(1050)  # C4\nsound.beep(220, 900) ; time.sleep_ms(950)  # A3\nsound.beep(294, 1200) ; time.sleep_ms(1250)  # D4\nsound.beep(247, 1000) ; time.sleep_ms(1050)  # B3\nsound.beep(196, 1500) ; time.sleep_ms(1550)  # G3\nsound.beep(330, 800) ; time.sleep_ms(850)  # E4\nsound.beep(262, 1400) ; time.sleep_ms(1450)  # C4";
@@ -48,36 +52,36 @@ const CLP_RIGHT = {
 };*/
 const CLP_LEFT = {
     // Face U
-    "U":  "motor.reset_relative_position(port.A,0);motor.run_to_relative_position(port.A, -90, 1100, stop=motor.SMART_BRAKE, acceleration=10000, deceleration=10000);\n",
-    "U'": "motor.reset_relative_position(port.A,0);motor.run_to_relative_position(port.A, 90, 1100, stop=motor.SMART_BRAKE, acceleration=10000, deceleration=10000);\n",
-    "U2": "motor.reset_relative_position(port.A,0);motor.run_to_relative_position(port.A, 180, 1100, stop=motor.SMART_BRAKE, acceleration=10000, deceleration=10000);\n",
+    "U":  "motor.reset_relative_position(port.A,0);motor.run_to_relative_position(port.A, -90, 1100, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
+    "U'": "motor.reset_relative_position(port.A,0);motor.run_to_relative_position(port.A, 90, 1100, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
+    "U2": "motor.reset_relative_position(port.A,0);motor.run_to_relative_position(port.A, 180, 1100, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
 
     // Face L
-    "L":  "motor.reset_relative_position(port.C,0);motor.run_to_relative_position(port.C, -90, 1100, stop=motor.SMART_BRAKE, acceleration=10000, deceleration=10000);\n",
-    "L'": "motor.reset_relative_position(port.C,0);motor.run_to_relative_position(port.C, 90, 1100, stop=motor.SMART_BRAKE, acceleration=10000, deceleration=10000);\n",
-    "L2": "motor.reset_relative_position(port.C,0);motor.run_to_relative_position(port.C, 180, 1100, stop=motor.SMART_BRAKE, acceleration=10000, deceleration=10000);\n",
+    "L":  "motor.reset_relative_position(port.C,0);motor.run_to_relative_position(port.C, -90, 1100, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
+    "L'": "motor.reset_relative_position(port.C,0);motor.run_to_relative_position(port.C, 90, 1100, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
+    "L2": "motor.reset_relative_position(port.C,0);motor.run_to_relative_position(port.C, 180, 1100, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
 
     // Face F
-    "F":  "motor.reset_relative_position(port.E,0);motor.run_to_relative_position(port.E, -90, 1100, stop=motor.SMART_BRAKE, acceleration=10000, deceleration=10000);\n",
-    "F'": "motor.reset_relative_position(port.E,0);motor.run_to_relative_position(port.E, 90, 1100, stop=motor.SMART_BRAKE, acceleration=10000, deceleration=10000);\n",
-    "F2": "motor.reset_relative_position(port.E,0);motor.run_to_relative_position(port.E, 180, 1100, stop=motor.SMART_BRAKE, acceleration=10000, deceleration=10000);\n",
+    "F":  "motor.reset_relative_position(port.E,0);motor.run_to_relative_position(port.E, -90, 1100, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
+    "F'": "motor.reset_relative_position(port.E,0);motor.run_to_relative_position(port.E, 90, 1100, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
+    "F2": "motor.reset_relative_position(port.E,0);motor.run_to_relative_position(port.E, 180, 1100, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
 };
 
 const CLP_RIGHT = {
     // Face R
-    "R":  "motor.reset_relative_position(port.D,0);motor.run_to_relative_position(port.D, -90, 1100, stop=motor.SMART_BRAKE, acceleration=10000, deceleration=10000);\n",
-    "R'": "motor.reset_relative_position(port.D,0);motor.run_to_relative_position(port.D, 90, 1100, stop=motor.SMART_BRAKE, acceleration=10000, deceleration=10000);\n",
-    "R2": "motor.reset_relative_position(port.D,0);motor.run_to_relative_position(port.D, 180, 1100, stop=motor.SMART_BRAKE, acceleration=10000, deceleration=10000);\n",
+    "R":  "motor.reset_relative_position(port.D,0);motor.run_to_relative_position(port.D, -90, 1100, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
+    "R'": "motor.reset_relative_position(port.D,0);motor.run_to_relative_position(port.D, 90, 1100, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
+    "R2": "motor.reset_relative_position(port.D,0);motor.run_to_relative_position(port.D, 180, 1100, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
 
     // Face B
-    "B":  "motor.reset_relative_position(port.F,0);motor.run_to_relative_position(port.F, -90, 1100, stop=motor.SMART_BRAKE, acceleration=10000, deceleration=10000);\n",
-    "B'": "motor.reset_relative_position(port.F,0);motor.run_to_relative_position(port.F, 90, 1100, stop=motor.SMART_BRAKE, acceleration=10000, deceleration=10000);\n",
-    "B2": "motor.reset_relative_position(port.F,0);motor.run_to_relative_position(port.F, 180, 1100, stop=motor.SMART_BRAKE, acceleration=10000, deceleration=10000);\n",
+    "B":  "motor.reset_relative_position(port.F,0);motor.run_to_relative_position(port.F, -90, 1100, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
+    "B'": "motor.reset_relative_position(port.F,0);motor.run_to_relative_position(port.F, 90, 1100, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
+    "B2": "motor.reset_relative_position(port.F,0);motor.run_to_relative_position(port.F, 180, 1100, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
 
     // Face D
-    "D":  "motor.reset_relative_position(port.B,0);motor.run_to_relative_position(port.B, -90, 1100, stop=motor.SMART_BRAKE, acceleration=10000, deceleration=10000);\n",
-    "D'": "motor.reset_relative_position(port.B,0);motor.run_to_relative_position(port.B, 90, 1100, stop=motor.SMART_BRAKE, acceleration=10000, deceleration=10000);\n",
-    "D2": "motor.reset_relative_position(port.B,0);motor.run_to_relative_position(port.B, 180, 1100, stop=motor.SMART_BRAKE, acceleration=10000, deceleration=10000);\n",
+    "D":  "motor.reset_relative_position(port.B,0);motor.run_to_relative_position(port.B, -90, 1100, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
+    "D'": "motor.reset_relative_position(port.B,0);motor.run_to_relative_position(port.B, 90, 1100, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
+    "D2": "motor.reset_relative_position(port.B,0);motor.run_to_relative_position(port.B, 180, 1100, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
 };
 
 // Merge into one pool
@@ -241,45 +245,40 @@ async function startReading(which, reader) {
                 if (done) break;
                 if (value) {
                     log(`RX [${which}]:`, value);
-                }
-                value.split('\n').forEach(element => {
-                    console.log(element);
-                    if (element.startsWith('Ba')) {
-                        const batteryValue = parseFloat(element.replace('Ba', '')) / 1000;
-                        const batteryPercentageValue = batteryPercentage(batteryValue, 6.0, 8.4);
-                        console.log('got battery update', batteryPercentageValue);
-
-                        // Update the battery icon class
-                        const ganBatterie = document.getElementById('ganBatterie');
-                        if (ganBatterie) {
-                            // Remove all existing battery classes
-                            ganBatterie.classList.remove(
-                                'icon-battery-0',
-                                'icon-battery-25',
-                                'icon-battery-50',
-                                'icon-battery-75',
-                                'icon-battery-100'
-                            );
-
-                            // Map the battery level to the closest icon class
-                            let iconClass;
-                            if (batteryPercentageValue === 0) {
-                                iconClass = 'icon-battery-0';
-                            } else if (batteryPercentageValue <= 25) {
-                                iconClass = 'icon-battery-25';
-                            } else if (batteryPercentageValue <= 50) {
-                                iconClass = 'icon-battery-50';
-                            } else if (batteryPercentageValue <= 75) {
-                                iconClass = 'icon-battery-75';
-                            } else {
-                                iconClass = 'icon-battery-100';
+                    value.split('\n').forEach(element => {
+                        if (element.startsWith('Ba')) {
+                            const batteryValue = parseFloat(element.replace('Ba', '')) / 1000;
+                            const batteryPercentageValue = batteryPercentage(batteryValue, 6.0, 8.4);
+                            // Update the battery icon for the correct side
+                            const batteryIcon = document.getElementById(`${which}`);
+                            if (batteryIcon) {
+                                // Remove all existing battery classes
+                                batteryIcon.classList.remove(
+                                    'icon-battery-0',
+                                    'icon-battery-25',
+                                    'icon-battery-50',
+                                    'icon-battery-75',
+                                    'icon-battery-100'
+                                );
+                                // Map the battery level to the closest icon class
+                                let iconClass;
+                                if (batteryPercentageValue == 0) {
+                                    iconClass = 'icon-battery-0';
+                                } else if (batteryPercentageValue <= 25) {
+                                    iconClass = 'icon-battery-25';
+                                } else if (batteryPercentageValue <= 50) {
+                                    iconClass = 'icon-battery-50';
+                                } else if (batteryPercentageValue <= 75) {
+                                    iconClass = 'icon-battery-75';
+                                } else {
+                                    iconClass = 'icon-battery-100';
+                                }
+                                // Add the appropriate battery class
+                                batteryIcon.classList.add(iconClass);
                             }
-
-                            // Add the appropriate battery class
-                            ganBatterie.classList.add(iconClass);
                         }
-                    }
-                });
+                    });
+                }
             }
         } catch (err) {
             log(`RX error [${which}]:`, err?.message || err);
@@ -384,7 +383,7 @@ function stopTimer() {
     }
 }
 
-async function SpikeCube(moves, sleep = 240) {
+async function SpikeCube(moves, sleep = 160) {
     var timerStarted = new Date();
     if (!SpikeState.left && !SpikeState.right) return;
     console.log(moves);
@@ -398,8 +397,8 @@ async function SpikeCube(moves, sleep = 240) {
     startTimer(timerStarted);
     let iM = 0
     let Skip = false
-    let OpposeRight = ['U','F','L']
-    let OpposeLeft  = ['D','B','R']
+    let OpposeRight = ['U','F','L',"U'","F'","L2","U2","F2","L2"]
+    let OpposeLeft  = ['D','B','R',"D'","B'","R2","D2","B2","R2"]
     for (const move of moves) {
         iM++
         if (OpposeLeft[OpposeRight.indexOf(move)] == moves[iM] || OpposeRight[OpposeLeft.indexOf(move)] == moves[iM]) {
@@ -428,7 +427,7 @@ function sc() {
         worker.postMessage({ type: 'solve', state: cube.asString() });
         setTimeout(()=> {
             SolveSecure = false
-        },10000)
+        },6001)
     }
 }
 
@@ -447,7 +446,7 @@ async function leb() {
         await scramble()
         await new Promise(r => setTimeout(r, 15000));
         sc()
-        await new Promise(r => setTimeout(r, 10000));
+        await new Promise(r => setTimeout(r, 100000000));
     }
 }
 
@@ -497,3 +496,13 @@ document.addEventListener("fullscreenchange", (event) => {
         fullscreenstate = true;
     }
 });
+
+function sexyMoves1() {
+    SpikeCube(sexyMove1,200)
+}
+function sexyMoves2() {
+    SpikeCube(sexyMove3,200)
+}
+function sexyMoves3() {
+    SpikeCube(sexyMove3,200)
+}
