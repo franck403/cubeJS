@@ -489,4 +489,8 @@ document.addEventListener("fullscreenchange", (event) => {
         document.getElementById('full').innerHTML = `<i class="fa-solid fa-expand"></i>`;
         fullscreenstate = false;
     }
+    if (document.fullscreenElement) {
+        document.getElementById('full').innerHTML = `<i class="fa-solid fa-compress"></i>`;
+        fullscreenstate = true;
+    }
 });
