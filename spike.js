@@ -470,16 +470,19 @@ let fullscreenstate = false;
 
 function fullscreen() {
     if (!fullscreenstate) {
-        document.body.requestFullscreen().catch(err => {
+        document.body.requestFullscreen()
+        .then(() => {
+            document.getElementById('full').innerHTML = `<i class="fa-solid fa-compress"></i>`;
+        })
+        .catch(err => {
             console.error("Error attempting to enable fullscreen:", err);
         });
-        document.getElementById('full').innerHTML = `<i class="fa-solid fa-compress"></i>`;
         fullscreenstate = true;
     } else {
-        if (document.fullscreenElement) {
-            document.exitFullscreen();
-        }
-        document.getElementById('full').innerHTML = `<i class="fa-solid fa-expand"></i>`;
+        document.exitFullscreen()
+        .then(() => {
+            document.getElementById('full').innerHTML = `<i class="fa-solid fa-expand"></i>`;
+        })
         fullscreenstate = false;
     }
 }
