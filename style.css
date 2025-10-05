@@ -1,3 +1,12 @@
+@import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@700&display=swap');
+
+:root * {
+    font-family: "Comfortaa", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 700;
+    font-style: normal;
+}
+
 body {
     display: flex;
     justify-content: center;
@@ -132,10 +141,12 @@ body {
     height: 60x;
     font-size: 1.2rem;
     border-radius: 50px !important;
+    background: #fccd03;
 }
 
 .MoveLib button {
-    background:#fccd03 !important;
+    background:#ffe98a !important;
+    color:#000000;
 }
 
 .stats {
@@ -182,11 +193,9 @@ body {
 }
 
 .btn, .controls button {
-    font-family: Arial, Helvetica, sans-serif;
     color: #fff;
     border: none;
     margin: 5px;
-    font-weight: 700;
     background: #020202;
     cursor: pointer;
     height: 50px;
