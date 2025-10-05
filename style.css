@@ -137,7 +137,7 @@ body {
     flex-direction: row;
     align-items: flex-end;
     padding:5px;
-    width: 270px;
+    width: 335px;
     height: 60x;
     font-size: 1.2rem;
     border-radius: 50px !important;
@@ -145,6 +145,7 @@ body {
 }
 
 .MoveLib button {
+    font-size: 1.2rem;
     background:#ffe98a !important;
     color:#000000;
 }
