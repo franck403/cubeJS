@@ -397,11 +397,15 @@ async function SpikeCube(moves, sleep = 160) {
     startTimer(timerStarted);
     let iM = 0
     let Skip = false
-    let OpposeRight = ['U','F','L',"U'","F'","L2","U2","F2","L2"]
-    let OpposeLeft  = ['D','B','R',"D'","B'","R2","D2","B2","R2"]
+    let OpposeRight = ['U','F','L']
+    let OpposeLeft  = ['D','B','R']
+    function check(move,i) {
+        var move = move.replace("'",'').replace("2",'')
+        return OpposeLeft[OpposeRight.indexOf(move)] == moves[i] || OpposeRight[OpposeLeft.indexOf(move)] == moves[i]
+    }
     for (const move of moves) {
         iM++
-        if (OpposeLeft[OpposeRight.indexOf(move)] == moves[iM] || OpposeRight[OpposeLeft.indexOf(move)] == moves[iM]) {
+        if (check(move,iM)) {
             Skip = true
             runMovement(move, sleep);
             await runMovement(moves[iM], sleep);
