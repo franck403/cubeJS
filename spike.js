@@ -383,7 +383,11 @@ function stopTimer() {
     }
 }
 
-async function SpikeCube(moves, sleep = 160) {
+window.sleep = 200
+async function SpikeCube(moves, sleep = 200) {
+    if (sleep == 200) {
+        var sleep = window.sleep
+    }
     var timerStarted = new Date();
     if (!SpikeState.left && !SpikeState.right) return;
     console.log(moves);
@@ -399,13 +403,18 @@ async function SpikeCube(moves, sleep = 160) {
     let Skip = false
     let OpposeRight = ['U','F','L']
     let OpposeLeft  = ['D','B','R']
-    function check(move,i) {
+    function check(move,move2) {
         var move = move.replace("'",'').replace("2",'')
-        return OpposeLeft[OpposeRight.indexOf(move)] == moves[i] || OpposeRight[OpposeLeft.indexOf(move)] == moves[i]
+        try {
+            var fixmove = move2.replace("'",'').replace("2",'')
+            return OpposeLeft[OpposeRight.indexOf(move)] == fixmove || OpposeRight[OpposeLeft.indexOf(move)] == fixmove    
+        } catch {
+
+        }
     }
     for (const move of moves) {
         iM++
-        if (check(move,iM)) {
+        if (check(move,moves[iM])) {
             Skip = true
             runMovement(move, sleep);
             await runMovement(moves[iM], sleep);
@@ -440,7 +449,7 @@ log("Ready. Use openSpike('left') and openSpike('right') to connect.");
 async function scramble() {
     if (!scSecure) {
         scSecure = true
-        var moves = generateScramble(20)
+        var moves = generateScramble(100)
         SpikeCube(moves,300)
     } 
 }
@@ -505,7 +514,7 @@ function sexyMoves1() {
     SpikeCube(sexyMove1,200)
 }
 function sexyMoves2() {
-    SpikeCube(sexyMove3,200)
+    SpikeCube(sexyMove2,200)
 }
 function sexyMoves3() {
     SpikeCube(sexyMove3,200)
