@@ -135,7 +135,7 @@ eruda.add(function (eruda) {
 
             // Calculate scale to fit both parent and element in the canvas with padding
             const padding = 40;
-            const minElementSize = 20; // Minimum size for small elements
+            const minElementSize = 60; // Minimum size for small elements
             const elementWidth = Math.max(elRect.width, minElementSize);
             const elementHeight = Math.max(elRect.height, minElementSize);
 

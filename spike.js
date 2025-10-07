@@ -383,11 +383,13 @@ function stopTimer() {
     }
 }
 
-window.sleep = 200
-async function SpikeCube(moves, sleep = 200) {
-    if (sleep == 200) {
-        var sleep = window.sleep
+window.sleeped = 210
+async function SpikeCube(moves, sleeped = 210) {
+    let sleep = sleeped
+    if (sleep == 210) {
+        sleep = window.sleeped
     }
+    console.warn(sleep)
     var timerStarted = new Date();
     if (!SpikeState.left && !SpikeState.right) return;
     console.log(moves);
@@ -401,35 +403,34 @@ async function SpikeCube(moves, sleep = 200) {
     startTimer(timerStarted);
     let iM = 0
     let Skip = false
-    let OpposeRight = ['U','F','L']
-    let OpposeLeft  = ['D','B','R']
-    function check(move,move2) {
-        var move = move.replace("'",'').replace("2",'')
-        try {
-            var fixmove = move2.replace("'",'').replace("2",'')
-            return OpposeLeft[OpposeRight.indexOf(move)] == fixmove || OpposeRight[OpposeLeft.indexOf(move)] == fixmove    
-        } catch {
+    let OpposeRight = ['U','F','L','U2','F2','L2',"U'","F'","L'"]
+    let OpposeLeft  = ['D','B','R','D2','B2','R2',"D'","B'","R'"]
+    for (let i = 0; i < moves.length; i++) {
+        const move = moves[i];
+        const nextMove = moves[i + 1];
 
-        }
-    }
-    for (const move of moves) {
-        iM++
-        if (check(move,moves[iM])) {
-            Skip = true
+        // Check if the next move is the opposite of the current move
+        const isOpposite = OpposeLeft[OpposeRight.indexOf(move)] === nextMove || OpposeRight[OpposeLeft.indexOf(move)] === nextMove;
+
+        if (isOpposite) {
+            console.warn('WWWWWW')
+            // Run both moves as a pair
             runMovement(move, sleep);
-            await runMovement(moves[iM], sleep);
-        } else if (!Skip) {
-            await runMovement(move, sleep);
+            await runMovement(nextMove, sleep);
+            i++; // Skip the next move since it's already handled
         } else {
-            Skip = false
+            console.warn('UUUUUUU')
+            // Run the current move
+            await runMovement(move, sleep);
         }
     }
+    stopTimer();
 
     await new Promise(r => setTimeout(r, 200));
     updateBatteries();
 
     // Stop live timer once done
-    stopTimer();
+    scSecure = false
 }
 
 
@@ -449,7 +450,7 @@ log("Ready. Use openSpike('left') and openSpike('right') to connect.");
 async function scramble() {
     if (!scSecure) {
         scSecure = true
-        var moves = generateScramble(100)
+        var moves = generateScramble(30)
         SpikeCube(moves,300)
     } 
 }

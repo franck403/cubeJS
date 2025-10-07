@@ -36,10 +36,7 @@ worker.onmessage = function (e) {
     //animate3DSolution(moves, 10);
 
     //
-    (async () => {
-      await SpikeCube(moves)
-      scSecure = false
-    })()
+    SpikeCube(moves)
     /*document.getElementById('res').innerHTML = 'Solution: ' + e.data.solution;
 
     const moves = e.data.solution.trim().split(/\s+/);
