@@ -12,9 +12,9 @@ Any **commercial use**, including but not limited to sale, hosting services, sub
 Users may not record, track, log, or otherwise monitor usage of the Software beyond what is strictly necessary for its intended personal or educational function.  
 Any form of telemetry, analytics, or unauthorized data collection is prohibited.
 
-## 3. No Competition or World Record Use
-The Software may **can be used for competitions, tournaments, speed records, world record attempts, or any official or unofficial record submissions** of any kind but you need to referance Franck403 as a member.  
-Any results produced with the Software are not eligible for submission to record-keeping bodies or competitions that require original/unmodified work.
+## 3. Competition or World Record Useage
+The Software may **can be used for competitions, tournaments, speed records, world record attempts, or any official or unofficial record submissions** of any kind but you need to reference to Franck403 as a member.
+Any results produced with the Software are eligible for submission to record-keeping bodies or competitions that require original/unmodified work.
 
 ## 4. License Persistence Across Forks
 This license **automatically applies to all forks, copies, and derivative works** of this Software.  
