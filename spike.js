@@ -401,26 +401,17 @@ async function SpikeCube(moves, sleeped = 210) {
 
     // Start live timer
     startTimer(timerStarted);
-    let iM = 0
-    let Skip = false
     let OpposeRight = ['U','F','L','U2','F2','L2',"U'","F'","L'"]
     let OpposeLeft  = ['D','B','R','D2','B2','R2',"D'","B'","R'"]
     for (let i = 0; i < moves.length; i++) {
         const move = moves[i];
         const nextMove = moves[i + 1];
-
-        // Check if the next move is the opposite of the current move
         const isOpposite = OpposeLeft[OpposeRight.indexOf(move)] === nextMove || OpposeRight[OpposeLeft.indexOf(move)] === nextMove;
-
         if (isOpposite) {
-            console.warn('WWWWWW')
-            // Run both moves as a pair
             runMovement(move, sleep);
             await runMovement(nextMove, sleep);
             i++; // Skip the next move since it's already handled
         } else {
-            console.warn('UUUUUUU')
-            // Run the current move
             await runMovement(move, sleep);
         }
     }
