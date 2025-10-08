@@ -308,7 +308,7 @@ async function runMovement(move,sleep=220) {
     await sendLine(writer, cmd);
     await sendLine(leftWriter,`light_matrix.write("${move.charAt(0)}",100)`)
     if (move.startsWith('B') || move.startsWith('D')) {
-        var waitTimer = sleep + 20
+        var waitTimer = sleep + 40
     } else {
         var waitTimer = sleep
     }
@@ -361,9 +361,14 @@ async function updateBatteries() {
 } 
 
 async function SpikeMove(move) {
+    if (scSecure) {
+        return
+    }
+    scSecure = true
     if (!SpikeState.left && !SpikeState.right) return;
     await runMovement(move);
     updateBatteries()
+    scSecure = false 
 }
 
 let timerInterval = null;
@@ -389,6 +394,10 @@ async function SpikeCube(moves, sleeped = 210) {
     if (sleep == 210) {
         sleep = window.sleeped
     }
+    if (scSecure) {
+        return
+    }
+    scSecure = true
     console.warn(sleep)
     var timerStarted = new Date();
     if (!SpikeState.left && !SpikeState.right) return;
@@ -409,7 +418,7 @@ async function SpikeCube(moves, sleeped = 210) {
         const isOpposite = OpposeLeft[OpposeRight.indexOf(move)] === nextMove || OpposeRight[OpposeLeft.indexOf(move)] === nextMove;
         if (isOpposite) {
             runMovement(move, sleep);
-            await runMovement(nextMove, sleep);
+            await runMovement(nextMove, sleep + 10);
             i++; // Skip the next move since it's already handled
         } else {
             await runMovement(move, sleep);
