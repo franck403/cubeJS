@@ -1,7 +1,35 @@
-<script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
-<video id="remote" autoplay playsinline></video>
-<script>
-  const peer = new Peer({ host: "your.server.ip", port: 9000, path: "/peerjs" });
-  const call = peer.call("CAMERA_ID", null);
-  call.on("stream", stream => document.getElementById("remote").srcObject = stream);
-</script>
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Multi Camera Viewer</title>
+  <style>
+    body { margin:0; display:grid; grid-template-columns:repeat(2,1fr); grid-template-rows:repeat(2,50vh); }
+    video { width:100%; height:100%; object-fit:cover; background:#000; }
+  </style>
+</head>
+<body>
+  <video id="cam1" autoplay playsinline></video>
+  <video id="cam2" autoplay playsinline></video>
+  <video id="cam3" autoplay playsinline></video>
+  <video id="cam4" autoplay playsinline></video>
+
+  <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+  <script>eruda.init()</script>
+  <script src="plugin.js"></script>
+
+  <script>
+    const peer = new Peer({ host: location.hostname, port: 9000, path: "/peerjs" });
+    const cameras = ["iphone1", "android1", "android2", "android3"];
+    const videos = ["cam1", "cam2", "cam3", "cam4"].map(id => document.getElementById(id));
+
+    peer.on("open", () => {
+      cameras.forEach((id, index) => {
+        const call = peer.call(id, null);
+        call.on("stream", stream => videos[index].srcObject = stream);
+      });
+    });
+  </script>
+</body>
+</html>

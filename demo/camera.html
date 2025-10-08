@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Camera Stream</title>
+  <style>
+    body { font-family:sans-serif; margin:0; text-align:center; }
+    video { width:100%; height:auto; background:#000; }
+    select, button { margin:5px; padding:6px; font-size:16px; }
+  </style>
+</head>
+<body>
+  <video id="preview" autoplay playsinline></video>
+  <br>
+  <select id="videoSelect"></select>
+  <select id="audioSelect"></select>
+  <button id="applyBtn">Apply</button>
+
+  <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+  <script>eruda.init()</script>
+  <script src="plugin.js"></script>
+
+  <script>
+    const urlParams = new URLSearchParams(location.search);
+    const id = urlParams.get("id") || "camera1";
+    const video = document.getElementById("preview");
+    const videoSelect = document.getElementById("videoSelect");
+    const audioSelect = document.getElementById("audioSelect");
+    const applyBtn = document.getElementById("applyBtn");
+
+    let currentStream = null;
+    const peer = new Peer(id, { host: location.hostname, port: 9000, path: "/peerjs" });
+
+    async function listDevices() {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      videoSelect.innerHTML = "";
+      audioSelect.innerHTML = "";
+      devices.forEach(d => {
+        if (d.kind === "videoinput") {
+          const opt = document.createElement("option");
+          opt.value = d.deviceId;
+          opt.textContent = d.label || `Camera ${videoSelect.length + 1}`;
+          videoSelect.appendChild(opt);
+        } else if (d.kind === "audioinput") {
+          const opt = document.createElement("option");
+          opt.value = d.deviceId;
+          opt.textContent = d.label || `Microphone ${audioSelect.length + 1}`;
+          audioSelect.appendChild(opt);
+        }
+      });
+    }
+
+    async function startStream(videoId, audioId) {
+      if (currentStream) currentStream.getTracks().forEach(t => t.stop());
+      const constraints = {
+        video: videoId ? { deviceId: { exact: videoId } } : true,
+        audio: audioId ? { deviceId: { exact: audioId } } : true
+      };
+      currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+      video.srcObject = currentStream;
+      peer.on("call", call => call.answer(currentStream));
+    }
+
+    applyBtn.onclick = async () => {
+      await startStream(videoSelect.value, audioSelect.value);
+    };
+
+    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+      .then(stream => {
+        currentStream = stream;
+        video.srcObject = stream;
+        listDevices();
+        peer.on("call", call => call.answer(stream));
+      });
+  </script>
+</body>
+</html>
