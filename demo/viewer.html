@@ -4,32 +4,151 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Multi Camera Viewer</title>
   <style>
-    body { margin:0; display:grid; grid-template-columns:repeat(2,1fr); grid-template-rows:repeat(2,50vh); }
-    video { width:100%; height:100%; object-fit:cover; background:#000; }
+    body {
+      margin: 0;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      grid-template-rows: repeat(2, 50vh);
+    }
+    video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      background: #000;
+      position: relative;
+    }
+    .loading-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: Arial, sans-serif;
+      font-size: 24px;
+    }
+    #startButton {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      padding: 12px 24px;
+      font-size: 18px;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      z-index: 1000;
+    }
   </style>
 </head>
 <body>
-  <video id="cam1" autoplay playsinline></video>
-  <video id="cam2" autoplay playsinline></video>
-  <video id="cam3" autoplay playsinline></video>
-  <video id="cam4" autoplay playsinline></video>
+  <video id="cam1" playsinline></video>
+  <video id="cam2" playsinline></video>
+  <video id="cam3" playsinline></video>
+  <video id="cam4" playsinline></video>
+  <button id="startButton">Start Camera Viewer</button>
 
   <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
-  <script>eruda.init()</script>
-  <script src="plugin.js"></script>
+  <script>eruda.init();</script>
+  <script src="../plugin.js"></script>
+  <script src="peerPlugin.js"></script>
 
   <script>
-    const peer = new Peer({ host: location.hostname, port: 9000, path: "/peerjs" });
-    const cameras = ["iphone1", "android1", "android2", "android3"];
-    const videos = ["cam1", "cam2", "cam3", "cam4"].map(id => document.getElementById(id));
+    async function getMediaStreamWithFakeVideoTrack() {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = 640;
+      canvas.height = 480;
+      ctx.fillStyle = 'black';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = 'white';
+      ctx.font = '30px Arial';
+      ctx.fillText('Fake Video', 200, 240);
+      const stream = canvas.captureStream(30);
+      return stream;
+    }
 
-    peer.on("open", () => {
-      cameras.forEach((id, index) => {
-        const call = peer.call(id, null);
-        call.on("stream", stream => videos[index].srcObject = stream);
-      });
+    const peer = new Peer({
+      host: location.hostname,
+      port: 8081,
+      path: "/peerjs"
     });
+
+    const cameraIds = ["iphone1", "android1", "android2", "android3"];
+    const videoEls = ["cam1", "cam2", "cam3", "cam4"].map(id => {
+      const videoEl = document.getElementById(id);
+      const overlay = document.createElement('div');
+      overlay.className = 'loading-overlay';
+      overlay.textContent = 'Connecting...';
+      videoEl.parentNode.insertBefore(overlay, videoEl.nextSibling);
+      return { videoEl, overlay };
+    });
+
+    let fakeStream;
+    let isFirstConnection = true;
+
+    document.getElementById('startButton').addEventListener('click', async () => {
+      document.getElementById('startButton').style.display = 'none';
+      await initializePeer();
+    });
+
+    async function initializePeer() {
+      try {
+        fakeStream = await getMediaStreamWithFakeVideoTrack();
+        connectToCameras();
+      } catch (err) {
+        console.error("Initialization error:", err);
+      }
+    }
+
+    function connectToCameras() {
+      for (let i = 0; i < cameraIds.length; i++) {
+        const camId = cameraIds[i];
+        const { videoEl, overlay } = videoEls[i];
+        tryConnect(camId, videoEl, overlay);
+      }
+    }
+
+    function tryConnect(targetId, videoEl, overlay, attempt = 1) {
+      console.log(`Connecting to ${targetId}, attempt ${attempt}`);
+      const call = peer.call(targetId, fakeStream);
+
+      if (!call) {
+        console.error(`Failed to create call to ${targetId}`);
+        if (attempt < 100) setTimeout(() => tryConnect(targetId, videoEl, overlay, attempt + 1), 2000);
+        return;
+      }
+
+      call.on("stream", stream => {
+        console.log(`Stream received from ${targetId}, tracks:`, stream.getTracks());
+        videoEl.srcObject = stream;
+        overlay.style.display = 'none';
+        if (isFirstConnection) {
+          document.querySelectorAll('.loading-overlay').forEach(ov => ov.style.display = 'none');
+          isFirstConnection = false;
+        }
+        videoEl.play().catch(e => console.error("Playback error:", e));
+      });
+
+      call.on("error", err => {
+        console.error(`Error calling ${targetId}:`, err);
+        if (attempt < 5) setTimeout(() => tryConnect(targetId, videoEl, overlay, attempt + 1), 2000);
+      });
+
+      call.on("close", () => {
+        console.warn(`${targetId} disconnected`);
+        videoEl.srcObject = null;
+        overlay.style.display = 'flex';
+        if (attempt < 5) setTimeout(() => tryConnect(targetId, videoEl, overlay, attempt + 1), 2000);
+      });
+    }
   </script>
 </body>
 </html>

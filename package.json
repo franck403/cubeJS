@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "start": "servor --reload"
+    "start": "servor --reload && node demo/server.js"
   },
   "dependencies": {
     "express": "^5.1.0",

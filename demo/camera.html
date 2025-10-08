@@ -15,64 +15,122 @@
   <select id="videoSelect"></select>
   <select id="audioSelect"></select>
   <button id="applyBtn">Apply</button>
-
   <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
   <script>eruda.init()</script>
-  <script src="plugin.js"></script>
-
+  <script src="../plugin.js"></script>
+  <script src="peerPlugin.js"></script>
   <script>
     const urlParams = new URLSearchParams(location.search);
     const id = urlParams.get("id") || "camera1";
+    console.log("Peer ID:", id);
     const video = document.getElementById("preview");
     const videoSelect = document.getElementById("videoSelect");
     const audioSelect = document.getElementById("audioSelect");
     const applyBtn = document.getElementById("applyBtn");
-
     let currentStream = null;
-    const peer = new Peer(id, { host: location.hostname, port: 9000, path: "/peerjs" });
-
-    async function listDevices() {
-      const devices = await navigator.mediaDevices.enumerateDevices();
-      videoSelect.innerHTML = "";
-      audioSelect.innerHTML = "";
-      devices.forEach(d => {
-        if (d.kind === "videoinput") {
-          const opt = document.createElement("option");
-          opt.value = d.deviceId;
-          opt.textContent = d.label || `Camera ${videoSelect.length + 1}`;
-          videoSelect.appendChild(opt);
-        } else if (d.kind === "audioinput") {
-          const opt = document.createElement("option");
-          opt.value = d.deviceId;
-          opt.textContent = d.label || `Microphone ${audioSelect.length + 1}`;
-          audioSelect.appendChild(opt);
-        }
-      });
+    const peer = new Peer(id, { host: location.hostname, port: 8081, path: "/peerjs" });
+  
+    // Load saved settings for the current id
+    function loadSettings() {
+      const saved = localStorage.getItem(`settings_${id}`);
+      if (saved) {
+        const { videoId, audioId } = JSON.parse(saved);
+        videoSelect.value = videoId || "";
+        audioSelect.value = audioId || "";
+        return { videoId, audioId };
+      }
+      return { videoId: null, audioId: null };
     }
-
+  
+    // Save settings to localStorage
+    function saveSettings(videoId, audioId) {
+      localStorage.setItem(`settings_${id}`, JSON.stringify({ videoId, audioId }));
+    }
+  
+    // List available devices
+    async function listDevices() {
+      try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        videoSelect.innerHTML = "";
+        audioSelect.innerHTML = "";
+        devices.forEach(d => {
+          if (d.kind === "videoinput") {
+            const opt = document.createElement("option");
+            opt.value = d.deviceId;
+            opt.textContent = d.label || `Camera ${videoSelect.length + 1}`;
+            videoSelect.appendChild(opt);
+          } else if (d.kind === "audioinput") {
+            const opt = document.createElement("option");
+            opt.value = d.deviceId;
+            opt.textContent = d.label || `Microphone ${audioSelect.length + 1}`;
+            audioSelect.appendChild(opt);
+          }
+        });
+        const { videoId, audioId } = loadSettings();
+        if (videoId || audioId) {
+          startStream(videoId, audioId);
+        } else if (devices.some(d => d.kind === "videoinput")) {
+          // If no saved settings, start with the first camera
+          startStream(devices.find(d => d.kind === "videoinput").deviceId, null);
+        }
+      } catch (err) {
+        console.error("Error enumerating devices:", err);
+      }
+    }
+  
+    // Start stream with selected devices
     async function startStream(videoId, audioId) {
-      if (currentStream) currentStream.getTracks().forEach(t => t.stop());
+      if (currentStream) {
+        currentStream.getTracks().forEach(track => track.stop());
+      }
       const constraints = {
         video: videoId ? { deviceId: { exact: videoId } } : true,
         audio: audioId ? { deviceId: { exact: audioId } } : true
       };
-      currentStream = await navigator.mediaDevices.getUserMedia(constraints);
-      video.srcObject = currentStream;
-      peer.on("call", call => call.answer(currentStream));
+      try {
+        currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+        video.srcObject = currentStream;
+        // Reattach call handler with the new stream
+        if (peer) {
+          peer.off("call");
+          peer.on("call", (call) => {
+            console.log("Answering call with current stream");
+            call.answer(currentStream);
+          });
+        }
+        saveSettings(videoId, audioId);
+      } catch (err) {
+        console.error("Error accessing media devices:", err);
+      }
     }
-
-    applyBtn.onclick = async () => {
-      await startStream(videoSelect.value, audioSelect.value);
+  
+    // Apply button click handler
+    applyBtn.onclick = () => {
+      startStream(videoSelect.value, audioSelect.value);
     };
-
-    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-      .then(stream => {
-        currentStream = stream;
-        video.srcObject = stream;
-        listDevices();
-        peer.on("call", call => call.answer(stream));
-      });
+  
+    // Initialize
+    peer.on("open", () => {
+      console.log("Peer connection opened");
+      navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+        .then(stream => {
+          currentStream = stream;
+          video.srcObject = stream;
+          listDevices();
+          // Attach call handler for the first time
+          peer.on("call", (call) => {
+            console.log("Answering initial call with current stream");
+            call.answer(currentStream);
+          });
+        })
+        .catch(err => {
+          console.error("Error accessing initial media devices:", err);
+        });
+    });
   </script>
+  
+  
+  
 </body>
 </html>
