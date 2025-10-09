@@ -258,7 +258,9 @@ async function startReading(which, reader) {
                                     'icon-battery-25',
                                     'icon-battery-50',
                                     'icon-battery-75',
-                                    'icon-battery-100'
+                                    'icon-battery-100',
+                                    'fa-solid',
+                                    'fa-xmark'
                                 );
                                 // Map the battery level to the closest icon class
                                 let iconClass;
@@ -330,7 +332,7 @@ function ganB() {
     var ganBatterie = document.getElementById('ganBatterie');
 
     // Remove all existing battery classes
-    ganBatterie.classList.remove('icon-battery-0', 'icon-battery-25', 'icon-battery-50', 'icon-battery-75', 'icon-battery-100');
+    ganBatterie.classList.remove('icon-battery-0', 'icon-battery-25', 'icon-battery-50', 'icon-battery-75', 'icon-battery-100', 'fa-solid', 'fa-xmark');
 
     // Map the battery level to the closest icon class
     let iconClass;
