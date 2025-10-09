@@ -10,9 +10,9 @@ let SpikeState = { left: false, right: false };
 let scSecure = false
 let SolveSecure = false
 
-const sexyMove1 = ["R","U","R'","U'","R","U","R'","U'","R","U","R'","U'","R","U","R'","U'","R","U","R'","U'","R","U","R'","U'"];
-const sexyMove2 = ["L","F","U","F","R","F2","L","F","U","F","R","F2","L","F","U","F","R","F2","L","F","U","F","R","F2","L","F","U","F","R","F2","L","F","U","F","R","F2"];
-const sexyMove3 = ["R2","L2","U2","R2","L2","U2","R2","L2","U2","R2","L2","U2"];
+const sexyMove1 = ["R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'"];
+const sexyMove2 = ["L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2"];
+const sexyMove3 = ["R2", "L2", "U2", "R2", "L2", "U2", "R2", "L2", "U2", "R2", "L2", "U2"];
 
 const startup = "import motor\n\nfrom hub import port, light_matrix, sound\n\nimport time\n\nlayer = motor.run_for_degrees\n\nlight_matrix.clear();\nmotor.motor_set_high_resolution_mode(port.A, True);\nmotor.motor_set_high_resolution_mode(port.B, True);\nmotor.motor_set_high_resolution_mode(port.C, True);\nmotor.motor_set_high_resolution_mode(port.D, True);\nmotor.motor_set_high_resolution_mode(port.E, True);\nmotor.motor_set_high_resolution_mode(port.F, True)";
 const connectSound = "sound.beep(392,120);time.sleep_ms(120);sound.beep(494,120);time.sleep_ms(120);sound.beep(587,150);time.sleep_ms(150);sound.beep(784,200)";
@@ -52,34 +52,34 @@ const CLP_RIGHT = {
 };*/
 const CLP_LEFT = {
     // Face U
-    "U":  "motor.reset_relative_position(port.A,0);motor.run_to_relative_position(port.A, -90, 1100, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
+    "U": "motor.reset_relative_position(port.A,0);motor.run_to_relative_position(port.A, -90, 1100, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
     "U'": "motor.reset_relative_position(port.A,0);motor.run_to_relative_position(port.A, 90, 1100, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
     "U2": "motor.reset_relative_position(port.A,0);motor.run_to_relative_position(port.A, 180, 1100, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
 
     // Face L
-    "L":  "motor.reset_relative_position(port.C,0);motor.run_to_relative_position(port.C, -90, 1100, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
+    "L": "motor.reset_relative_position(port.C,0);motor.run_to_relative_position(port.C, -90, 1100, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
     "L'": "motor.reset_relative_position(port.C,0);motor.run_to_relative_position(port.C, 90, 1100, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
     "L2": "motor.reset_relative_position(port.C,0);motor.run_to_relative_position(port.C, 180, 1100, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
 
     // Face F
-    "F":  "motor.reset_relative_position(port.E,0);motor.run_to_relative_position(port.E, -90, 1100, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
+    "F": "motor.reset_relative_position(port.E,0);motor.run_to_relative_position(port.E, -90, 1100, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
     "F'": "motor.reset_relative_position(port.E,0);motor.run_to_relative_position(port.E, 90, 1100, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
     "F2": "motor.reset_relative_position(port.E,0);motor.run_to_relative_position(port.E, 180, 1100, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
 };
 
 const CLP_RIGHT = {
     // Face R
-    "R":  "motor.reset_relative_position(port.D,0);motor.run_to_relative_position(port.D, -90, 1100, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
+    "R": "motor.reset_relative_position(port.D,0);motor.run_to_relative_position(port.D, -90, 1100, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
     "R'": "motor.reset_relative_position(port.D,0);motor.run_to_relative_position(port.D, 90, 1100, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
     "R2": "motor.reset_relative_position(port.D,0);motor.run_to_relative_position(port.D, 180, 1100, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
 
     // Face B
-    "B":  "motor.reset_relative_position(port.F,0);motor.run_to_relative_position(port.F, -90, 1100, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
+    "B": "motor.reset_relative_position(port.F,0);motor.run_to_relative_position(port.F, -90, 1100, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
     "B'": "motor.reset_relative_position(port.F,0);motor.run_to_relative_position(port.F, 90, 1100, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
     "B2": "motor.reset_relative_position(port.F,0);motor.run_to_relative_position(port.F, 180, 1100, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
 
     // Face D
-    "D":  "motor.reset_relative_position(port.B,0);motor.run_to_relative_position(port.B, -90, 1100, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
+    "D": "motor.reset_relative_position(port.B,0);motor.run_to_relative_position(port.B, -90, 1100, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
     "D'": "motor.reset_relative_position(port.B,0);motor.run_to_relative_position(port.B, 90, 1100, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
     "D2": "motor.reset_relative_position(port.B,0);motor.run_to_relative_position(port.B, 180, 1100, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
 };
@@ -106,9 +106,9 @@ function generateScramble(count = 20) {
         let move;
         do {
             move = ALL_MOVES[Math.floor(Math.random() * ALL_MOVES.length)];
-        } while (i > 0 && move[0] === scramble[i - 1][0]); 
+        } while (i > 0 && move[0] === scramble[i - 1][0]);
         // avoids repeating same face twice in a row (e.g., "U" then "U'")
-        
+
         scramble.push(move);
     }
 
@@ -138,7 +138,7 @@ function batteryPercentage(voltage, minVolt, maxVolt) {
     console.warn(Math.round(((voltage - minVolt) / (maxVolt - minVolt)) * 100))
     return Math.round(((voltage - minVolt) / (maxVolt - minVolt)) * 100);
 }
-  
+
 
 async function openSpike(which) {
     let port, writer, reader, abortCtrl;
@@ -150,7 +150,7 @@ async function openSpike(which) {
         if (port.writable) {
             writer = port.writable.getWriter();
         }
-    
+
         await writer.write(new Uint8Array([3]));
 
         abortCtrl = new AbortController();
@@ -166,7 +166,7 @@ async function openSpike(which) {
             rightWriter = writer;
             rightReader = reader;
             rightAbort = abortCtrl;
-            SpikeState.right = true;            
+            SpikeState.right = true;
         }
 
         // start listening for RX
@@ -214,11 +214,11 @@ async function disconnectSpike(which) {
             reader.releaseLock();
         }
         if (writer) {
-            try { await writer.close(); } catch (e) {}
+            try { await writer.close(); } catch (e) { }
             writer.releaseLock();
         }
         if (port) {
-            try { await port.close(); } catch (e) {}
+            try { await port.close(); } catch (e) { }
         }
 
         if (which === "left") {
@@ -289,7 +289,7 @@ async function startReading(which, reader) {
 }
 
 
-async function runMovement(move,sleep=220) {
+async function runMovement(move, sleep = 220, noCube) {
     let cmd = null;
     let writer = null;
 
@@ -305,27 +305,39 @@ async function runMovement(move,sleep=220) {
         log(`Error: Movement '${move}' not found or no Spike connected`);
         return;
     }
-
-    log(`Running move '${move}'`);
-    await sendLine(writer, cmd);
-    await sendLine(leftWriter,`light_matrix.write("${move.charAt(0)}",100)`)
-    if (move.startsWith('B') || move.startsWith('D')) {
-        var waitTimer = sleep + 40
+    if (!noCube) {
+        log(`Running move '${move}'`);
+        await sendLine(writer, cmd);
+        await sendLine(leftWriter, `light_matrix.write("${move.charAt(0)}",100)`)
+        if (move.startsWith('B') || move.startsWith('D')) {
+            var waitTimer = sleep + 40
+        } else {
+            var waitTimer = sleep
+        }
+        if (move.endsWith("'")) {
+            await sendLine(rightWriter, 'light_matrix.write("\'",100)')
+        } else if (move.endsWith("2")) {
+            await sendLine(rightWriter, 'light_matrix.write("2",100)')
+        } else {
+            await sendLine(rightWriter, 'light_matrix.write("",100)')
+        }
     } else {
-        var waitTimer = sleep
+        window.mover(move)        
     }
     if (move.endsWith("'")) {
-        await sendLine(rightWriter,'light_matrix.write("\'",100)') 
         await new Promise(r => setTimeout(r, waitTimer));
     } else if (move.endsWith("2")) {
-        await sendLine(rightWriter,'light_matrix.write("2",100)') 
-        await new Promise(r => setTimeout(r, waitTimer*2));
+        await new Promise(r => setTimeout(r, waitTimer * 2));
     } else {
-        await sendLine(rightWriter,'light_matrix.write("",100)') 
         await new Promise(r => setTimeout(r, waitTimer));
     }
 }
-  
+
+function ganCubePresent() {
+    var b = document.getElementById('cube-view').contentWindow;
+    return b.document.getElementById("batteryLevel").value == "- n/a -"
+}
+
 function ganB() {
     var b = document.getElementById('cube-view').contentWindow;
     var batteryLevel = parseInt(b.document.getElementById('batteryLevel').value, 10);
@@ -353,14 +365,14 @@ function ganB() {
 }
 
 async function updateBatteries() {
-    await sendLine(rightWriter,getBattery) 
+    await sendLine(rightWriter, getBattery)
     await new Promise(r => setTimeout(r, 200));
-    await sendLine(leftWriter,getBattery) 
+    await sendLine(leftWriter, getBattery)
     await new Promise(r => setTimeout(r, 200));
-    await sendLine(leftWriter,clearDisplay)
-    await sendLine(rightWriter,clearDisplay)  
+    await sendLine(leftWriter, clearDisplay)
+    await sendLine(rightWriter, clearDisplay)
     ganB()
-} 
+}
 
 async function SpikeMove(move) {
     if (scSecure) {
@@ -370,7 +382,7 @@ async function SpikeMove(move) {
     if (!SpikeState.left && !SpikeState.right) return;
     await runMovement(move);
     updateBatteries()
-    scSecure = false 
+    scSecure = false
 }
 
 let timerInterval = null;
@@ -392,6 +404,7 @@ function stopTimer() {
 
 window.sleeped = 210
 async function SpikeCube(moves, sleeped = 210) {
+    noCube = ganCubePresent()
     let sleep = sleeped
     if (sleep == 210) {
         sleep = window.sleeped
@@ -412,18 +425,18 @@ async function SpikeCube(moves, sleeped = 210) {
 
     // Start live timer
     startTimer(timerStarted);
-    let OpposeRight = ['U','F','L','U2','F2','L2',"U'","F'","L'"]
-    let OpposeLeft  = ['D','B','R','D2','B2','R2',"D'","B'","R'"]
+    let OpposeRight = ['U', 'F', 'L', 'U2', 'F2', 'L2', "U'", "F'", "L'"]
+    let OpposeLeft = ['D', 'B', 'R', 'D2', 'B2', 'R2', "D'", "B'", "R'"]
     for (let i = 0; i < moves.length; i++) {
         const move = moves[i];
         const nextMove = moves[i + 1];
         const isOpposite = OpposeLeft[OpposeRight.indexOf(move)] === nextMove || OpposeRight[OpposeLeft.indexOf(move)] === nextMove;
         if (isOpposite) {
-            runMovement(move, sleep);
-            await runMovement(nextMove, sleep + 10);
+            runMovement(move, sleep, noCube);
+            await runMovement(nextMove, sleep + 10, noCube);
             i++; // Skip the next move since it's already handled
         } else {
-            await runMovement(move, sleep);
+            await runMovement(move, sleep, noCube);
         }
     }
     stopTimer();
@@ -439,11 +452,11 @@ async function SpikeCube(moves, sleeped = 210) {
 // hook for cube solver worker
 function sc() {
     if (!SolveSecure) {
-        SolveSecure = true 
+        SolveSecure = true
         worker.postMessage({ type: 'solve', state: cube.asString() });
-        setTimeout(()=> {
+        setTimeout(() => {
             SolveSecure = false
-        },6001)
+        }, 6001)
     }
 }
 
@@ -453,12 +466,12 @@ async function scramble() {
     if (!scSecure) {
         scSecure = true
         var moves = generateScramble(30)
-        SpikeCube(moves,300)
-    } 
+        SpikeCube(moves, 300)
+    }
 }
 
 async function leb() {
-    for (let i = 0;i<=15;i++) {
+    for (let i = 0; i <= 15; i++) {
         await scramble()
         await new Promise(r => setTimeout(r, 15000));
         sc()
@@ -467,17 +480,17 @@ async function leb() {
 }
 
 function StartCube() {
-    SpikeCube(['U2'],300)
+    SpikeCube(['U2'], 300)
 }
 
 let SpinState = true
 async function spin() {
     if (SpinState) {
         SpinState = false
-        await sendLine(leftWriter,'motor.run(port.A, 50)')
+        await sendLine(leftWriter, 'motor.run(port.A, 50)')
     } else {
         SpinState = true
-        await sendLine(leftWriter,'motor.stop(port.A)')
+        await sendLine(leftWriter, 'motor.stop(port.A)')
     }
 }
 
@@ -486,18 +499,18 @@ let fullscreenstate = false;
 function fullscreen() {
     if (!fullscreenstate) {
         document.body.requestFullscreen()
-        .then(() => {
-            document.getElementById('full').innerHTML = `<i class="fa-solid fa-compress"></i>`;
-        })
-        .catch(err => {
-            console.error("Error attempting to enable fullscreen:", err);
-        });
+            .then(() => {
+                document.getElementById('full').innerHTML = `<i class="fa-solid fa-compress"></i>`;
+            })
+            .catch(err => {
+                console.error("Error attempting to enable fullscreen:", err);
+            });
         fullscreenstate = true;
     } else {
         document.exitFullscreen()
-        .then(() => {
-            document.getElementById('full').innerHTML = `<i class="fa-solid fa-expand"></i>`;
-        })
+            .then(() => {
+                document.getElementById('full').innerHTML = `<i class="fa-solid fa-expand"></i>`;
+            })
         fullscreenstate = false;
     }
 }
@@ -514,11 +527,11 @@ document.addEventListener("fullscreenchange", (event) => {
 });
 
 function sexyMoves1() {
-    SpikeCube(sexyMove1,200)
+    SpikeCube(sexyMove1, 200)
 }
 function sexyMoves2() {
-    SpikeCube(sexyMove2,200)
+    SpikeCube(sexyMove2, 200)
 }
 function sexyMoves3() {
-    SpikeCube(sexyMove3,200)
+    SpikeCube(sexyMove3, 200)
 }

@@ -17,7 +17,9 @@ function reset() {
 window.addEventListener("message", (event) => {
     console.log(`Received message: ${event.data}`);
     if (event.data == 'connect') {
-        document.getElementById('connect').click()
+        if (document.getElementById("batteryLevel").value == "- n/a -") {
+            document.getElementById('connect').click()
+        }
     } else if (event.data == 'reset') {
         document.getElementById('reset-state').click()
     } else if (event.data == 'state') {
