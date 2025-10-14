@@ -9,17 +9,7 @@ let rightAbort = null;
 let SpikeState = { left: false, right: false };
 let scSecure = false
 let SolveSecure = false
-let keyboard = {
-    "1": sexyMove1,
-    "2": sexyMove2,
-    "3": sexyMove3,
-    "c": FullConnect,
-    "r": reset,
-    "Enter": sc,
-    "w": rotate,
-    "s": spin,
-    "f": fullscreen
-}
+
 
 
 const sexyMove1 = ["R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'"];
@@ -578,16 +568,6 @@ async function resetMotors() {
     scSecure = false;
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-        document.addEventListener('keydown', (e) => {
-        const fn = keyboard[e.key] || keyboard[e.key.toLowerCase()];
-        if (fn) fn();
-    });
-    document.addEventListener("keydown", (event) => {
-        console.log('Key pressed:', event.key);
-    });
-});
-
 function sexyMoves1() {
     SpikeCube(sexyMove1, 200)
 }
@@ -597,3 +577,24 @@ function sexyMoves2() {
 function sexyMoves3() {
     SpikeCube(sexyMove3, 200)
 }
+let keyboard = {
+    "1": sexyMove1,
+    "2": sexyMove2,
+    "3": sexyMove3,
+    "c": FullConnect,
+    "r": reset,
+    "Enter": sc,
+    "w": rotate,
+    "s": spin,
+    "f": fullscreen
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('keydown', (e) => {
+    const fn = keyboard[e.key] || keyboard[e.key.toLowerCase()];
+    if (fn) fn();
+});
+document.addEventListener("keydown", (event) => {
+    console.log('Key pressed:', event.key);
+});
+});
