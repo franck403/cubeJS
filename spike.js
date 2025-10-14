@@ -545,16 +545,6 @@ document.addEventListener("fullscreenchange", (event) => {
     }
 });
 
-function sexyMoves1() {
-    SpikeCube(sexyMove1, 200)
-}
-function sexyMoves2() {
-    SpikeCube(sexyMove2, 200)
-}
-function sexyMoves3() {
-    SpikeCube(sexyMove3, 200)
-}
-
 async function resetMotors() {
     if (!SpikeState.left && !SpikeState.right) {
         log("No Spike connected");
@@ -589,8 +579,21 @@ async function resetMotors() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    document.addEventListener('keydown', (e) => {
+        document.addEventListener('keydown', (e) => {
         const fn = keyboard[e.key] || keyboard[e.key.toLowerCase()];
         if (fn) fn();
     });
+    document.addEventListener("keydown", (event) => {
+        console.log('Key pressed:', event.key);
+    });
 });
+
+function sexyMoves1() {
+    SpikeCube(sexyMove1, 200)
+}
+function sexyMoves2() {
+    SpikeCube(sexyMove2, 200)
+}
+function sexyMoves3() {
+    SpikeCube(sexyMove3, 200)
+}
