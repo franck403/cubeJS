@@ -15,7 +15,7 @@ eruda.add(function (eruda) {
                 }
                 .eruda-movement-tester .button-grid {
                     display: grid;
-                    grid-template-columns: repeat(3, 1fr);
+                    grid-template-columns: repeat(6, 1fr);
                     gap: 5px;
                     margin-bottom: 10px;
                 }
@@ -41,6 +41,12 @@ eruda.add(function (eruda) {
                     font-size: 12px;
                     background: #f9f9f9;
                 }
+                .eruda-movement-tester .error {
+                    color: red;
+                }
+                .eruda-movement-tester .success {
+                    color: green;
+                }
             `);
         }
         init($el) {
@@ -50,29 +56,41 @@ eruda.add(function (eruda) {
             this._$el.html(`
                 <div class="title">Movement Tester</div>
                 <div class="button-grid">
-                    <!-- Left Side -->
-                    <button onclick="window.SpikeMove('U')">U</button>
-                    <button onclick="window.SpikeMove('U\'')">U'</button>
-                    <button onclick="window.SpikeMove('U2')">U2</button>
-                    <button onclick="window.SpikeMove('L')">L</button>
-                    <button onclick="window.SpikeMove('L\'')">L'</button>
-                    <button onclick="window.SpikeMove('L2')">L2</button>
-                    <button onclick="window.SpikeMove('F')">F</button>
-                    <button onclick="window.SpikeMove('F\'')">F'</button>
-                    <button onclick="window.SpikeMove('F2')">F2</button>
-                    <!-- Right Side -->
-                    <button onclick="window.SpikeMove('R')">R</button>
-                    <button onclick="window.SpikeMove('R\'')">R'</button>
-                    <button onclick="window.SpikeMove('R2')">R2</button>
-                    <button onclick="window.SpikeMove('B')">B</button>
-                    <button onclick="window.SpikeMove('B\'')">B'</button>
-                    <button onclick="window.SpikeMove('B2')">B2</button>
-                    <button onclick="window.SpikeMove('D')">D</button>
-                    <button onclick="window.SpikeMove('D\'')">D'</button>
-                    <button onclick="window.SpikeMove('D2')">D2</button>
+                    <button onclick='handleMove("U")'>U</button>
+                    <button onclick='handleMove("U\\\'")'>U'</button>
+                    <button onclick='handleMove("U2")'>U2</button>
+                    <button onclick='handleMove("L")'>L</button>
+                    <button onclick='handleMove("L\\\'")'>L'</button>
+                    <button onclick='handleMove("L2")'>L2</button>
+                    <button onclick='handleMove("F")'>F</button>
+                    <button onclick='handleMove("F\\\'")'>F'</button>
+                    <button onclick='handleMove("F2")'>F2</button>
+                    <button onclick='handleMove("R")'>R</button>
+                    <button onclick='handleMove("R\\\'")'>R'</button>
+                    <button onclick='handleMove("R2")'>R2</button>
+                    <button onclick='handleMove("B")'>B</button>
+                    <button onclick='handleMove("B\\\'")'>B'</button>
+                    <button onclick='handleMove("B2")'>B2</button>
+                    <button onclick='handleMove("D")'>D</button>
+                    <button onclick='handleMove("D\\\'")'>D'</button>
+                    <button onclick='handleMove("D2")'>D2</button>
                 </div>
                 <div class="log" id="movement-log"></div>
             `);
+
+            // Define handleMove in the global scope for onclick
+            window.handleMove = (move) => {
+                try {
+                    if (window.SpikeMove && typeof window.SpikeMove === 'function') {
+                        window.SpikeMove(move);
+                        this._log(`<span class="success">Executed: ${move}</span>`);
+                    } else {
+                        throw new Error("SpikeMove is not defined or not a function.");
+                    }
+                } catch (error) {
+                    this._log(`<span class="error">Error: ${error.message}</span>`);
+                }
+            };
         }
         _log(message) {
             const logEl = this._$el.find('#movement-log');
@@ -88,6 +106,7 @@ eruda.add(function (eruda) {
         destroy() {
             super.destroy();
             eruda.util.evalCss.remove(this.style);
+            delete window.handleMove; // Clean up
         }
     }
     return new MovementTester();
