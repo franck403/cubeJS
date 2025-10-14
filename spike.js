@@ -586,7 +586,7 @@ document.addEventListener('DOMContentLoaded', () => {
         "3": sexyMoves3,
         "c": FullConnect,
         "r": reset,
-        "Enter": sc,
+        "<": sc,
         "w": StartCube,
         "s": spin,
         "f": fullscreen

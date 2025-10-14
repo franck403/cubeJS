@@ -292,6 +292,7 @@ function update3DCubeFromState(stateString) {
     async function addCenterSticker(cubelet, index, src, rotation = 0) {
         const texture = new THREE.TextureLoader().load(`img/${src}`);
         texture.center.set(0.5, 0.5);   // pivot au centre
+        texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
         texture.rotation = THREE.MathUtils.degToRad(rotation); // rotation en degrés → radians
         cubelet.material[index].map = texture;
         cubelet.material[index].needsUpdate = true;
