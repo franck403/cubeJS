@@ -405,9 +405,10 @@ function startTimer(startTime) {
     }, 1);
 }
 
-function stopTimer() {
+function stopTimer(startTime) {
     if (timerInterval) {
         clearInterval(timerInterval);
+        let elapsed = ((new Date() - startTime) / 1000).toFixed(3);
         conn.send(Number(elapsed));
         timerInterval = null;
 
@@ -456,7 +457,7 @@ async function SpikeCube(moves, sleeped = 210) {
             await runMovement(move, sleep, noCube);
         }
     }
-    stopTimer();
+    stopTimer(timerStarted);
 
     await new Promise(r => setTimeout(r, 200));
     updateBatteries();
