@@ -126,7 +126,7 @@ footer {
       'gan js'
       'spike spike'
       'footer footer';
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 60% 1fr;
     grid-template-rows: 1fr auto auto min-content;
   }
 

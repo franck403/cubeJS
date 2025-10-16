@@ -643,7 +643,10 @@ document.addEventListener('DOMContentLoaded', () => {
         "f": fullscreen,
         "=": scramble
     }
-    document.addEventListener('keydown', (e) => {
+    document.body.addEventListener('keydown', (e) => {
+        e.preventDefault()
+        e.stopImmediatePropagation()
+        e.stopPropagation()
         console.log('Key pressed:', event.key);
         const fn = keyboard[e.key] || keyboard[e.key.toLowerCase()];
         if (fn) fn();
