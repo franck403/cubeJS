@@ -456,67 +456,57 @@ function stopTimer(startTime) {
 
     }
 }
-let oppositeFace = {
-    U: "D", D: "U",
-    F: "B", B: "F",
-    L: "R", R: "L"
-};
 
-function normalizeMove(move) {
-    return move.replace(/2|'/g, "");
+const oppositeFace = { U:"D", D:"U", F:"B", B:"F", L:"R", R:"L" };
+const normalize = m => m?.replace(/2|'/g,"");
+const isOpposite = (a,b) => normalize(a) && normalize(b) && oppositeFace[normalize(a)] === normalize(b);
+
+function simplifyMoves(moves) {
+    const out = [];
+    for (let i = 0; i < moves.length; i++) {
+        const a = moves[i], b = moves[i + 1];
+        if (!b) return [...out, a];
+        const fa = normalize(a), fb = normalize(b);
+        if (fa !== fb) { out.push(a); continue; }
+        if (a === b) { out.push(fa + "2"); i++; continue; }
+        if (a.includes("'") !== b.includes("'")) { i++; continue; }
+        if (a.includes("2") || b.includes("2")) {
+            out.push((a.includes("2") ^ b.includes("'")) ? fa + "'" : fa);
+            i++;
+        } else out.push(a);
+    }
+    return out;
 }
 
-function isOppositeMove(a, b) {
-    if (!a || !b) return false;
-    const faceA = normalizeMove(a);
-    const faceB = normalizeMove(b);
-    return oppositeFace[faceA] === faceB;
-}
-window.sleeped = 210
+window.sleeped = 210;
+
 async function SpikeCube(moves, sleeped = 210) {
-    console.log(sleeped)
-    noCube = ganCubePresent()
-    let sleep = sleeped
-    if (sleep == 210) {
-        sleep = window.sleeped
-    }
-    console.log(sleep)
-    if (scSecure) {
-        return
-    }
-    scSecure = true
-    console.warn(sleep)
-    var timerStarted = new Date();
-    if (!SpikeState.left && !SpikeState.right) return;
-    console.log(moves);
+    if (scSecure || !SpikeState.left || !SpikeState.right) return;
+    scSecure = true;
+    const noCube = ganCubePresent();
+    const sleep = sleeped === 210 ? window.sleeped : sleeped;
+    moves = simplifyMoves(moves);
 
-    sendLine(leftWriter, `light_matrix.write("${String(moves.length).charAt(0)}",100)`);
-    sendLine(rightWriter, `light_matrix.write("${String(moves.length).charAt(1)}",100)`);
+    const lenStr = String(moves.length).padStart(2, "0");
+    sendLine(leftWriter, `light_matrix.write("${lenStr[0]}",100)`);
+    sendLine(rightWriter, `light_matrix.write("${lenStr[1]}",100)`);
 
     await new Promise(r => setTimeout(r, 2001));
+    const start = new Date();
 
-    // Start live timer
     for (let i = 0; i < moves.length; i++) {
-        const move = moves[i];
-        const nextMove = moves[i + 1];
-        const opposite = isOppositeMove(move, nextMove);
-
-        if (opposite) {
-            runMovement(move, sleep, noCube);
-            console.warn(move, nextMove);
-            const found = await runMovement(nextMove, sleep + 10, noCube);
-            if (found !== false) i++;
-        } else {
-            await runMovement(move, sleep, noCube);
-        }
+        const m = moves[i], n = moves[i + 1];
+        if (isOpposite(m, n)) {
+            await runMovement(m, sleep, noCube);
+            const ok = await runMovement(n, sleep + 10, noCube);
+            if (ok !== false) i++;
+        } else await runMovement(m, sleep, noCube);
     }
-    stopTimer(timerStarted);
 
+    stopTimer(start);
     await new Promise(r => setTimeout(r, 200));
     updateBatteries();
-
-    // Stop live timer once done
-    scSecure = false
+    scSecure = false;
 }
 
 
