@@ -1,168 +1,165 @@
 /* Global */
 * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-  }
-   
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: #000;
+  color: #fff;
+  display: grid;
+  grid-template-areas:
+    'gan times'
+    'js times'
+    'spike times'
+    'footer footer';
+  grid-template-columns: minmax(300px, 1fr) minmax(400px, 1fr);
+  grid-template-rows: auto auto auto min-content;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  gap: 1vw;
+}
+
+/* Sections */
+.section {
+  padding: 1.2rem;
+  border-radius: 25px;
+  margin: 0.5vw;
+  overflow: hidden;
+  background-color: #39adad;
+  color: #fff;
+}
+
+.gan {
+  grid-area: gan;
+}
+
+.js {
+  grid-area: js;
+}
+
+.spike {
+  grid-area: spike;
+}
+
+.section h3 {
+  font-size: clamp(1.2rem, 2vw, 1.8rem);
+  margin-bottom: 0.8rem;
+}
+
+.section p {
+  font-size: clamp(0.95rem, 1.3vw, 2rem);
+  line-height: 1.4;
+  margin-bottom: 0.5rem;
+}
+
+.section code {
+  font-size: clamp(0.9rem, 1.2vw, 1.2rem);
+  background: rgba(0, 0, 0, 0.2);
+  padding: 0.2em 0.4em;
+  border-radius: 4px;
+}
+
+/* Times section */
+.times {
+  grid-area: times;
+  background-color: #7a306c;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border-radius: 25px;
+  padding: 2vh 2vw;
+  gap: 2vh;
+  margin: 0.5vw;
+  height: calc(100%-1vh);
+}
+
+.times h3 {
+  font-size: clamp(1.6rem, 2.2vw, 2.5rem);
+  text-align: center;
+  margin-bottom: 1vh;
+}
+
+.time {
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 1.5vh 2vw;
+  border-radius: 10px;
+  width: 100%;
+  text-align: center;
+  font-size: clamp(1.2rem, 1.8vw, 2.6rem);
+  font-weight: 600;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4em;
+}
+
+.cn {
+  font-family: 'Courier New', monospace;
+}
+
+/* Footer */
+footer {
+  grid-area: footer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  background-color: #fccd03;
+  color: #000;
+  font-weight: bold;
+  padding: clamp(0.5rem, 1vw, 1.5rem);
+  font-size: clamp(1rem, 1.2vw, 1.4rem);
+  height: 40px;
+  min-height: 10px;
+  word-wrap: break-word;
+}
+
+/* Responsive for medium screens */
+@media (max-width: 1300px) {
   body {
-    font-family: Arial, sans-serif;
-    background-color: #000;
-    color: #fff;
-    display: grid;
     grid-template-areas:
-        'gan times'
-        'js times'
-        'spike times'
-        'footer footer';
-    grid-template-columns: minmax(300px, 1fr) minmax(400px, 1fr);
-    grid-template-rows: auto auto auto min-content;
-    height: 100vh;
-    width: 100vw;
-    overflow: hidden;
-    gap: 1vw;
-    padding: 1vh 1vw;
+      'times times'
+      'gan js'
+      'spike spike'
+      'footer footer';
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: 1fr auto auto min-content;
   }
-   
-  /* Sections */
-  .section {
-    padding: 1.2rem;
-    border-radius: 25px;
-    margin: 0.5vw;
-    overflow: hidden;
-    background-color: #39adad;
-    color: #fff;
-  }
-   
-  .gan {
-    grid-area: gan;
-  }
-   
-  .js {
-    grid-area: js;
-  }
-   
-  .spike {
-    grid-area: spike;
-  }
-   
-  .section h3 {
-    font-size: clamp(1.2rem, 2vw, 1.8rem);
-    text-align: center;
-    margin-bottom: 0.8rem;
-  }
-   
-  .section p {
-    font-size: clamp(0.95rem, 1.3vw, 2rem);
-    line-height: 1.4;
-    margin-bottom: 0.5rem;
-  }
-   
-  .section code {
-    font-size: clamp(0.9rem, 1.2vw, 1.2rem);
-    background: rgba(0, 0, 0, 0.2);
-    padding: 0.2em 0.4em;
-    border-radius: 4px;
-  }
-   
-  /* Times section */
+
   .times {
-    grid-area: times;
-    background-color: #7a306c;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    border-radius: 25px;
-    padding: 2vh 2vw;
-    gap: 2vh;
-    margin: 0.5vw;
-    height: calc(100%-1vh);
-  }
-   
-  .times h3 {
-    font-size: clamp(1.6rem, 2.2vw, 2.5rem);
-    text-align: center;
-    margin-bottom: 1vh;
-  }
-   
-  .time {
-    background-color: rgba(255, 255, 255, 0.1);
-    padding: 1.5vh 2vw;
-    border-radius: 10px;
-    width: 100%;
-    text-align: center;
-    font-size: clamp(1.2rem, 1.8vw, 2.6rem);
-    font-weight: 600;
-    display: flex;
-    flex-direction: column;
-    gap: 0.4em;
-  }
-   
-  .cn {
-    font-family: 'Courier New', monospace;
-  }
-   
-  /* Footer */
-  footer {
-    grid-area: footer;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    background-color: #fccd03;
-    border-radius: 50px;
-    color: #000;
-    font-weight: bold;
-    padding: clamp(0.5rem, 1vw, 1.5rem);
-    font-size: clamp(0.9rem, 1.1vw, 1.3rem);
-    min-height: 6vh;
-    word-wrap: break-word;
+    width: auto;
     margin: 0.5vw;
   }
-   
-  /* Responsive for medium screens */
-  @media (max-width: 1300px) {
-    body {
-        grid-template-areas:
-            'times times'
-            'gan js'
-            'spike spike'
-            'footer footer';
-        grid-template-columns: repeat(2, 1fr);
-        grid-template-rows: 1fr auto auto min-content;
-    }
-   
-    .times {
-        width: auto;
-        margin: 0.5vw;
-    }
+}
+
+/* Responsive for small screens */
+@media (max-width: 800px) {
+  body {
+    grid-template-areas:
+      'times'
+      'gan'
+      'js'
+      'spike'
+      'footer';
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto auto min-content;
   }
-   
-  /* Responsive for small screens */
-  @media (max-width: 800px) {
-    body {
-        grid-template-areas:
-            'times'
-            'gan'
-            'js'
-            'spike'
-            'footer';
-        grid-template-columns: 1fr;
-        grid-template-rows: auto auto auto auto min-content;
-    }
-   
-    .times, .section {
-        width: 95%;
-        margin: 1vh auto;
-    }
+
+  .times,
+  .section {
+    width: 95%;
+    margin: 1vh auto;
   }
-   
-  /* 4K/High-DPI optimizations */
-  @media (min-width: 2560px) {
-    body {
-        font-size: 1.05em;
-        gap: 1.2vw;
-    }
+}
+
+/* 4K/High-DPI optimizations */
+@media (min-width: 2560px) {
+  body {
+    font-size: 1.05em;
+    gap: 1.2vw;
   }
-  
+}
