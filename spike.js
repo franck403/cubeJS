@@ -9,6 +9,7 @@ let rightAbort = null;
 let SpikeState = { left: false, right: false };
 let scSecure = false
 let SolveSecure = false
+let scLenght = 30;
 
 
 
@@ -16,7 +17,7 @@ const sexyMove1 = ["R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "
 const sexyMove2 = ["L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2"];
 const sexyMove3 = ["R2", "L2", "U2", "R2", "L2", "U2", "R2", "L2", "U2", "R2", "L2", "U2"];
 
-const startup = "import motor\n\nfrom hub import port, light_matrix, sound\n\nimport time\n\nlayer = motor.run_for_degrees\n\nlight_matrix.clear();\nmotor.motor_set_high_resolution_mode(port.A, True);\nmotor.motor_set_high_resolution_mode(port.B, True);\nmotor.motor_set_high_resolution_mode(port.C, True);\nmotor.motor_set_high_resolution_mode(port.D, True);\nmotor.motor_set_high_resolution_mode(port.E, True);\nmotor.motor_set_high_resolution_mode(port.F, True)";
+const startup = "cor=1.5\n\nimport motor\n\nfrom hub import port, light_matrix, sound\n\nimport time\n\nlayer = motor.run_for_degrees\n\nlight_matrix.clear();\nmotor.motor_set_high_resolution_mode(port.A, True);\nmotor.motor_set_high_resolution_mode(port.B, True);\nmotor.motor_set_high_resolution_mode(port.C, True);\nmotor.motor_set_high_resolution_mode(port.D, True);\nmotor.motor_set_high_resolution_mode(port.E, True);\nmotor.motor_set_high_resolution_mode(port.F, True)";
 const connectSound = "sound.beep(392,120);time.sleep_ms(120);sound.beep(494,120);time.sleep_ms(120);sound.beep(587,150);time.sleep_ms(150);sound.beep(784,200)";
 const music = "sound.beep(196, 800) ; time.sleep_ms(850)  # G3\nsound.beep(262, 1000) ; time.sleep_ms(1050)  # C4\nsound.beep(220, 900) ; time.sleep_ms(950)  # A3\nsound.beep(294, 1200) ; time.sleep_ms(1250)  # D4\nsound.beep(247, 1000) ; time.sleep_ms(1050)  # B3\nsound.beep(196, 1500) ; time.sleep_ms(1550)  # G3\nsound.beep(330, 800) ; time.sleep_ms(850)  # E4\nsound.beep(262, 1400) ; time.sleep_ms(1450)  # C4";
 const getBattery = `import hub\n\nprint("Ba" + str(hub.battery_voltage()))`
@@ -53,6 +54,7 @@ const CLP_RIGHT = {
     "D2": "motor.run_for_degrees(port.B, 180, 1110)",
 };*/
 
+/*
 const CLP_LEFT = {
     // Face U
     "U": "motor.run_to_absolute_position(port.A, (motor.absolute_position(port.A) + (motor.absolute_position(port.A) - round(motor.absolute_position(port.A) / 90) * 90) * -2) - 90, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
@@ -86,6 +88,42 @@ const CLP_RIGHT = {
     "D'": "motor.run_to_absolute_position(port.B, (motor.absolute_position(port.B) + (motor.absolute_position(port.B) - round(motor.absolute_position(port.B) / 90) * 90) * -2) + 90, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
     "D2": "motor.run_to_absolute_position(port.B, (motor.absolute_position(port.B) + (motor.absolute_position(port.B) - round(motor.absolute_position(port.B) / 90) * 90) * -2) + 180, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
 };
+*/
+
+const CLP_LEFT = {
+    // Face U
+    "U": "motor.run_to_absolute_position(port.A,  motor.absolute_position(port.A)- 90, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
+    "U'": "motor.run_to_absolute_position(port.A, motor.absolute_position(port.A)+ 90, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
+    "U2": "motor.run_to_absolute_position(port.A, motor.absolute_position(port.A)+ 180, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
+
+    // Face L
+    "L": "motor.run_to_absolute_position(port.C,  motor.absolute_position(port.C) - 90, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
+    "L'": "motor.run_to_absolute_position(port.C, motor.absolute_position(port.C) + 90, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
+    "L2": "motor.run_to_absolute_position(port.C, motor.absolute_position(port.C) + 180, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
+
+    // Face F
+    "F": "motor.run_to_absolute_position(port.E,  motor.absolute_position(port.E)- 90, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
+    "F'": "motor.run_to_absolute_position(port.E, motor.absolute_position(port.E)+ 90, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
+    "F2": "motor.run_to_absolute_position(port.E, motor.absolute_position(port.E)+ 180, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
+};
+
+const CLP_RIGHT = {
+    // Face R
+    "R": "motor.run_to_absolute_position(port.D,  motor.absolute_position(port.D)- 90, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
+    "R'": "motor.run_to_absolute_position(port.D, motor.absolute_position(port.D)+ 90, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
+    "R2": "motor.run_to_absolute_position(port.D, motor.absolute_position(port.D)+ 180, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
+
+    // Face B
+    "B": "motor.run_to_absolute_position(port.F,  motor.absolute_position(port.F) - 90, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
+    "B'": "motor.run_to_absolute_position(port.F, motor.absolute_position(port.F) + 90, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
+    "B2": "motor.run_to_absolute_position(port.F, motor.absolute_position(port.F) + 180, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
+
+    // Face D
+    "D": "motor.run_to_absolute_position(port.B,  motor.absolute_position(port.B)- 90, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
+    "D'": "motor.run_to_absolute_position(port.B, motor.absolute_position(port.B)+ 90, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
+    "D2": "motor.run_to_absolute_position(port.B, motor.absolute_position(port.B)+ 180, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
+};
+
 
 // Merge into one pool
 const ALL_MOVES = Object.keys({ ...CLP_LEFT, ...CLP_RIGHT });
@@ -408,13 +446,32 @@ function startTimer(startTime) {
 function stopTimer(startTime) {
     if (timerInterval) {
         clearInterval(timerInterval);
-        let elapsed = ((new Date() - startTime) / 1000).toFixed(3);
-        conn.send(Number(elapsed));
+        try {
+            conn.send(Number(elapsed));
+            let elapsed = ((new Date() - startTime) / 1000).toFixed(3);
+        } catch {
+
+        }
         timerInterval = null;
 
     }
 }
+let oppositeFace = {
+    U: "D", D: "U",
+    F: "B", B: "F",
+    L: "R", R: "L"
+};
 
+function normalizeMove(move) {
+    return move.replace(/2|'/g, "");
+}
+
+function isOppositeMove(a, b) {
+    if (!a || !b) return false;
+    const faceA = normalizeMove(a);
+    const faceB = normalizeMove(b);
+    return oppositeFace[faceA] === faceB;
+}
 window.sleeped = 210
 async function SpikeCube(moves, sleeped = 210) {
     console.log(sleeped)
@@ -439,20 +496,16 @@ async function SpikeCube(moves, sleeped = 210) {
     await new Promise(r => setTimeout(r, 2001));
 
     // Start live timer
-    startTimer(timerStarted);
-    let OpposeRight = ['U', 'F', 'L', 'U2', 'F2', 'L2', "U'", "F'", "L'"]
-    let OpposeLeft = ['D', 'B', 'R', 'D2', 'B2', 'R2', "D'", "B'", "R'"]
     for (let i = 0; i < moves.length; i++) {
         const move = moves[i];
         const nextMove = moves[i + 1];
-        const isOpposite = OpposeLeft[OpposeRight.indexOf(move)] === nextMove || OpposeRight[OpposeLeft.indexOf(move)] === nextMove;
-        if (isOpposite) {
+        const opposite = isOppositeMove(move, nextMove);
+
+        if (opposite) {
             runMovement(move, sleep, noCube);
-            console.warn(move, nextMove)
+            console.warn(move, nextMove);
             const found = await runMovement(nextMove, sleep + 10, noCube);
-            if (found != false) {
-                i++;
-            }
+            if (found !== false) i++;
         } else {
             await runMovement(move, sleep, noCube);
         }
@@ -482,7 +535,7 @@ log("Ready. Use openSpike('left') and openSpike('right') to connect.");
 
 async function scramble() {
     if (!scSecure) {
-        var moves = generateScramble(30)
+        var moves = generateScramble(scLenght)
         SpikeCube(moves, 300)
     }
 }
@@ -597,7 +650,8 @@ document.addEventListener('DOMContentLoaded', () => {
         "<": sc,
         "w": StartCube,
         "s": spin,
-        "f": fullscreen
+        "f": fullscreen,
+        "=": scramble
     }
     document.addEventListener('keydown', (e) => {
         console.log('Key pressed:', event.key);
