@@ -408,7 +408,9 @@ function startTimer(startTime) {
 function stopTimer() {
     if (timerInterval) {
         clearInterval(timerInterval);
+        conn.send(Number(elapsed));
         timerInterval = null;
+
     }
 }
 
@@ -445,10 +447,10 @@ async function SpikeCube(moves, sleeped = 210) {
         const isOpposite = OpposeLeft[OpposeRight.indexOf(move)] === nextMove || OpposeRight[OpposeLeft.indexOf(move)] === nextMove;
         if (isOpposite) {
             runMovement(move, sleep, noCube);
-            console.warn(move,nextMove)
+            console.warn(move, nextMove)
             const found = await runMovement(nextMove, sleep + 10, noCube);
             if (found != false) {
-                i++; 
+                i++;
             }
         } else {
             await runMovement(move, sleep, noCube);
@@ -601,4 +603,30 @@ document.addEventListener('DOMContentLoaded', () => {
         const fn = keyboard[e.key] || keyboard[e.key.toLowerCase()];
         if (fn) fn();
     });
+});
+
+const peer = new Peer('sender-tab');
+let conn;
+
+// Wait for the peer to be ready
+peer.on('open', (id) => {
+    console.log('Sender peer ID:', id);
+
+    // Connect to the receiver peer (e.g., 'receiver-tab')
+    conn = peer.connect('receiver-tab');
+
+    // Handle connection errors
+    conn.on('error', (err) => {
+        console.error('Connection error:', err);
+    });
+
+    // Handle connection open event
+    conn.on('open', () => {
+        console.log('Connected to receiver');
+    });
+});
+
+// Handle peer errors
+peer.on('error', (err) => {
+    console.error('Peer error:', err);
 });
