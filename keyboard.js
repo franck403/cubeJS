@@ -39,7 +39,9 @@ eruda.add(function (eruda) {
                     max-height: 80%;
                     overflow-y: auto;
                     font-size: 12px;
-                    background: #f9f9f9;
+                    background: #f9f9f9;                    
+                    display: flex;
+                    flex-direction: column-reverse;
                 }
                 .eruda-movement-tester .error {
                     color: red;
@@ -55,21 +57,34 @@ eruda.add(function (eruda) {
             this._$el.addClass('eruda-movement-tester');
             this._$el.html(`
                 <div class="title">Movement store</div>
+                <div class="log" id="current-movement-logs"></div>
                 <div class="log" id="movement-log"></div>
             `);
             var lastedStore = []
             setInterval(() => {
+                const currentEl = this._$el.find('#current-movement-logs')[0];
+                const logEl = this._$el.find('#movement-log')[0];
+            
+                currentEl.textContent = JSON.stringify(store);
+            
                 if (JSON.stringify(lastedStore) === JSON.stringify(store)) return;
-                let result = store.slice(); // copy to avoid mutation
+            
+                let result = store.slice();
                 for (let x of lastedStore) {
                     let i = result.indexOf(x);
                     if (i !== -1) result.splice(i, 1);
                 }
-                const logEl = this._$el.find('#movement-log');
-                logEl.append(`<div>${result}</div>`);
-                logEl.scrollTop = logEl.scrollHeight;
-                lastedStore = store.slice(); // copy array, not reference
-            }, 10)
+            
+                const shouldStick = logEl.scrollTop + logEl.clientHeight >= logEl.scrollHeight - 5;
+                const div = document.createElement('div');
+                div.textContent = JSON.stringify(result);
+                logEl.appendChild(div);
+            
+                if (shouldStick) logEl.scrollTop = logEl.scrollHeight;
+            
+                lastedStore = store.slice();
+                Soupdate()
+            }, 50);
         }
         _log(message) {
             const logEl = this._$el.find('#movement-log');

@@ -427,22 +427,24 @@ async function SpikeMove(move) {
         return
     }
     scSecure = true
-    if (!SpikeState.left && !SpikeState.right) return;
+    if (!SpikeState.left && !SpikeState.right) {
+        scSecure = false
+        return
+    };
     await runMovement(move);
     updateBatteries()
     scSecure = false
 }
 
 var store = []
-setInterval(() => {
+var Soupdate= () => {
     if (!scSecure && store.length != 0) {
-        console.log('heart')
         var toPlay = store.pop(0)
         try {
             SpikeMove(toPlay)
         } catch { }
     }
-}, 10)
+}
 
 async function playMove(move) {
     store.push(move)
@@ -648,11 +650,11 @@ function sexyMoves3() {
 document.addEventListener('DOMContentLoaded', () => {
     const keyToCubeMove = {
         5: 'U',
-        g: "U'",
-        b: 'U2',
+        t: "U'",
+        g: 'U2',
         6: 'R',
-        h: "R'",
-        n: 'R2',
+        y: "R'",
+        h: 'R2',
         7: 'F',
         u: "F'",
         j: 'F2',
