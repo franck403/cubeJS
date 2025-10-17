@@ -433,6 +433,22 @@ async function SpikeMove(move) {
     scSecure = false
 }
 
+var store = []
+setInterval(() => {
+    if (!scSecure && store.length != 0) {
+        console.log('heart')
+        var toPlay = store.pop(0)
+        try {
+            SpikeMove(toPlay)
+        } catch { }
+    }
+}, 10)
+
+async function playMove(move) {
+    store.push(move)
+    console.log(move)
+}
+
 let timerInterval = null;
 
 function startTimer(startTime) {
@@ -457,9 +473,9 @@ function stopTimer(startTime) {
     }
 }
 
-const oppositeFace = { U:"D", D:"U", F:"B", B:"F", L:"R", R:"L" };
-const normalize = m => m?.replace(/2|'/g,"");
-const isOpposite = (a,b) => normalize(a) && normalize(b) && oppositeFace[normalize(a)] === normalize(b);
+const oppositeFace = { U: "D", D: "U", F: "B", B: "F", L: "R", R: "L" };
+const normalize = m => m?.replace(/2|'/g, "");
+const isOpposite = (a, b) => normalize(a) && normalize(b) && oppositeFace[normalize(a)] === normalize(b);
 
 function simplifyMoves(moves) {
     const out = [];
@@ -630,18 +646,37 @@ function sexyMoves3() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-
+    const keyToCubeMove = {
+        5: 'U',
+        g: "U'",
+        b: 'U2',
+        6: 'R',
+        h: "R'",
+        n: 'R2',
+        7: 'F',
+        u: "F'",
+        j: 'F2',
+        8: 'L',
+        i: "L'",
+        k: 'L2',
+        9: 'D',
+        o: "D'",
+        l: 'D2',
+        0: 'B',
+        p: "B'",
+        ';': 'B2',
+    };
     let keyboard = {
         "1": sexyMoves1,
         "2": sexyMoves2,
         "3": sexyMoves3,
         "c": FullConnect,
         "r": reset,
-        "<": sc,
+        "enter": sc,
         "w": StartCube,
         "s": spin,
         "f": fullscreen,
-        "=": scramble
+        "backspace": scramble
     }
     document.body.addEventListener('keydown', (e) => {
         e.preventDefault()
@@ -649,7 +684,14 @@ document.addEventListener('DOMContentLoaded', () => {
         e.stopPropagation()
         console.log('Key pressed:', event.key);
         const fn = keyboard[e.key] || keyboard[e.key.toLowerCase()];
-        if (fn) fn();
+        const fn2 = keyToCubeMove[e.key] || keyToCubeMove[e.key.toLowerCase()]
+        if (fn) {
+            console.log('working')
+            fn()
+        };
+        if (fn2) {
+            playMove(fn2)
+        };
     });
 });
 

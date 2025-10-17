@@ -2,7 +2,7 @@ eruda.add(function (eruda) {
     class MovementTester extends eruda.Tool {
         constructor() {
             super();
-            this.name = 'Movement Tester';
+            this.name = 'Movement Store';
             this.style = eruda.util.evalCss(`
                 .eruda-movement-tester {
                     padding: 10px;
@@ -36,7 +36,7 @@ eruda.add(function (eruda) {
                     padding: 5px;
                     border: 1px solid #ccc;
                     border-radius: 4px;
-                    max-height: 100px;
+                    max-height: 80%;
                     overflow-y: auto;
                     font-size: 12px;
                     background: #f9f9f9;
@@ -54,49 +54,27 @@ eruda.add(function (eruda) {
             this._$el = $el;
             this._$el.addClass('eruda-movement-tester');
             this._$el.html(`
-                <div class="title">Movement Tester</div>
-                <div class="button-grid">
-                    <button onclick='handleMove("U")'>U</button>
-                    <button onclick='handleMove("U",true)'>U'</button>
-                    <button onclick='handleMove("U2")'>U2</button>
-                    <button onclick='handleMove("L")'>L</button>
-                    <button onclick='handleMove("L",true)'>L'</button>
-                    <button onclick='handleMove("L2")'>L2</button>
-                    <button onclick='handleMove("F")'>F</button>
-                    <button onclick='handleMove("F",true)'>F'</button>
-                    <button onclick='handleMove("F2")'>F2</button>
-                    <button onclick='handleMove("R")'>R</button>
-                    <button onclick='handleMove("R",true)'>R'</button>
-                    <button onclick='handleMove("R2")'>R2</button>
-                    <button onclick='handleMove("B")'>B</button>
-                    <button onclick='handleMove("B",true)'>B'</button>
-                    <button onclick='handleMove("B2")'>B2</button>
-                    <button onclick='handleMove("D")'>D</button>
-                    <button onclick='handleMove("D",true)'>D'</button>
-                    <button onclick='handleMove("D2")'>D2</button>
-                </div>
+                <div class="title">Movement store</div>
                 <div class="log" id="movement-log"></div>
             `);
-
-            // Define handleMove in the global scope for onclick
-            window.handleMove = (move,reverse) => {
-                try {
-                    if (reverse) {
-                        playMove(move + "'");
-                        this._log(`<span class="success">Executed: ${move + "'"}</span>`);
-                    } else {
-                        playMove(move);
-                        this._log(`<span class="success">Executed: ${move}</span>`);
-                    }
-                } catch (error) {
-                    this._log(`<span class="error">Error: ${error.message}</span>`);
+            var lastedStore = []
+            setInterval(() => {
+                if (JSON.stringify(lastedStore) === JSON.stringify(store)) return;
+                let result = store.slice(); // copy to avoid mutation
+                for (let x of lastedStore) {
+                    let i = result.indexOf(x);
+                    if (i !== -1) result.splice(i, 1);
                 }
-            };
+                const logEl = this._$el.find('#movement-log');
+                logEl.append(`<div>${result}</div>`);
+                logEl.scrollTop = logEl.scrollHeight;
+                lastedStore = store.slice(); // copy array, not reference
+            }, 10)
         }
         _log(message) {
             const logEl = this._$el.find('#movement-log');
             logEl.append(`<div>${message}</div>`);
-            logEl.scrollTop = logEl.scrollHeight;
+            logEl.scrollHeight = logEl.scrollHeight;
         }
         show() {
             this._$el.show();
