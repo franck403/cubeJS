@@ -22,9 +22,10 @@ eruda.add(function (eruda) {
                 .eruda-movement-tester button {
                     padding: 8px;
                     border: none;
-                    border-radius: 4px;
+                    border-radius: 10px;
                     cursor: pointer;
                     font-weight: bold;
+                    margin:3px;
                     background: #4CAF50;
                     color: white;
                 }
@@ -56,34 +57,54 @@ eruda.add(function (eruda) {
             this._$el = $el;
             this._$el.addClass('eruda-movement-tester');
             this._$el.html(`
-                <div class="title">Movement store</div>
+                <div class="title">Movement store<button onclick='window.Storing()' id="stored">stop autoPlay</button></div>
                 <div class="log" id="current-movement-logs"></div>
                 <div class="log" id="movement-log"></div>
             `);
+            var autoPlay = true
+            window.Storing = () => {
+                const currentEl = this._$el.find('#stored')[0];
+                if (autoPlay) {
+                    autoPlay = false
+                } else {
+                    autoPlay = true
+                }
+                currentEl.textContent = `${autoPlay? 'stop':'Start'} autoPlay`
+            }
             var lastedStore = []
             setInterval(() => {
                 const currentEl = this._$el.find('#current-movement-logs')[0];
                 const logEl = this._$el.find('#movement-log')[0];
-            
+
                 currentEl.textContent = JSON.stringify(store);
-            
-                if (JSON.stringify(lastedStore) === JSON.stringify(store)) return;
-            
+
+                if (JSON.stringify(lastedStore) === JSON.stringify(store)) {
+                    if (autoPlay) {
+                        Soupdate()
+                    }
+                    return;
+                };
+
                 let result = store.slice();
                 for (let x of lastedStore) {
                     let i = result.indexOf(x);
                     if (i !== -1) result.splice(i, 1);
                 }
-            
+
                 const shouldStick = logEl.scrollTop + logEl.clientHeight >= logEl.scrollHeight - 5;
-                const div = document.createElement('div');
-                div.textContent = JSON.stringify(result);
-                logEl.appendChild(div);
-            
+                if (JSON.stringify(result) != '[]') {
+                    const div = document.createElement('div');
+                    div.textContent = JSON.stringify(result);
+                    logEl.appendChild(div);
+                    logEl.appendChild(div);
+                }
+
                 if (shouldStick) logEl.scrollTop = logEl.scrollHeight;
-            
+
                 lastedStore = store.slice();
-                Soupdate()
+                if (autoPlay) {
+                    Soupdate()
+                }
             }, 50);
         }
         _log(message) {

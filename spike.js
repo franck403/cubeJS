@@ -439,7 +439,7 @@ async function SpikeMove(move) {
 var store = []
 var Soupdate= () => {
     if (!scSecure && store.length != 0) {
-        var toPlay = store.pop(0)
+        var toPlay = store.shift()
         try {
             SpikeMove(toPlay)
         } catch { }
