@@ -511,6 +511,7 @@ async function SpikeCube(moves, sleeped = 210) {
 
     await new Promise(r => setTimeout(r, 2001));
     const start = new Date();
+    startTimer(start)
 
     for (let i = 0; i < moves.length; i++) {
         const m = moves[i], n = moves[i + 1];
