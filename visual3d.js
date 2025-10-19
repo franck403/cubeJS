@@ -239,6 +239,7 @@ function init3DCube(containerId = "cube3d") {
 
     // Add OrbitControls for camera movement
     controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.listenToKeyEvents(window)
     controls.enableDamping = true;
     controls.dampingFactor = 0.25;
 

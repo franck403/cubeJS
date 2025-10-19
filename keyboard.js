@@ -91,7 +91,7 @@ eruda.add(function (eruda) {
                     if (i !== -1) result.splice(i, 1);
                 }
 
-                const shouldStick = logEl.scrollTop + logEl.clientHeight >= logEl.scrollHeight - 5;
+                const shouldStick = -logEl.scrollTop + logEl.clientHeight >= logEl.scrollHeight - 5;
                 if (JSON.stringify(result) != '[]') {
                     const div = document.createElement('div');
                     div.textContent = JSON.stringify(result);
@@ -99,7 +99,7 @@ eruda.add(function (eruda) {
                     logEl.appendChild(div);
                 }
 
-                if (shouldStick) logEl.scrollTop = logEl.scrollHeight;
+                if (shouldStick) logEl.scrollTop = -logEl.scrollHeight;
 
                 lastedStore = store.slice();
                 if (autoPlay) {
