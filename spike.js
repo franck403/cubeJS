@@ -467,7 +467,7 @@ function stopTimer(startTime) {
         clearInterval(timerInterval);
         try {
             let elapsed = ((new Date() - startTime) / 1000).toFixed(3);
-            conn.send(Number(elapsed));
+            bc.postMessage(Number(elapsed));
         } catch {
 
         }
@@ -699,40 +699,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-const peer = new Peer('s' + crypto.randomUUID(), {
-	config: {'iceServers': [
-	  { url: 'stun:stun.l.google.com:19302' }
-	]}
-});
-let conn;
 
-// Wait for the peer to be ready
-peer.on('open', (id) => {
-    console.log('Sender peer ID:', id);
-
-    // Connect to the receiver peer (e.g., 'receiver-tab')
-    // Sender side
-    setTimeout(() => {
-        let conn = peer.connect('receiver-tab-test');
-    
-        // Handle connection errors
-        conn.on('error', (err) => {
-            console.error('Connection error:', err);
-        });
-    
-        // Handle connection open event
-    
-        peer.on('connection', (con) => {
-            console.log('Connecting to receiver');
-        });
-    
-        conn.on('open', () => {
-            console.log('Connected to receiver');
-        });
-    }, 1000);
-});
-
-// Handle peer errors
-peer.on('error', (err) => {
-    console.error('Peer error:', err);
-});
+// Connection to a broadcast channel
+const bc = new BroadcastChannel("test_channel");
+// Example of sending of a very simple message
+bc.postMessage("This is a test message.");
