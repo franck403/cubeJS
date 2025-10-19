@@ -3,14 +3,6 @@ const last = document.getElementById("last")
 const best = document.getElementById("best")
 const mid = document.getElementById("mid")
 const worst = document.getElementById("worst")
-let peer = new Peer('receiver-tab-test', {
-    config: {
-        'iceServers': [
-            { url: 'stun:stun.l.google.com:19302' }
-        ]
-    }
-});
-let conn
 
 function average(arr) {
     if (arr.length === 0) {
@@ -29,9 +21,8 @@ document.addEventListener("keydown", (e) => {
     }
 });
 
-
 const bc = new BroadcastChannel("test_channel");
-// A handler that only logs the event to the console:
+
 bc.onmessage = (event) => {
     console.log(event);
     let data = event.data
