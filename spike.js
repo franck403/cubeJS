@@ -500,7 +500,8 @@ function simplifyMoves(moves) {
 window.sleeped = 210;
 
 async function SpikeCube(moves, sleeped = 210) {
-    if (scSecure || !SpikeState.left || !SpikeState.right) return;
+    //if (scSecure || !SpikeState.left || !SpikeState.right) return;
+    if (scSecure) return;
     scSecure = true;
     const noCube = ganCubePresent();
     const sleep = sleeped === 210 ? window.sleeped : sleeped;
@@ -515,8 +516,10 @@ async function SpikeCube(moves, sleeped = 210) {
     startTimer(start)
 
     for (let i = 0; i < moves.length; i++) {
-        const m = moves[i], n = moves[i + 1];
+        const m = moves[i]
+        const n = moves[i + 1];
         if (isOpposite(m, n)) {
+            console.log(m,n)
             await runMovement(m, sleep, noCube);
             const ok = await runMovement(n, sleep + 10, noCube);
             if (ok !== false) i++;
