@@ -4,53 +4,51 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Robot GAN SPIKE JS</title>
-    <link rel="icon" type="image/png" href="../icon.png" />
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
     <script>eruda.init();</script>
     <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
-    <script src="../plugin.js"></script>
 </head>
 <body>
     <div class="section gan">
-        <h3>1.Le cube GAN</h3>
+        <h3>1: GAN Cube</h3>
         <p>
             Le <b>GAN iCarry V2</b> est un cube Bluetooth utilisé pour détecter la position et la rotation des faces en temps réel. Chacuns de ses capteurs envoient les données à l’ordinateur via Bluetooth, permettant une synchronisation.
         </p>
     </div>
     <div class="section js">
-        <h3>2.L’ordinateur de contrôle</h3>
+        <h3>2: L'ordinateur de contrôle</h3>
         <p>
-            L’<b>ordinateur</b> utilise <code>Cube.js</code> pour calculer la meilleure façon de résoudre le cube. Une fois les mouvements trouvés, il les envoie aux LEGO Spike Prime par câble USB.
+            L’<b>ordinateur de contrôle</b> utilise <code>Cube.js</code> pour calculer les algorithmes de résolution à partir de l’état détecté. Il détermine la séquence optimale de mouvements et les envoie aux hubs LEGO Spike Prime via USB.
         </p>
     </div>
     <div class="section spike">
-        <h3>3.Les robots LEGO Spike</h3>
+        <h3>3: LEGO Spike</h3>
         <p>
-            Les <b>LEGO Spike Prime</b> reçoivent les instructions de l’ordinateur. Ils exécutent les mouvements pour résoudre le cube avec des bras robotisés. Pendant ce temps, il affiche sur les écrans le mouvement actuel.
+            Les <b>LEGO Spike Prime</b> hubs reçoivent les mouvements de l’ordinateur de contrôle via USB. Chaque mouvement exécuté par le robot est affiché sur le devant du robot par les écrans intégrés aux hubs.
         </p>
     </div>
     <div class="section times">
         <h3>Temps de résolution</h3>
         <div class="time">
-          <label>Meilleur :</label>
+          <label>Meilleur:</label>
           <span id="best" class="cn">0.000 sec</span>
         </div>
         <div class="time">
-            <label>Moyenne :</label>
+            <label>Moyen:</label>
             <span id="mid" class="cn">0.000 sec</span>
         </div>
         <div class="time">
-            <label>Pire :</label>
+            <label>Pire:</label>
             <span id="worst" class="cn">0.000 sec</span>
         </div>
         <div class="time">
-            <label>Actuel :</label>
+            <label>Dernier:</label>
             <span id="last" class="cn">0.000 sec</span>
         </div>
     </div>
     <footer>
-        <h3>Contributeurs : Caleb Gauthier et François Chouinard</h3>
+        <h3>Contributeurs : Caleb Gauthier, François Chouinard</h3>
     </footer>
     <script src="script.js"></script>
 </body>

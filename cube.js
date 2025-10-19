@@ -13,7 +13,9 @@ initCube();
 
 // Start the worker
 setTimeout(()=> {
-  document.getElementById('load').remove()
+  try {
+    document.getElementById('load').remove()
+  } catch {}
 },10000)
 const worker = new Worker('Corker.js');
 

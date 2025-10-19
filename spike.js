@@ -228,6 +228,7 @@ async function spike() {
 }
 
 async function FullConnect() {
+    scSecure = false
     await spike()
     if (document.getElementById('FC').innerHTML != '<i class="fa-solid fa-plug-circle-exclamation"></i>') {
         connect()
@@ -465,8 +466,8 @@ function stopTimer(startTime) {
     if (timerInterval) {
         clearInterval(timerInterval);
         try {
-            conn.send(Number(elapsed));
             let elapsed = ((new Date() - startTime) / 1000).toFixed(3);
+            conn.send(Number(elapsed));
         } catch {
 
         }
@@ -698,7 +699,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-const peer = new Peer('sender-tab');
+const peer = new Peer('s' + crypto.randomUUID(), {
+	config: {'iceServers': [
+	  { url: 'stun:stun.l.google.com:19302' }
+	]}
+});
 let conn;
 
 // Wait for the peer to be ready
@@ -706,17 +711,25 @@ peer.on('open', (id) => {
     console.log('Sender peer ID:', id);
 
     // Connect to the receiver peer (e.g., 'receiver-tab')
-    conn = peer.connect('receiver-tab');
-
-    // Handle connection errors
-    conn.on('error', (err) => {
-        console.error('Connection error:', err);
-    });
-
-    // Handle connection open event
-    conn.on('open', () => {
-        console.log('Connected to receiver');
-    });
+    // Sender side
+    setTimeout(() => {
+        let conn = peer.connect('receiver-tab-test');
+    
+        // Handle connection errors
+        conn.on('error', (err) => {
+            console.error('Connection error:', err);
+        });
+    
+        // Handle connection open event
+    
+        peer.on('connection', (con) => {
+            console.log('Connecting to receiver');
+        });
+    
+        conn.on('open', () => {
+            console.log('Connected to receiver');
+        });
+    }, 1000);
 });
 
 // Handle peer errors
