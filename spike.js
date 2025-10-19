@@ -335,7 +335,7 @@ async function runMovement(move, sleep = 220, noCube = false) {
     // Validate input
     if (!move || typeof move !== 'string') {
         log(`Error: Invalid move '${move}'`);
-        return false;
+        return;
     }
 
     // Determine command and writer
@@ -520,9 +520,9 @@ async function SpikeCube(moves, sleeped = 210) {
         const n = moves[i + 1];
         if (isOpposite(m, n)) {
             console.log(m,n)
-            await runMovement(m, sleep, noCube);
-            const ok = await runMovement(n, sleep + 10, noCube);
-            if (ok !== false) i++;
+            runMovement(m, sleep, noCube);
+            await runMovement(n, sleep + 10, noCube);
+            i++;
         } else await runMovement(m, sleep, noCube);
     }
 
