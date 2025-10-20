@@ -15,7 +15,7 @@ body {
       'js times'
       'spike times'
       'footer footer';
-  grid-template-columns: minmax(300px, 1fr) minmax(400px, 1fr);
+  grid-template-columns: minmax(400px, 1fr) minmax(300px, 1fr);
   grid-template-rows: auto auto auto min-content;
   height: 100vh;
   width: 100vw;
@@ -121,19 +121,19 @@ footer {
 }
 
 /* Responsive for medium screens */
-@media (max-width: 1400px) {
+@media (max-width: 1300px) {
   body {
       grid-template-areas:
-          'times times'
+          'times'
           'gan js'
           'spike spike'
           'footer footer';
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: 1fr 30%;
       grid-template-rows: 1fr auto auto min-content;
   }
 
   .times {
-      width: auto;
+      width: 10px;
       margin: 0.5vw;
   }
 }
