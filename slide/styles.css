@@ -1,3 +1,4 @@
+
 /* Global */
 * {
   box-sizing: border-box;
@@ -27,8 +28,8 @@ body {
 
 /* Sections */
 .section {
-  padding: 10px;
-  border-radius: 25px;
+  padding: 3vh;
+  border-radius: 3vh;
   margin: 0.5vw;
   overflow: hidden;
   background-color: #39adad;
@@ -48,18 +49,19 @@ body {
 }
 
 .section h3 {
-  font-size: clamp(1.8rem, 3vh, 1.8rem);
+  font-size: clamp(2.4rem, 3.4vh, 2.2rem);
   margin-bottom: 0.8rem;
 }
 
 .section p {
-  font-size: clamp(1.5rem, 1.3vh, 2rem);
+  font-size: clamp(1.8rem, 1.3vh, 2.4rem);
   line-height: 1.4;
-  margin-bottom: 0.5rem;
+  margin-bottom: 1rem;
+  text-align: justify;
 }
 
 .section code {
-  font-size: clamp(1.2rem, 1.1vh, 1.8rem);
+  font-size: clamp(1.5rem, 1.4vh, 2.2rem);
   background: rgba(0, 0, 0, 0.2);
   padding: 0.2em 0.4em;
   border-radius: 4px;

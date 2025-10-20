@@ -380,9 +380,9 @@ async function runMovement(move, sleep = 220, noCube = false) {
     if (!move || typeof move !== "string") return log(`Invalid move ${move}`);
     const cmd = CLP_LEFT[move] || CLP_RIGHT[move];
     const writer = CLP_LEFT[move] ? leftWriter : rightWriter;
-    if (!cmd || !writer) return log(`No writer for ${move}`);
 
     const wait = (move.startsWith("B") || move.startsWith("D") ? sleep + 40 : sleep) * (move.endsWith("2") ? 2 : 1);
+    if (!cmd || !writer) await new Promise(r => setTimeout(r, wait));
 
     if (!noCube) {
         await sendLine(writer, cmd);
