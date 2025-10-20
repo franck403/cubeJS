@@ -535,8 +535,10 @@ async function SpikeCube(moves, sleeped = 180) {
     for (let i = 0; i < moves.length; i++) {
         const m = moves[i], n = moves[i + 1];
         if (isOpposite(m, n)) {
-            await runMovement(m, sleep, noCube);
-            await runMovement(n, sleep + 10, noCube);
+            await Promise.all([
+                runMovement(m, sleep, noCube),
+                runMovement(n, sleep + 10, noCube)
+            ]);
             i++;
         } else await runMovement(m, sleep, noCube);
     }
