@@ -10,7 +10,8 @@ let SpikeState = { left: false, right: false };
 let scSecure = false
 let SolveSecure = false
 let scLenght = 30;
-
+let deg = 95;
+let dog = 180
 
 
 const sexyMove1 = ["R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'"];
@@ -27,101 +28,101 @@ const clearDisplay = `light_matrix.clear();\n`
 
 /*
 const CLP_LEFT = {
-    "U":  "motor.run_for_degrees(port.E, -95, 1110)",
-    "U'": "motor.run_for_degrees(port.E, 95, 1110)",
-    "U2": "motor.run_for_degrees(port.E, 180, 1110)",
+    "U":  "motor.run_for_degrees(port.E, -${deg}, 1110)",
+    "U'": "motor.run_for_degrees(port.E, ${deg}, 1110)",
+    "U2": "motor.run_for_degrees(port.E, ${dog}, 1110)",
 
-    "L":  "motor.run_for_degrees(port.C, -95, 1110)",
-    "L'": "motor.run_for_degrees(port.C, 95, 1110)",
-    "L2": "motor.run_for_degrees(port.C, 180, 1110)",
+    "L":  "motor.run_for_degrees(port.C, -${deg}, 1110)",
+    "L'": "motor.run_for_degrees(port.C, ${deg}, 1110)",
+    "L2": "motor.run_for_degrees(port.C, ${dog}, 1110)",
 
-    "F":  "motor.run_for_degrees(port.A, -95, 1110)",
-    "F'": "motor.run_for_degrees(port.A, 95, 1110)",
-    "F2": "motor.run_for_degrees(port.A, 180, 1110)",
+    "F":  "motor.run_for_degrees(port.A, -${deg}, 1110)",
+    "F'": "motor.run_for_degrees(port.A, ${deg}, 1110)",
+    "F2": "motor.run_for_degrees(port.A, ${dog}, 1110)",
 };
 // RIGHT side ports: B, D, F
 const CLP_RIGHT = {
-    "R":  "motor.run_for_degrees(port.D, -95, 1110)",
-    "R'": "motor.run_for_degrees(port.D, 95, 1110)",
-    "R2": "motor.run_for_degrees(port.D, 180, 1110)",
+    "R":  "motor.run_for_degrees(port.D, -${deg}, 1110)",
+    "R'": "motor.run_for_degrees(port.D, ${deg}, 1110)",
+    "R2": "motor.run_for_degrees(port.D, ${dog}, 1110)",
 
-    "B":  "motor.run_for_degrees(port.F, -95, 1110)",
-    "B'": "motor.run_for_degrees(port.F, 95, 1110)",
-    "B2": "motor.run_for_degrees(port.F, 180, 1110)",
+    "B":  "motor.run_for_degrees(port.F, -${deg}, 1110)",
+    "B'": "motor.run_for_degrees(port.F, ${deg}, 1110)",
+    "B2": "motor.run_for_degrees(port.F, ${dog}, 1110)",
 
-    "D":  "motor.run_for_degrees(port.B, -95, 1110)",
-    "D'": "motor.run_for_degrees(port.B, 95, 1110)",
-    "D2": "motor.run_for_degrees(port.B, 180, 1110)",
+    "D":  "motor.run_for_degrees(port.B, -${deg}, 1110)",
+    "D'": "motor.run_for_degrees(port.B, ${deg}, 1110)",
+    "D2": "motor.run_for_degrees(port.B, ${dog}, 1110)",
 };*/
 
 /*
 const CLP_LEFT = {
     // Face U
-    "U": "motor.run_to_absolute_position(port.A, (motor.absolute_position(port.A) + (motor.absolute_position(port.A) - round(motor.absolute_position(port.A) / 95) * 95) * -2) - 95, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
-    "U'": "motor.run_to_absolute_position(port.A, (motor.absolute_position(port.A) + (motor.absolute_position(port.A) - round(motor.absolute_position(port.A) / 95) * 95) * -2) + 95, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
-    "U2": "motor.run_to_absolute_position(port.A, (motor.absolute_position(port.A) + (motor.absolute_position(port.A) - round(motor.absolute_position(port.A) / 95) * 95) * -2) + 180, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
+    "U": "motor.run_to_absolute_position(port.A, (motor.absolute_position(port.A) + (motor.absolute_position(port.A) - round(motor.absolute_position(port.A) / 95) * 95) * -2) - ${deg}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
+    "U'": "motor.run_to_absolute_position(port.A, (motor.absolute_position(port.A) + (motor.absolute_position(port.A) - round(motor.absolute_position(port.A) / 95) * 95) * -2) + ${deg}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
+    "U2": "motor.run_to_absolute_position(port.A, (motor.absolute_position(port.A) + (motor.absolute_position(port.A) - round(motor.absolute_position(port.A) / 95) * 95) * -2) + ${dog}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
 
     // Face L
-    "L": "motor.run_to_absolute_position(port.C, (motor.absolute_position(port.C) + (motor.absolute_position(port.C) - round(motor.absolute_position(port.C) / 95) * 95) * -2) - 95, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
-    "L'": "motor.run_to_absolute_position(port.C, (motor.absolute_position(port.C) + (motor.absolute_position(port.C) - round(motor.absolute_position(port.C) / 95) * 95) * -2) + 95, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
-    "L2": "motor.run_to_absolute_position(port.C, (motor.absolute_position(port.C) + (motor.absolute_position(port.C) - round(motor.absolute_position(port.C) / 95) * 95) * -2) + 180, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
+    "L": "motor.run_to_absolute_position(port.C, (motor.absolute_position(port.C) + (motor.absolute_position(port.C) - round(motor.absolute_position(port.C) / 95) * 95) * -2) - ${deg}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
+    "L'": "motor.run_to_absolute_position(port.C, (motor.absolute_position(port.C) + (motor.absolute_position(port.C) - round(motor.absolute_position(port.C) / 95) * 95) * -2) + ${deg}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
+    "L2": "motor.run_to_absolute_position(port.C, (motor.absolute_position(port.C) + (motor.absolute_position(port.C) - round(motor.absolute_position(port.C) / 95) * 95) * -2) + ${dog}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
 
     // Face F
-    "F": "motor.run_to_absolute_position(port.E,  (motor.absolute_position(port.E) + (motor.absolute_position(port.E) - round(motor.absolute_position(port.E) / 95) * 95) * -2) - 95, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
-    "F'": "motor.run_to_absolute_position(port.E, (motor.absolute_position(port.E) + (motor.absolute_position(port.E) - round(motor.absolute_position(port.E) / 95) * 95) * -2) + 95, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
-    "F2": "motor.run_to_absolute_position(port.E, (motor.absolute_position(port.E) + (motor.absolute_position(port.E) - round(motor.absolute_position(port.E) / 95) * 95) * -2) + 180, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
+    "F": "motor.run_to_absolute_position(port.E,  (motor.absolute_position(port.E) + (motor.absolute_position(port.E) - round(motor.absolute_position(port.E) / 95) * 95) * -2) - ${deg}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
+    "F'": "motor.run_to_absolute_position(port.E, (motor.absolute_position(port.E) + (motor.absolute_position(port.E) - round(motor.absolute_position(port.E) / 95) * 95) * -2) + ${deg}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
+    "F2": "motor.run_to_absolute_position(port.E, (motor.absolute_position(port.E) + (motor.absolute_position(port.E) - round(motor.absolute_position(port.E) / 95) * 95) * -2) + ${dog}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
 };
 
 const CLP_RIGHT = {
     // Face R
-    "R": "motor.run_to_absolute_position(port.D,  (motor.absolute_position(port.D) + (motor.absolute_position(port.D) - round(motor.absolute_position(port.D) / 95) * 95) * -2) - 95, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
-    "R'": "motor.run_to_absolute_position(port.D, (motor.absolute_position(port.D) + (motor.absolute_position(port.D) - round(motor.absolute_position(port.D) / 95) * 95) * -2) + 95, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
-    "R2": "motor.run_to_absolute_position(port.D, (motor.absolute_position(port.D) + (motor.absolute_position(port.D) - round(motor.absolute_position(port.D) / 95) * 95) * -2) + 180, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
+    "R": "motor.run_to_absolute_position(port.D,  (motor.absolute_position(port.D) + (motor.absolute_position(port.D) - round(motor.absolute_position(port.D) / 95) * 95) * -2) - ${deg}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
+    "R'": "motor.run_to_absolute_position(port.D, (motor.absolute_position(port.D) + (motor.absolute_position(port.D) - round(motor.absolute_position(port.D) / 95) * 95) * -2) + ${deg}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
+    "R2": "motor.run_to_absolute_position(port.D, (motor.absolute_position(port.D) + (motor.absolute_position(port.D) - round(motor.absolute_position(port.D) / 95) * 95) * -2) + ${dog}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
 
     // Face B
-    "B": "motor.run_to_absolute_position(port.F,  (motor.absolute_position(port.F) + (motor.absolute_position(port.F) - round(motor.absolute_position(port.F) / 95) * 95) * -2) - 95, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
-    "B'": "motor.run_to_absolute_position(port.F, (motor.absolute_position(port.F) + (motor.absolute_position(port.F) - round(motor.absolute_position(port.F) / 95) * 95) * -2) + 95, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
-    "B2": "motor.run_to_absolute_position(port.F, (motor.absolute_position(port.F) + (motor.absolute_position(port.F) - round(motor.absolute_position(port.F) / 95) * 95) * -2) + 180, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
+    "B": "motor.run_to_absolute_position(port.F,  (motor.absolute_position(port.F) + (motor.absolute_position(port.F) - round(motor.absolute_position(port.F) / 95) * 95) * -2) - ${deg}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
+    "B'": "motor.run_to_absolute_position(port.F, (motor.absolute_position(port.F) + (motor.absolute_position(port.F) - round(motor.absolute_position(port.F) / 95) * 95) * -2) + ${deg}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
+    "B2": "motor.run_to_absolute_position(port.F, (motor.absolute_position(port.F) + (motor.absolute_position(port.F) - round(motor.absolute_position(port.F) / 95) * 95) * -2) + ${dog}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
 
     // Face D
-    "D": "motor.run_to_absolute_position(port.B,  (motor.absolute_position(port.B) + (motor.absolute_position(port.B) - round(motor.absolute_position(port.B) / 95) * 95) * -2) - 95, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
-    "D'": "motor.run_to_absolute_position(port.B, (motor.absolute_position(port.B) + (motor.absolute_position(port.B) - round(motor.absolute_position(port.B) / 95) * 95) * -2) + 95, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
-    "D2": "motor.run_to_absolute_position(port.B, (motor.absolute_position(port.B) + (motor.absolute_position(port.B) - round(motor.absolute_position(port.B) / 95) * 95) * -2) + 180, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
+    "D": "motor.run_to_absolute_position(port.B,  (motor.absolute_position(port.B) + (motor.absolute_position(port.B) - round(motor.absolute_position(port.B) / 95) * 95) * -2) - ${deg}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
+    "D'": "motor.run_to_absolute_position(port.B, (motor.absolute_position(port.B) + (motor.absolute_position(port.B) - round(motor.absolute_position(port.B) / 95) * 95) * -2) + ${deg}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
+    "D2": "motor.run_to_absolute_position(port.B, (motor.absolute_position(port.B) + (motor.absolute_position(port.B) - round(motor.absolute_position(port.B) / 95) * 95) * -2) + ${dog}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
 };
 */
 
 const CLP_LEFT = {
     // Face U
-    "U": "motor.run_to_absolute_position(port.A,  motor.absolute_position(port.A)- 95, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
-    "U'": "motor.run_to_absolute_position(port.A, motor.absolute_position(port.A)+ 95, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
-    "U2": "motor.run_to_absolute_position(port.A, motor.absolute_position(port.A)+ 180, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
+    "U": `motor.run_to_absolute_position(port.A,  motor.absolute_position(port.A)- ${deg}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n`,
+    "U'": `motor.run_to_absolute_position(port.A, motor.absolute_position(port.A)+ ${deg}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n`,
+    "U2": `motor.run_to_absolute_position(port.A, motor.absolute_position(port.A)+ ${dog}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n`,
 
     // Face L
-    "L": "motor.run_to_absolute_position(port.C,  motor.absolute_position(port.C) - 95, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
-    "L'": "motor.run_to_absolute_position(port.C, motor.absolute_position(port.C) + 95, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
-    "L2": "motor.run_to_absolute_position(port.C, motor.absolute_position(port.C) + 180, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
+    "L": `motor.run_to_absolute_position(port.C,  motor.absolute_position(port.C) - ${deg}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n`,
+    "L'": `motor.run_to_absolute_position(port.C, motor.absolute_position(port.C) + ${deg}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n`,
+    "L2": `motor.run_to_absolute_position(port.C, motor.absolute_position(port.C) + ${dog}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n`,
 
     // Face F
-    "F": "motor.run_to_absolute_position(port.E,  motor.absolute_position(port.E)- 95, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
-    "F'": "motor.run_to_absolute_position(port.E, motor.absolute_position(port.E)+ 95, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
-    "F2": "motor.run_to_absolute_position(port.E, motor.absolute_position(port.E)+ 180, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
+    "F": `motor.run_to_absolute_position(port.E,  motor.absolute_position(port.E)- ${deg}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n`,
+    "F'": `motor.run_to_absolute_position(port.E, motor.absolute_position(port.E)+ ${deg}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n`,
+    "F2": `motor.run_to_absolute_position(port.E, motor.absolute_position(port.E)+ ${dog}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n`,
 };
 
 const CLP_RIGHT = {
     // Face R
-    "R": "motor.run_to_absolute_position(port.D,  motor.absolute_position(port.D)- 95, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
-    "R'": "motor.run_to_absolute_position(port.D, motor.absolute_position(port.D)+ 95, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
-    "R2": "motor.run_to_absolute_position(port.D, motor.absolute_position(port.D)+ 180, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
+    "R": `motor.run_to_absolute_position(port.D,  motor.absolute_position(port.D)- ${deg}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n`,
+    "R'": `motor.run_to_absolute_position(port.D, motor.absolute_position(port.D)+ ${deg}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n`,
+    "R2": `motor.run_to_absolute_position(port.D, motor.absolute_position(port.D)+ ${dog}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n`,
 
     // Face B
-    "B": "motor.run_to_absolute_position(port.F,  motor.absolute_position(port.F) - 95, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
-    "B'": "motor.run_to_absolute_position(port.F, motor.absolute_position(port.F) + 95, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
-    "B2": "motor.run_to_absolute_position(port.F, motor.absolute_position(port.F) + 180, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
+    "B": `motor.run_to_absolute_position(port.F,  motor.absolute_position(port.F) - ${deg}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n`,
+    "B'": `motor.run_to_absolute_position(port.F, motor.absolute_position(port.F) + ${deg}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n`,
+    "B2": `motor.run_to_absolute_position(port.F, motor.absolute_position(port.F) + ${dog}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n`,
 
     // Face D
-    "D": "motor.run_to_absolute_position(port.B,  motor.absolute_position(port.B)- 95, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
-    "D'": "motor.run_to_absolute_position(port.B, motor.absolute_position(port.B)+ 95, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
-    "D2": "motor.run_to_absolute_position(port.B, motor.absolute_position(port.B)+ 180, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n",
+    "D":  `motor.run_to_absolute_position(port.B,  motor.absolute_position(port.B)- ${deg}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n`,
+    "D'": `motor.run_to_absolute_position(port.B, motor.absolute_position(port.B)+ ${deg}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n`,
+    "D2": `motor.run_to_absolute_position(port.B, motor.absolute_position(port.B)+ ${dog}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n`,
 };
 
 
