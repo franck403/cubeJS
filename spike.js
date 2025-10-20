@@ -498,14 +498,14 @@ function simplifyMoves(moves) {
     return out;
 }
 
-window.sleeped = 210;
+window.sleeped = 180;
 
-async function SpikeCube(moves, sleeped = 210) {
+async function SpikeCube(moves, sleeped = 180) {
     //if (scSecure || !SpikeState.left || !SpikeState.right) return;
     if (scSecure) return;
     scSecure = true;
     const noCube = ganCubePresent();
-    const sleep = sleeped === 210 ? window.sleeped : sleeped;
+    const sleep = sleeped === 180 ? window.sleeped : sleeped;
     moves = simplifyMoves(moves);
 
     const lenStr = String(moves.length).padStart(2, "0");
