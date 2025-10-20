@@ -140,20 +140,15 @@ const ALL_MOVES = Object.keys({ ...CLP_LEFT, ...CLP_RIGHT });
  * @param {number} count - number of moves
  * @returns {string[]} - array of move notations
  */
-function generateScramble(count = 20) {
-    const scramble = [];
-
-    for (let i = 0; i < count; i++) {
-        let move;
-        do {
-            move = ALL_MOVES[Math.floor(Math.random() * ALL_MOVES.length)];
-        } while (i > 0 && move[0] === scramble[i - 1][0]);
-        // avoids repeating same face twice in a row (e.g., "U" then "U'")
-
-        scramble.push(move);
+function generateScramble(n = 20) {
+    const result = [];
+    for (let i = 0; i < n; i++) {
+        let m;
+        do m = ALL_MOVES[Math.random() * ALL_MOVES.length | 0];
+        while (i && m[0] === result[i - 1][0]);
+        result.push(m);
     }
-
-    return scramble;
+    return result;
 }
 
 function log(...args) {
@@ -331,7 +326,7 @@ async function startReading(which, reader) {
 }
 
 
-async function runMovement(move, sleep = 220, noCube = false) {
+/*async function runMovement(move, sleep = 220, noCube = false) {
     // Validate input
     if (!move || typeof move !== 'string') {
         log(`Error: Invalid move '${move}'`);
@@ -379,7 +374,26 @@ async function runMovement(move, sleep = 220, noCube = false) {
         const waitMultiplier = move.endsWith("'") ? 1 : move.endsWith("2") ? 2 : 1;
         await new Promise(r => setTimeout(r, waitTimer * waitMultiplier));
     }
+}*/
+
+async function runMovement(move, sleep = 220, noCube = false) {
+    if (!move || typeof move !== "string") return log(`Invalid move ${move}`);
+    const cmd = CLP_LEFT[move] || CLP_RIGHT[move];
+    const writer = CLP_LEFT[move] ? leftWriter : rightWriter;
+    if (!cmd || !writer) return log(`No writer for ${move}`);
+
+    const wait = (move.startsWith("B") || move.startsWith("D") ? sleep + 40 : sleep) * (move.endsWith("2") ? 2 : 1);
+
+    if (!noCube) {
+        await sendLine(writer, cmd);
+        await sendLine(leftWriter, `light_matrix.write("${move[0]}",100)`);
+        const sym = move.endsWith("'") ? "'" : move.endsWith("2") ? "2" : "";
+        await sendLine(rightWriter, `light_matrix.write("${sym}",100)`);
+    } else window.mover(move);
+
+    await new Promise(r => setTimeout(r, wait));
 }
+
 
 function ganCubePresent() {
     var b = document.getElementById('cube-view').contentWindow;
@@ -414,13 +428,12 @@ function ganB() {
 }
 
 async function updateBatteries() {
-    await sendLine(rightWriter, getBattery)
-    await new Promise(r => setTimeout(r, 200));
-    await sendLine(leftWriter, getBattery)
-    await new Promise(r => setTimeout(r, 200));
-    await sendLine(leftWriter, clearDisplay)
-    await sendLine(rightWriter, clearDisplay)
-    ganB()
+    for (const w of [rightWriter, leftWriter]) {
+        await sendLine(w, getBattery);
+        await new Promise(r => setTimeout(r, 200));
+    }
+    await Promise.all([sendLine(leftWriter, clearDisplay), sendLine(rightWriter, clearDisplay)]);
+    ganB();
 }
 
 async function SpikeMove(move) {
@@ -501,27 +514,26 @@ function simplifyMoves(moves) {
 window.sleeped = 180;
 
 async function SpikeCube(moves, sleeped = 180) {
-    //if (scSecure || !SpikeState.left || !SpikeState.right) return;
     if (scSecure) return;
     scSecure = true;
     const noCube = ganCubePresent();
-    const sleep = sleeped === 180 ? window.sleeped : sleeped;
+    const sleep = sleeped || window.sleeped;
     moves = simplifyMoves(moves);
 
     const lenStr = String(moves.length).padStart(2, "0");
-    sendLine(leftWriter, `light_matrix.write("${lenStr[0]}",100)`);
-    sendLine(rightWriter, `light_matrix.write("${lenStr[1]}",100)`);
+    await Promise.all([
+        sendLine(leftWriter, `light_matrix.write("${lenStr[0]}",100)`),
+        sendLine(rightWriter, `light_matrix.write("${lenStr[1]}",100)`)
+    ]);
 
-    await new Promise(r => setTimeout(r, 2001));
+    await new Promise(r => setTimeout(r, 2000));
     const start = new Date();
-    startTimer(start)
+    startTimer(start);
 
     for (let i = 0; i < moves.length; i++) {
-        const m = moves[i]
-        const n = moves[i + 1];
+        const m = moves[i], n = moves[i + 1];
         if (isOpposite(m, n)) {
-            console.log(m,n)
-            runMovement(m, sleep, noCube);
+            await runMovement(m, sleep, noCube);
             await runMovement(n, sleep + 10, noCube);
             i++;
         } else await runMovement(m, sleep, noCube);
@@ -529,9 +541,10 @@ async function SpikeCube(moves, sleeped = 180) {
 
     stopTimer(start);
     await new Promise(r => setTimeout(r, 200));
-    updateBatteries();
+    await updateBatteries();
     scSecure = false;
 }
+
 
 
 // hook for cube solver worker
