@@ -455,6 +455,7 @@ async function playMove(move) {
 let timerInterval = null;
 
 function startTimer(startTime) {
+    bc.postMessage("last" + startTime.toString());
     if (timerInterval) clearInterval(timerInterval);
     timerInterval = setInterval(() => {
         let elapsed = ((new Date() - startTime) / 1000).toFixed(3);
@@ -581,7 +582,7 @@ let fullscreenstate = false;
 
 function fullscreen() {
     if (!fullscreenstate) {
-        document.body.requestFullscreen()
+        document.getElementById('cube3d').requestFullscreen()
             .then(() => {
                 document.getElementById('full').innerHTML = `<i class="fa-solid fa-compress"></i>`;
             })
@@ -707,3 +708,12 @@ document.addEventListener('DOMContentLoaded', () => {
 const bc = new BroadcastChannel("test_channel");
 // Example of sending of a very simple message
 bc.postMessage("This is a test message.");
+
+bc.onmessage = (event) => {
+    var data = event.data
+    if (data == true) {
+        document.getElementById('timerBlock').style.display = 'none'
+    } else if (data == false) {
+        document.getElementById('timerBlock').style.display = 'block'
+    }
+}

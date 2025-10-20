@@ -23,20 +23,48 @@ document.addEventListener("keydown", (e) => {
 
 const bc = new BroadcastChannel("test_channel");
 
-bc.onmessage = (event) => {
-    console.log(event);
-    let data = event.data
-    if (typeof data != Number && typeof data != typeof 1.0) {
-        return;
+
+let timerInterval = null;
+let lastStartTime = null;
+
+function startTimer(startTime) {
+    lastStartTime = startTime
+    if (timerInterval) clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+        let elapsed = ((new Date() - startTime) / 1000).toFixed(3);
+        document.getElementById('last').innerHTML = elapsed + 'S';
+    }, 1);
+}
+function stopTimer() {
+    if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+        lastStartTime = null;
     }
+}
+
+bc.onmessage = e => {
+    const data = e.data;
+    console.log(e.data)
+    if (typeof data === "string" && data.startsWith("last")) {
+        return startTimer(new Date(data.slice(4)));
+    }
+    if (typeof data !== "number") return;
+    stopTimer()
+
     solves.push(data);
-    last.innerText = data + " sec";
-    if (data < parseFloat(best.innerText) || best.innerText === "0.000 sec") {
-        best.innerText = data + " sec";
-    }
-    if (data > parseFloat(worst.innerText) || worst.innerText === "0.000 sec") {
-        worst.innerText = data + " sec";
-    }
-    const nMid = average(solves);
-    mid.innerText = nMid.toFixed(3) + " sec";
+    last.innerText = `${data} sec`;
+
+    const bestVal = parseFloat(best.innerText) || Infinity;
+    const worstVal = parseFloat(worst.innerText) || 0;
+
+    if (data < bestVal) best.innerText = `${data} sec`;
+    if (data > worstVal) worst.innerText = `${data} sec`;
+
+    mid.innerText = `${average(solves).toFixed(3)} sec`;
 };
+
+
+setInterval(()=> {
+    bc.postMessage(true)
+},100)
