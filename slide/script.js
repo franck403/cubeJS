@@ -68,3 +68,32 @@ bc.onmessage = e => {
 setInterval(()=> {
     bc.postMessage(true)
 },100)
+
+const style = document.createElement('style');
+style.textContent = `
+  .active-flash {
+    box-shadow: 0 0 30px 8px rgba(255, 255, 255, 0.3);
+    transform: scale(1.02);
+    transition: all 0.15s ease;
+  }
+`;
+document.head.appendChild(style);
+
+// Handle key press / release
+document.addEventListener('keydown', (e) => {
+  let target;
+  if (e.key === '1') target = document.querySelector('.gan');
+  if (e.key === '2') target = document.querySelector('.js');
+  if (e.key === '3') target = document.querySelector('.spike');
+  if (e.key === '4') target = document.querySelector('.times');
+  if (target) target.classList.add('active-flash');
+});
+
+document.addEventListener('keyup', (e) => {
+  let target;
+  if (e.key === '1') target = document.querySelector('.gan');
+  if (e.key === '2') target = document.querySelector('.js');
+  if (e.key === '3') target = document.querySelector('.spike');
+  if (e.key === '4') target = document.querySelector('.times');
+  if (target) target.classList.remove('active-flash');
+});
