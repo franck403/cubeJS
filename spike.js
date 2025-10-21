@@ -12,27 +12,27 @@ let SolveSecure = false
 let scLenght = 20;
 let deg = 95;
 let dog = 180
-let u  = 0  
-let f  = 0
-let l  = 0  
-let r  = 0 
-let b  = 5 
-let d  = 5
+let u = 0
+let f = 0
+let l = 0
+let r = 0
+let b = 5
+let d = 5
 
-let u1  = 0  
-let f1  = 0
-let l1  = 0  
-let r1  = 0 
-let b1  = 5 
-let d1  = 5
+let u1 = 0
+let f1 = 0
+let l1 = 0
+let r1 = 0
+let b1 = 5
+let d1 = 5
 
 
-let u2 = 0 
+let u2 = 0
 let f2 = 0
-let l2 = 0  
-let r2 = 0 
+let l2 = 0
+let r2 = 0
 let b2 = 0
-let d2 = 0  
+let d2 = 0
 
 var silence = true
 
@@ -121,34 +121,34 @@ function regen() {
         "U": `motor.run_to_absolute_position(port.A,  motor.absolute_position(port.A)- ${deg + u}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n`,
         "U'": `motor.run_to_absolute_position(port.A, motor.absolute_position(port.A)+ ${deg + u1}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n`,
         "U2": `motor.run_to_absolute_position(port.A, motor.absolute_position(port.A)+ ${dog + u2}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n`,
-    
+
         // Face L
         "L": `motor.run_to_absolute_position(port.C,  motor.absolute_position(port.C) - ${deg + l}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n`,
         "L'": `motor.run_to_absolute_position(port.C, motor.absolute_position(port.C) + ${deg + l1}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n`,
         "L2": `motor.run_to_absolute_position(port.C, motor.absolute_position(port.C) + ${dog + l2}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n`,
-    
+
         // Face F
         "F": `motor.run_to_absolute_position(port.E,  motor.absolute_position(port.E)- ${deg + f}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n`,
         "F'": `motor.run_to_absolute_position(port.E, motor.absolute_position(port.E)+ ${deg + f1}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n`,
         "F2": `motor.run_to_absolute_position(port.E, motor.absolute_position(port.E)+ ${dog + f2}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n`,
     };
-    
+
     CLP_RIGHT = {
         // Face R
         "R": `motor.run_to_absolute_position(port.D,  motor.absolute_position(port.D)- ${deg + r}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n`,
         "R'": `motor.run_to_absolute_position(port.D, motor.absolute_position(port.D)+ ${deg + r1}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n`,
         "R2": `motor.run_to_absolute_position(port.D, motor.absolute_position(port.D)+ ${dog + r2}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n`,
-    
+
         // Face B
         "B": `motor.run_to_absolute_position(port.F,  motor.absolute_position(port.F) - ${deg + b}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n`,
         "B'": `motor.run_to_absolute_position(port.F, motor.absolute_position(port.F) + ${deg + b1}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n`,
         "B2": `motor.run_to_absolute_position(port.F, motor.absolute_position(port.F) + ${dog + b2}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n`,
-    
+
         // Face D
-        "D":  `motor.run_to_absolute_position(port.B,  motor.absolute_position(port.B)- ${deg  + d}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n`,
+        "D": `motor.run_to_absolute_position(port.B,  motor.absolute_position(port.B)- ${deg + d}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n`,
         "D'": `motor.run_to_absolute_position(port.B, motor.absolute_position(port.B)+ ${deg + d1}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n`,
-        "D2": `motor.run_to_absolute_position(port.B, motor.absolute_position(port.B)+ ${dog  + d2}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n`,
-    };    
+        "D2": `motor.run_to_absolute_position(port.B, motor.absolute_position(port.B)+ ${dog + d2}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n`,
+    };
 }
 regen();
 
@@ -268,7 +268,7 @@ async function reconnectSpike(side) {
             autoReconnectLoop(side, p, reader);
             return;
         } catch {
-            try { await p.close(); } catch {}
+            try { await p.close(); } catch { }
         }
     }
     console.log(`No ${side} port found, retrying in 5s`);
@@ -278,7 +278,7 @@ async function reconnectSpike(side) {
 async function spike(cubeed) {
     if (cubeed) {
         await openSpike('left')
-        await openSpike('right')    
+        await openSpike('right')
     } else {
         await reconnectSpike('left')
         await reconnectSpike('right')
@@ -517,7 +517,7 @@ async function SpikeMove(move) {
 }
 
 var store = []
-var Soupdate= () => {
+var Soupdate = () => {
     if (!scSecure && store.length != 0) {
         var toPlay = store.shift()
         try {
@@ -578,7 +578,7 @@ function simplifyMoves(moves) {
     return out;
 }
 
-window.sleeped = 180;
+window.sleeped = 170;
 
 async function SpikeCube(moves, sleeped = 180) {
     regen()
@@ -770,17 +770,20 @@ document.addEventListener('DOMContentLoaded', () => {
         "backspace": scramble
     }
     document.body.addEventListener('keydown', (e) => {
-        e.preventDefault()
-        e.stopImmediatePropagation()
-        e.stopPropagation()
         console.log('Key pressed:', event.key);
         const fn = keyboard[e.key] || keyboard[e.key.toLowerCase()];
         const fn2 = keyToCubeMove[e.key] || keyToCubeMove[e.key.toLowerCase()]
         if (fn) {
+            e.preventDefault()
+            e.stopImmediatePropagation()
+            e.stopPropagation()
             console.log('working')
             fn()
         };
         if (fn2) {
+            e.preventDefault()
+            e.stopImmediatePropagation()
+            e.stopPropagation()
             playMove(fn2)
         };
     });
