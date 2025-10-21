@@ -279,9 +279,11 @@ async function spike(cubeed) {
 
 async function FullConnect() {
     scSecure = false
-    await spike(cubeed)
     if (document.getElementById('FC').innerHTML != '<i class="fa-solid fa-plug-circle-exclamation"></i>') {
+        await spike(true)
         connect()
+    } else {
+        await spike(false)
     }
 }
 
