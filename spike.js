@@ -16,15 +16,15 @@ let u = 0
 let f = 0
 let l = 0
 let r = 0
-let b = 5
-let d = 5
+let b = 3
+let d = 3
 
 let u1 = 0
 let f1 = 0
 let l1 = 0
 let r1 = 0
-let b1 = 5
-let d1 = 5
+let b1 = 3
+let d1 = 3
 
 
 let u2 = 0
@@ -770,7 +770,7 @@ document.addEventListener('DOMContentLoaded', () => {
         "backspace": scramble
     }
     document.body.addEventListener('keydown', (e) => {
-        console.log('Key pressed:', event.key);
+        console.log('Key pressed:', e.key);
         const fn = keyboard[e.key] || keyboard[e.key.toLowerCase()];
         const fn2 = keyToCubeMove[e.key] || keyToCubeMove[e.key.toLowerCase()]
         if (fn) {
@@ -786,6 +786,10 @@ document.addEventListener('DOMContentLoaded', () => {
             e.stopPropagation()
             playMove(fn2)
         };
+        bc.postMessage('key' + e.key)
+    });
+    document.body.addEventListener('keyup', (e) => {
+        bc.postMessage('ked' + e.key)
     });
 });
 
