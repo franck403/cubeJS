@@ -16,8 +16,8 @@ let u  = 0
 let f  = 0
 let l  = 0  
 let r  = 0 
-let b  = 3 
-let d  = 3
+let b  = 5 
+let d  = 5
 
 let u2 = 0 
 let f2 = 0
@@ -239,15 +239,47 @@ async function openSpike(which) {
         log(`Error opening ${which} Spike:`, err?.message || err);
     }
 }
+async function reconnectSpike(side) {
+    const filters = []; // optional: restrict by vendorId/productId
+    const ports = await navigator.serial.getPorts();
+    for (const p of ports) {
+        try {
+            await p.open({ baudRate: 115200 });
+            const encoder = new TextEncoderStream();
+            encoder.readable.pipeTo(p.writable);
+            const writer = encoder.writable.getWriter();
 
-async function spike() {
-    await openSpike('left')
-    await openSpike('right')
+            if (side === 'left') leftWriter = writer;
+            if (side === 'right') rightWriter = writer;
+
+            SpikeState[side] = p;
+            console.log(`${side} reconnected`);
+            const textDecoder = new TextDecoderStream();
+            p.readable.pipeTo(textDecoder.writable);
+            const reader = textDecoder.readable.getReader();
+            autoReconnectLoop(side, p, reader);
+            return;
+        } catch {
+            try { await p.close(); } catch {}
+        }
+    }
+    console.log(`No ${side} port found, retrying in 5s`);
+    setTimeout(() => reconnectSpike(side), 5000);
+}
+
+async function spike(cubeed) {
+    if (cubeed) {
+        await openSpike('left')
+        await openSpike('right')    
+    } else {
+        await reconnectSpike('left')
+        await reconnectSpike('right')
+    }
 }
 
 async function FullConnect() {
     scSecure = false
-    await spike()
+    await spike(cubeed)
     if (document.getElementById('FC').innerHTML != '<i class="fa-solid fa-plug-circle-exclamation"></i>') {
         connect()
     }
