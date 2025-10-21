@@ -12,19 +12,21 @@ let SolveSecure = false
 let scLenght = 20;
 let deg = 95;
 let dog = 180
-let u =0 
-let d =0  
-let f =0
-let l =0  
-let r =0 
-let b =0
+let u  = 0  
+let f  = 0
+let l  = 0  
+let r  = 0 
+let b  = 3 
+let d  = 3
 
-let u2 =0 
-let d2 =0  
-let f2 =0
-let l2 =0  
-let r2 =0 
-let b2 =0
+let u2 = 0 
+let f2 = 0
+let l2 = 0  
+let r2 = 0 
+let b2 = 0
+let d2 = 0  
+
+var silence = true
 
 const sexyMove1 = ["R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'"];
 const sexyMove2 = ["L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2"];
@@ -228,7 +230,9 @@ async function openSpike(which) {
         startReading(which, reader);
 
         await sendLine(writer, startup);
-        await sendLine(writer, connectSound);
+        if (!silence) {
+            await sendLine(writer, connectSound);
+        }
 
         log(`${which} Spike connected`);
     } catch (err) {
