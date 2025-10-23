@@ -16,15 +16,15 @@ let u = 0
 let f = 0
 let l = 0
 let r = 0
-let b = 3
-let d = 3
+let b = 4
+let d = 4
 
 let u1 = 0
 let f1 = 0
 let l1 = 0
 let r1 = 0
-let b1 = 3
-let d1 = 3
+let b1 = 4
+let d1 = 4
 
 
 let u2 = 0

@@ -71,6 +71,6 @@ setInterval(() => {
     const rect = cursorCube.getBoundingClientRect();
     clone.style.left = rect.left + rect.width / 2 + 'px';
     clone.style.top = rect.top + rect.height / 2 + 'px';
-    load.appendChild(clone);
+    //load.appendChild(clone);
     setTimeout(() => clone.remove(), 2500);
-}, 3000);
+}, 100);
