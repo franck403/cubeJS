@@ -38,11 +38,14 @@ worker.onmessage = function (e) {
     //animate3DSolution(moves, 10);
 
     //
-
-    if (!silence) {
-       sendLine(leftWriter, solveSound);
+    var fnc = async () => {
+      if (!silence) {
+        await sendLine(leftWriter, solveSound);
+     }
+     await SpikeCube(moves)
+ 
     }
-    SpikeCube(moves)
+    fnc()
     /*document.getElementById('res').innerHTML = 'Solution: ' + e.data.solution;
 
     const moves = e.data.solution.trim().split(/\s+/);
