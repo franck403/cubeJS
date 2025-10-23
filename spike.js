@@ -16,15 +16,15 @@ let u = 0
 let f = 0
 let l = 0
 let r = 0
-let b = 4
-let d = 4
+let b = 5
+let d = 5
 
 let u1 = 0
 let f1 = 0
 let l1 = 0
 let r1 = 0
-let b1 = 4
-let d1 = 4
+let b1 = 5
+let d1 = 5
 
 
 let u2 = 0
@@ -608,7 +608,6 @@ async function SpikeCube(moves, sleeped = 180) {
             i++;
         } else await runMovement(m, sleep, noCube);
     }
-
     stopTimer(start);
     await new Promise(r => setTimeout(r, 200));
     await updateBatteries();
