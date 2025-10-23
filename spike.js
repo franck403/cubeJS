@@ -640,7 +640,7 @@ async function scramble() {
     if (!scSecure) {
         var moves = generateScramble(scLenght)
         if (!silence) {
-            await sendLine(writer, scrambleSound);
+            await sendLine(leftWriter, scrambleSound);
         }
         SpikeCube(moves, 300)
     }

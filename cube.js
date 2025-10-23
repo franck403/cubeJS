@@ -40,7 +40,7 @@ worker.onmessage = function (e) {
     //
 
     if (!silence) {
-       sendLine(writer, solveSound);
+       sendLine(leftWriter, solveSound);
     }
     SpikeCube(moves)
     /*document.getElementById('res').innerHTML = 'Solution: ' + e.data.solution;
