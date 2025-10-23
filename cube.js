@@ -38,6 +38,10 @@ worker.onmessage = function (e) {
     //animate3DSolution(moves, 10);
 
     //
+
+    if (!silence) {
+       sendLine(writer, solveSound);
+    }
     SpikeCube(moves)
     /*document.getElementById('res').innerHTML = 'Solution: ' + e.data.solution;
 

@@ -34,7 +34,7 @@ let r2 = 0
 let b2 = 0
 let d2 = 0
 
-var silence = true
+var silence = false
 
 const sexyMove1 = ["R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'"];
 const sexyMove2 = ["L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2"];
@@ -42,6 +42,8 @@ const sexyMove3 = ["R2", "L2", "U2", "R2", "L2", "U2", "R2", "L2", "U2", "R2", "
 
 const startup = "cor=1.5\n\nimport motor\n\nfrom hub import port, light_matrix, sound\n\nimport time\n\nlayer = motor.run_for_degrees\n\nlight_matrix.clear();\nmotor.motor_set_high_resolution_mode(port.A, True);\nmotor.motor_set_high_resolution_mode(port.B, True);\nmotor.motor_set_high_resolution_mode(port.C, True);\nmotor.motor_set_high_resolution_mode(port.D, True);\nmotor.motor_set_high_resolution_mode(port.E, True);\nmotor.motor_set_high_resolution_mode(port.F, True)";
 const connectSound = "sound.beep(392,120);time.sleep_ms(120);sound.beep(494,120);time.sleep_ms(120);sound.beep(587,150);time.sleep_ms(150);sound.beep(784,200)";
+const scrambleSound = "sound.beep(784,100);time.sleep_ms(100);sound.beep(659,100);time.sleep_ms(100);sound.beep(587,100);time.sleep_ms(100);sound.beep(494,150);time.sleep_ms(150);sound.beep(392,200)";
+const solveSound = "sound.beep(392,100);time.sleep_ms(100);sound.beep(494,100);time.sleep_ms(100);sound.beep(587,100);time.sleep_ms(100);sound.beep(659,150);time.sleep_ms(150);sound.beep(784,200);time.sleep_ms(200);sound.beep(988,300)";
 const music = "sound.beep(196, 800) ; time.sleep_ms(850)  # G3\nsound.beep(262, 1000) ; time.sleep_ms(1050)  # C4\nsound.beep(220, 950) ; time.sleep_ms(950)  # A3\nsound.beep(294, 1200) ; time.sleep_ms(1250)  # D4\nsound.beep(247, 1000) ; time.sleep_ms(1050)  # B3\nsound.beep(196, 1500) ; time.sleep_ms(1550)  # G3\nsound.beep(330, 800) ; time.sleep_ms(850)  # E4\nsound.beep(262, 1400) ; time.sleep_ms(1450)  # C4";
 const getBattery = `import hub\n\nprint("Ba" + str(hub.battery_voltage()))`
 const clearDisplay = `light_matrix.clear();\n`
@@ -337,6 +339,9 @@ async function disconnectSpike(which) {
         log("Disconnect error:", err);
     }
 }
+function areBothSpikesConnected() {
+    return SpikeState.left && SpikeState.right && leftPort && rightPort;
+}
 
 async function startReading(which, reader) {
     if (!reader) return;
@@ -346,7 +351,7 @@ async function startReading(which, reader) {
                 const { value, done } = await reader.read();
                 if (done) break;
                 if (value) {
-                    log(`RX [${which}]:`, value);
+                    //log(`RX [${which}]:`, value);
                     value.split('\n').forEach(element => {
                         if (element.startsWith('Ba')) {
                             const batteryValue = parseFloat(element.replace('Ba', '')) / 1000;
@@ -608,7 +613,9 @@ async function SpikeCube(moves, sleeped = 180) {
             i++;
         } else await runMovement(m, sleep, noCube);
     }
-    stopTimer(start);
+    if (areBothSpikesConnected()) {
+        stopTimer(start);
+    }
     await new Promise(r => setTimeout(r, 200));
     await updateBatteries();
     scSecure = false;
@@ -632,6 +639,9 @@ log("Ready. Use openSpike('left') and openSpike('right') to connect.");
 async function scramble() {
     if (!scSecure) {
         var moves = generateScramble(scLenght)
+        if (!silence) {
+            await sendLine(writer, scrambleSound);
+        }
         SpikeCube(moves, 300)
     }
 }
