@@ -213,10 +213,9 @@ function recover() {
     sdr = true;
     const savedState = localStorage.getItem('cube');
     if (savedState) {
-        console.log("Recovering cube with state:", savedState);
+        console.debug(savedState);
+        console.debug(document.getElementById("cube3d").innerHTML)
         newState(savedState);
-        let caca = renderer.render(scene, camera);
-        console.debug(caca, caca)
     } else {
         console.error("No saved cube state found.");
     }
