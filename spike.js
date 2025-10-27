@@ -217,7 +217,6 @@ function batteryPercentage(voltage, minVolt, maxVolt) {
     return Math.round(((voltage - minVolt) / (maxVolt - minVolt)) * 100);
 }
 
-
 async function openSpike(which) {
     let port, writer, reader, abortCtrl;
     try {
@@ -260,6 +259,7 @@ async function openSpike(which) {
         log(`Error opening ${which} Spike:`, err?.message || err);
     }
 }
+
 async function reconnectSpike(side) {
     const filters = []; // optional: restrict by vendorId/productId
     const ports = await navigator.serial.getPorts();
@@ -350,6 +350,7 @@ async function disconnectSpike(which) {
         log("Disconnect error:", err);
     }
 }
+
 function areBothSpikesConnected() {
     return SpikeState.left && SpikeState.right && leftPort && rightPort;
 }
@@ -846,7 +847,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 // Connection to a broadcast channel
-const bc = new BroadcastChannel("test_channel");
+const bc = new BroadcastChannel(localStorage.bc);
 // Example of sending of a very simple message
 bc.postMessage("This is a test message.");
 
