@@ -567,7 +567,7 @@ async function SpikeMove(move) {
     updateBatteries()
     scSecure = false
 }
-
+/*
 var store = []
 var Soupdate = () => {
     if (!scSecure && store.length != 0) {
@@ -582,7 +582,7 @@ async function playMove(move) {
     regen()
     store.push(move)
     console.log(move)
-}
+}*/
 
 let timerInterval = null;
 
