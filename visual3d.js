@@ -213,9 +213,10 @@ function recover() {
     sdr = true;
     const savedState = localStorage.getItem('cube');
     if (savedState) {
+        newState(savedState);
+        document.getElementById('cube').innerHTML = savedState
         console.debug(savedState);
         console.debug(document.getElementById('cube').innerHTML)
-        newState(savedState);
     } else {
         console.error("No saved cube state found.");
     }
