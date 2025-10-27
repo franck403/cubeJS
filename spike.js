@@ -35,8 +35,8 @@ let r2 = 0
 let b2 = 0
 let d2 = 0
 
-let lb = 0
-let ld = 0
+let lb = localStorage.lb || 0;
+let ld = localStorage.ld || 0;
 
 var silence = false
 
@@ -466,12 +466,14 @@ async function runMovement(move, sleep = 220, noCube = false) {
             b1 = b;
             b2 = b;
             lb = 2;
+            localStorage.lb = lb
             console.warn(`B - 1 - ${b}`);
         } else {
             b = lb === 2 ? 5 : 0;
             b1 = b;
             b2 = b;
             lb = 1;
+            localStorage.lb = lb
             console.warn(`B - 2 - ${b}`);
         }
     } else if (move.startsWith("D")) {
@@ -480,12 +482,14 @@ async function runMovement(move, sleep = 220, noCube = false) {
             d1 = d;
             d2 = d;
             ld = 2;
+            localStorage.ld = ld
             console.error(`D - 1 - ${d}`);
         } else {
             d = ld === 2 ? 5 : 0;
             d1 = d;
             d2 = d;
             ld = 1;
+            localStorage.ld = ld
             console.error(`D - 2 - ${d}`);
         }
     }
