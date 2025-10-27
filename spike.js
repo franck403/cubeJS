@@ -674,8 +674,6 @@ function sc() {
     }
 }
 
-log("Ready. Use openSpike('left') and openSpike('right') to connect.");
-
 async function scramble() {
     if (!scSecure) {
         var moves = generateScramble(scLenght)
