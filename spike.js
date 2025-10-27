@@ -840,7 +840,7 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault()
             e.stopImmediatePropagation()
             e.stopPropagation()
-            playMove(fn2)
+            //playMove(fn2)
         };
         bc.postMessage('key' + e.key)
     });
