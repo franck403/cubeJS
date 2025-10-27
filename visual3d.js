@@ -192,7 +192,7 @@ function newState(nState) {
 function resetCube() {
     if (sdr) return;
     sdr = true
-    const solvedState = cube.asString();
+    const solvedState = 'UUUUUUUUURRRRRRRRRFFFFFFFFFDDDDDDDDDLLLLLLLLLBBBBBBBBB';
 
     newState(solvedState)
 
@@ -212,12 +212,8 @@ function recover() {
     if (sdr) return;
     sdr = true
 
-    newState(localStorage.cube)
+    update3DCubeFromState(localStorage.cube);
 
-    renderer.clear();
-    renderer.resetState();
-    
-    // Re-enable animations after a short delay
     setTimeout(() => {
         sdr = false
     }, 2000);
