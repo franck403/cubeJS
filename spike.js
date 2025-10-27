@@ -10,6 +10,7 @@ let SpikeState = { left: false, right: false };
 let scSecure = false
 let SolveSecure = false
 let scLenght = 20;
+let debug = false;
 let deg = 95;
 let dog = 180
 let u = 0
@@ -50,6 +51,15 @@ const solveSound = "sound.beep(392,100);time.sleep_ms(100);sound.beep(494,100);t
 const music = "sound.beep(196, 800) ; time.sleep_ms(850)  # G3\nsound.beep(262, 1000) ; time.sleep_ms(1050)  # C4\nsound.beep(220, 950) ; time.sleep_ms(950)  # A3\nsound.beep(294, 1200) ; time.sleep_ms(1250)  # D4\nsound.beep(247, 1000) ; time.sleep_ms(1050)  # B3\nsound.beep(196, 1500) ; time.sleep_ms(1550)  # G3\nsound.beep(330, 800) ; time.sleep_ms(850)  # E4\nsound.beep(262, 1400) ; time.sleep_ms(1450)  # C4";
 const getBattery = `import hub\n\nprint("Ba" + str(hub.battery_voltage()))`
 const clearDisplay = `light_matrix.clear();\n`
+const params = new URLSearchParams(window.location.search);
+const debug = params.get('debug') === 'true';
+
+if (debug) {
+  console.log('Debug mode enabled');
+} else {
+  console.log('Debug mode disabled');
+}
+
 
 // LEFT side ports: A, C, E
 
@@ -463,7 +473,7 @@ async function runMovement(move, sleep = 220, noCube = false) {
             b1= b;
             b2= b;
             lb = 1;
-            cconsole.warn(`B - 2 - ${b}`)
+            console.warn(`B - 2 - ${b}`)
         }
     } else if (move.startsWith("D")) {
         if (move.endsWith("2") || move.endsWith("'")) {
@@ -483,8 +493,9 @@ async function runMovement(move, sleep = 220, noCube = false) {
     regen();
     const cmd = CLP_LEFT[move] || CLP_RIGHT[move];
     const writer = CLP_LEFT[move] ? leftWriter : rightWriter;
-    console.info(cmd)
-
+    if (debug) {
+        console.info(cmd)
+    }
     const wait = (move.startsWith("B") || move.startsWith("D") ? sleep + 40 : sleep) * (move.endsWith("2") ? 2 : 1);
     if (!cmd || !writer) await new Promise(r => setTimeout(r, wait));
 
