@@ -615,8 +615,8 @@ function simplifyMoves(moves) {
         if (!b) return [...out, a];
         const fa = normalize(a), fb = normalize(b);
         if (fa !== fb) { out.push(a); }
-        if (a === b) { out.push(fa + "2"); i++; ; }
-        if (a.includes("'") !== b.includes("'")) { i++; continue; }
+        if (a === b) { out.push(fa + "2"); i++; }
+        if (a.includes("'") !== b.includes("'")) { i++; }
         if (a.includes("2") || b.includes("2")) {
             out.push((a.includes("2") ^ b.includes("'")) ? fa + "'" : fa);
             i++;
