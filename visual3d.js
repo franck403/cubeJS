@@ -127,21 +127,18 @@ function get3DColor(face, position) {
 let sdr = false
 
 function newState(nState) {
+    console.log("Building new cube state:", nState); // Log the new state
     cube = new Cube();
-
-    // Create a new scene to prevent WebGL crashes
+    // Clear the scene
     while(scene.children.length > 0) {
         scene.remove(scene.children[0]);
     }
-
+    // Clear existing cubelets array
+    cubed = [];
     // Rebuild cubelets
-    cubed = []; // Clear existing cubelets array
-    
     const cubeletSize = 0.95;
     const offset = 1;
     const offCenterFix = 0;
-
-    // Rebuild all cubelets in their initial positions
     for (let x = -1; x <= 1; x++) {
         for (let y = -1; y <= 1; y++) {
             for (let z = -1; z <= 1; z++) {
@@ -153,7 +150,6 @@ function newState(nState) {
                     new THREE.MeshStandardMaterial({ color: 0x000000 }), // front
                     new THREE.MeshStandardMaterial({ color: 0x000000 }), // back
                 ];
-
                 const geo = new THREE.BoxGeometry(cubeletSize, cubeletSize, cubeletSize);
                 const cubelet = new THREE.Mesh(geo, materials);
                 cubelet.position.set(
@@ -161,15 +157,8 @@ function newState(nState) {
                     y * offset + offCenterFix,
                     z * offset + offCenterFix
                 );
-                
-                // Ensure clean rotation state
-                cubelet.rotation.set(0, 0, 0);
-                cubelet.quaternion.identity();
-                cubelet.updateMatrix();
-                
                 scene.add(cubelet);
                 cubed.push(cubelet);
-
                 // Add black wireframe for definition
                 const edges = new THREE.EdgesGeometry(geo);
                 const line = new THREE.LineSegments(
@@ -180,13 +169,13 @@ function newState(nState) {
             }
         }
     }
-
     // Add lighting back
     const ambientLight = new THREE.AmbientLight(0xffffff, 1);
     scene.add(ambientLight);
-
     // Update the visual state
     update3DCubeFromState(nState);
+    // Force a render
+    renderer.render(scene, camera);
 }
 
 function resetCube() {
