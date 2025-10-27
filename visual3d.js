@@ -210,15 +210,16 @@ function resetCube() {
 
 function recover() {
     if (sdr) return;
-    sdr = true
-
-    update3DCubeFromState(localStorage.cube);
-
-    setTimeout(() => {
-        sdr = false
-    }, 2000);
+    sdr = true;
+    const savedState = localStorage.getItem('cube');
+    if (savedState) {
+        newState(savedState);
+        renderer.render(scene, camera);
+    } else {
+        console.error("No saved cube state found.");
+    }
+    setTimeout(() => { sdr = false; }, 2000);
 }
-
 /**
  * Initializes the 3D cube scene, camera, and renderer.
  * @param {string} containerId The ID of the HTML container for the 3D scene.
