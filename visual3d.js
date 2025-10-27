@@ -196,7 +196,7 @@ function recover() {
         window.lastStateString = savedState; // Set the global state string
         newState(savedState);
         document.getElementById('cube').innerHTML = savedState;
-        console.debug(savedState);
+        console.log(savedState);
     } else {
         console.error("No saved cube state found.");
     }
