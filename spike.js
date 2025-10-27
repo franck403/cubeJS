@@ -53,12 +53,7 @@ const solveSound = "sound.beep(392,100);time.sleep_ms(100);sound.beep(494,100);t
 const music = "sound.beep(196, 800) ; time.sleep_ms(850)  # G3\nsound.beep(262, 1000) ; time.sleep_ms(1050)  # C4\nsound.beep(220, 950) ; time.sleep_ms(950)  # A3\nsound.beep(294, 1200) ; time.sleep_ms(1250)  # D4\nsound.beep(247, 1000) ; time.sleep_ms(1050)  # B3\nsound.beep(196, 1500) ; time.sleep_ms(1550)  # G3\nsound.beep(330, 800) ; time.sleep_ms(850)  # E4\nsound.beep(262, 1400) ; time.sleep_ms(1450)  # C4";
 const getBattery = `import hub\n\nprint("Ba" + str(hub.battery_voltage()))`
 const clearDisplay = `light_matrix.clear();\n`
-console.debug = (...args) => {
-    if (debug) {
-        console.log(args)
-    }
-}
-
+// fixed debug - francois
 // LEFT side ports: A, C, E
 
 /*
@@ -197,7 +192,7 @@ function log(...args) {
     console.info(...args);
     const logEl = document.getElementById('log');
     if (logEl) {
-        logEl.textContent += args.map(a => (typeof a === 'string' ? a : JSON.stringify(a))).join(' ') + '\n';
+        logEl.textContent += args.map(arg => (typeof arg === 'string' ? arg : JSON.stringify(arg))).join(' ') + '\n';
         logEl.scrollTop = logEl.scrollHeight;
     }
 }

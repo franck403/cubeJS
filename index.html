@@ -14,6 +14,11 @@
     let debug = false;
     debug = new URLSearchParams(window.location.search).get('debug') === 'true';
     if (debug) {eruda.show()};
+    console.debug = (...args) => {
+      if (debug) {
+          console.log(args)
+      }
+    }
   </script>
   <script src="spike.js"></script>
   <script src="plugin.js"></script>
