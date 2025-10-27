@@ -485,7 +485,7 @@ async function runMovement(move, sleep = 220, noCube = false) {
             d1 = d;
             d2 = d;
             ld = 1;
-            console.warn(`D - 2 - ${d}`);
+            console.error(`D - 2 - ${d}`);
         }
     }
     regen();
