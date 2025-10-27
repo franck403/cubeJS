@@ -126,13 +126,8 @@ function get3DColor(face, position) {
 
 let sdr = false
 
-function resetCube() {
-    if (sdr) return;
-    sdr = true
-
-    // Reset the global cube variable to a new solved instance
+function newState(nState) {
     cube = new Cube();
-    const solvedState = cube.asString();
 
     // Create a new scene to prevent WebGL crashes
     while(scene.children.length > 0) {
@@ -191,7 +186,16 @@ function resetCube() {
     scene.add(ambientLight);
 
     // Update the visual state
-    update3DCubeFromState(solvedState);
+    update3DCubeFromState(nState);
+}
+
+function resetCube() {
+    if (sdr) return;
+    sdr = true
+    const solvedState = cube.asString();
+
+    newState(solvedState)
+
     window.lastStateString = solvedState;
 
     // Force a renderer clear and reset
@@ -208,8 +212,12 @@ function recover() {
     if (sdr) return;
     sdr = true
 
-    update3DCubeFromState(localStorage.cube);
+    newState(localStorage.cube)
+
+    renderer.clear();
+    renderer.resetState();
     
+    // Re-enable animations after a short delay
     setTimeout(() => {
         sdr = false
     }, 2000);
