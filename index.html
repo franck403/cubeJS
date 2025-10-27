@@ -13,6 +13,7 @@
     eruda.init();
     let debug = false;
     debug = new URLSearchParams(window.location.search).get('debug') === 'true';
+    window.debug = debug;
     if (debug) {eruda.show()};
     console.debug = (...args) => {
       if (debug) {

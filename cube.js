@@ -58,7 +58,8 @@ const cursorCube = document.getElementById('cursorCube');
 const load = document.getElementById('mouseLoad');
 
 // Cursor follow + rotation
-document.addEventListener('mousemove', (e) => {
+if (window.debug) {
+  document.addEventListener('mousemove', (e) => {
     const xRatio = e.clientX / window.innerWidth;
     const yRatio = e.clientY / window.innerHeight;
     const rotX = (yRatio - 0.5) * 360;
@@ -69,7 +70,8 @@ document.addEventListener('mousemove', (e) => {
 
     cursorCube.style.left = e.clientX + 'px';
     cursorCube.style.top = e.clientY + 'px';
-});
+  });
+}
 
 // Drop cube every 3s
 setInterval(() => {
