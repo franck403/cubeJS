@@ -55,7 +55,7 @@ const music = "sound.beep(196, 800) ; time.sleep_ms(850)  # G3\nsound.beep(262, 
 const getBattery = `import hub\n\nprint("Ba" + str(hub.battery_voltage()))`
 const clearDisplay = `light_matrix.clear();\n`
 debug = new URLSearchParams(window.location.search).get('debug') === 'true';
-console.debug = (...args) {
+console.debug = (...args) => {
     if (debug) {
         console.log(args)
     }
