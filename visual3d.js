@@ -118,55 +118,15 @@ let sdr = false
 
 function newState(nState) {
     console.log("Building new cube state:", nState);
-    cube = new Cube();
+    cube = new Cube(nState);
     // Clear the scene
     while(scene.children.length > 0) {
         scene.remove(scene.children[0]);
     }
-    // Clear existing cubelets array
-    cubed = [];
-    // Rebuild cubelets
-    const cubeletSize = 0.95;
-    const offset = 1;
-    const offCenterFix = 0;
-    for (let x = -1; x <= 1; x++) {
-        for (let y = -1; y <= 1; y++) {
-            for (let z = -1; z <= 1; z++) {
-                const materials = [
-                    new THREE.MeshStandardMaterial({ color: 0x000000 }), // right
-                    new THREE.MeshStandardMaterial({ color: 0x000000 }), // left
-                    new THREE.MeshStandardMaterial({ color: 0x000000 }), // up
-                    new THREE.MeshStandardMaterial({ color: 0x000000 }), // down
-                    new THREE.MeshStandardMaterial({ color: 0x000000 }), // front
-                    new THREE.MeshStandardMaterial({ color: 0x000000 }), // back
-                ];
-                const geo = new THREE.BoxGeometry(cubeletSize, cubeletSize, cubeletSize);
-                const cubelet = new THREE.Mesh(geo, materials);
-                cubelet.position.set(
-                    x * offset + offCenterFix,
-                    y * offset + offCenterFix,
-                    z * offset + offCenterFix
-                );
-                scene.add(cubelet);
-                cubed.push(cubelet);
-                // Add black wireframe for definition
-                const edges = new THREE.EdgesGeometry(geo);
-                const line = new THREE.LineSegments(
-                    edges,
-                    new THREE.LineBasicMaterial({ color: 0x000000 })
-                );
-                cubelet.add(line);
-            }
-        }
-    }
-    // Add lighting back
-    const ambientLight = new THREE.AmbientLight(0xffffff, 1);
-    scene.add(ambientLight);
-    // Update the visual state
-    update3DCubeFromState(nState);
-    // Force a render
-    renderer.render(scene, camera);
+    init3DCube(); // Rebuild the cubelets
+    update3DCubeFromState(cube.asString()); // Update the visual cube
 }
+
 
 
 function resetCube() {
@@ -191,17 +151,29 @@ function resetCube() {
 function recover() {
     if (sdr) return;
     sdr = true;
-    const savedState = localStorage.getItem('cube');
-    if (savedState) {
-        newState(JSON.parse(savedState));
-        document.getElementById('cube').innerHTML = savedState;
-        console.log(savedState);
-    } else {
-        console.error("No saved cube state found.");
-    }
-    setTimeout(() => { sdr = false; }, 2000);
-}
 
+    try {
+        const saved = localStorage.getItem('cube');
+        if (!saved) throw new Error("No saved cube state found.");
+        const parsed = JSON.parse(saved);
+        const stateString = parsed.state || parsed;
+        if (typeof stateString !== 'string' || stateString.length !== 54) {
+            throw new Error("Invalid saved cube state.");
+        }
+
+        // rebuild logical cube
+        newState(stateString);
+        window.lastStateString = stateString;
+
+        // refresh 3D view
+        update3DCubeFromState(stateString);
+        console.log("Cube recovered:", stateString);
+    } catch (err) {
+        console.error("Recover failed:", err.message);
+    } finally {
+        setTimeout(() => { sdr = false; }, 2000);
+    }
+}
 
 /**
  * Initializes the 3D cube scene, camera, and renderer.
@@ -520,7 +492,7 @@ async function rotateFace(face, clockwise = true) {
         scene.remove(pivot);
         animating = false;
         currentFrontFace = face; // Update the current front face
-        localStorage.cube = JSON.toString(cube.toJSON())
+        localStorage.cube = JSON.stringify(cube.toJSON())
         resolve();
     });
 }
