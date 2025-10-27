@@ -465,11 +465,13 @@ async function runMovement(move, sleep = 220, noCube = false) {
             b1 = b;
             b2 = b;
             lb = 2;
+            console.warn(`B - 1 - ${b}`);
         } else {
             b = lb === 2 ? 5 : 0;
             b1 = b;
             b2 = b;
             lb = 1;
+            console.warn(`B - 2 - ${b}`);
         }
     } else if (move.startsWith("D")) {
         if (move.endsWith("2") || move.endsWith("'")) {
@@ -477,11 +479,13 @@ async function runMovement(move, sleep = 220, noCube = false) {
             d1 = d;
             d2 = d;
             ld = 2;
+            console.error(`D - 1 - ${d}`);
         } else {
             d = ld === 2 ? 5 : 0;
             d1 = d;
             d2 = d;
             ld = 1;
+            console.warn(`D - 2 - ${d}`);
         }
     }
     regen();
