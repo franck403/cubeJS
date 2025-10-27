@@ -117,7 +117,7 @@ function get3DColor(face, position) {
 let sdr = false
 
 function newState(nState) {
-    console.log("Building new cube state:", nState); // Log the new state
+    console.log("Building new cube state:", nState);
     cube = new Cube();
     // Clear the scene
     while(scene.children.length > 0) {
@@ -168,6 +168,7 @@ function newState(nState) {
     renderer.render(scene, camera);
 }
 
+
 function resetCube() {
     if (sdr) return;
     sdr = true
@@ -192,15 +193,16 @@ function recover() {
     sdr = true;
     const savedState = localStorage.getItem('cube');
     if (savedState) {
+        window.lastStateString = savedState; // Set the global state string
         newState(savedState);
-        document.getElementById('cube').innerHTML = savedState
+        document.getElementById('cube').innerHTML = savedState;
         console.debug(savedState);
-        console.debug(document.getElementById('cube').innerHTML)
     } else {
         console.error("No saved cube state found.");
     }
     setTimeout(() => { sdr = false; }, 2000);
 }
+
 
 /**
  * Initializes the 3D cube scene, camera, and renderer.
