@@ -214,7 +214,7 @@ function recover() {
     const savedState = localStorage.getItem('cube');
     if (savedState) {
         console.debug(savedState);
-        console.debug(document.getElementById("cube3d").innerHTML)
+        console.debug(document.getElementById('cube').innerHTML)
         newState(savedState);
     } else {
         console.error("No saved cube state found.");
