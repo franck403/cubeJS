@@ -567,7 +567,7 @@ async function SpikeMove(move) {
     updateBatteries()
     scSecure = false
 }
-/*
+
 var store = []
 var Soupdate = () => {
     if (!scSecure && store.length != 0) {
@@ -582,7 +582,7 @@ async function playMove(move) {
     regen()
     store.push(move)
     console.log(move)
-}*/
+}
 
 let timerInterval = null;
 
@@ -840,7 +840,7 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault()
             e.stopImmediatePropagation()
             e.stopPropagation()
-            //playMove(fn2)
+            playMove(fn2)
         };
         bc.postMessage('key' + e.key)
     });
