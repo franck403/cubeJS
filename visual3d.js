@@ -204,6 +204,17 @@ function resetCube() {
     }, 2000);
 }
 
+function recover() {
+    if (sdr) return;
+    sdr = true
+
+    update3DCubeFromState(localStorage.cube);
+    
+    setTimeout(() => {
+        sdr = false
+    }, 2000);
+}
+
 /**
  * Initializes the 3D cube scene, camera, and renderer.
  * @param {string} containerId The ID of the HTML container for the 3D scene.
@@ -521,10 +532,10 @@ async function rotateFace(face, clockwise = true) {
         scene.remove(pivot);
         animating = false;
         currentFrontFace = face; // Update the current front face
+        localStorage.cube = cube.asString()
         resolve();
     });
 }
-
 
 /**
  * Joue une séquence de mouvements avec animation.

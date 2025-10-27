@@ -35,6 +35,9 @@ let r2 = 0
 let b2 = 0
 let d2 = 0
 
+let cb = 5; // back deg corr
+let cd = 5; // down deg corr
+
 let lb = localStorage.lb || 0;
 let ld = localStorage.ld || 0;
 
@@ -462,14 +465,14 @@ async function runMovement(move, sleep = 220, noCube = false) {
     if (!move || typeof move !== "string") return log(`Invalid move ${move}`);
     if (move.startsWith("B")) {
         if (move.endsWith("2") || move.endsWith("'")) {
-            b = lb === 1 ? 5 : 0;
+            b = lb === 1 ? cb : 0;
             b1 = b;
             b2 = b;
             lb = 2;
             localStorage.lb = lb
             console.warn(`B - 1 - ${b}`);
         } else {
-            b = lb === 2 ? 5 : 0;
+            b = lb === 2 ? cb : 0;
             b1 = b;
             b2 = b;
             lb = 1;
@@ -478,14 +481,14 @@ async function runMovement(move, sleep = 220, noCube = false) {
         }
     } else if (move.startsWith("D")) {
         if (move.endsWith("2") || move.endsWith("'")) {
-            d = ld === 1 ? 5 : 0;
+            d = ld === 1 ? cd : 0;
             d1 = d;
             d2 = d;
             ld = 2;
             localStorage.ld = ld
             console.error(`D - 1 - ${d}`);
         } else {
-            d = ld === 2 ? 5 : 0;
+            d = ld === 2 ? cd : 0;
             d1 = d;
             d2 = d;
             ld = 1;
