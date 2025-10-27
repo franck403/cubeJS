@@ -67,6 +67,7 @@ if (!window.debug) {
 
     document.documentElement.style.setProperty('--rot-x', `${rotX}deg`);
     document.documentElement.style.setProperty('--rot-y', `${rotY}deg`);
+    document.body.style.cursor = "none";
 
     cursorCube.style.left = e.clientX + 'px';
     cursorCube.style.top = e.clientY + 'px';
