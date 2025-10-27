@@ -461,31 +461,31 @@ async function runMovement(move, sleep = 220, noCube = false) {
     if (!move || typeof move !== "string") return log(`Invalid move ${move}`);
     if (move.startsWith("B")) {
         if (move.endsWith("2") || move.endsWith("'")) {
-            b = lb == 1 ? 5 : 0;
-            b1= b;
-            b2= b;
+            b = lb === 1 ? 5 : 0;
+            b1 = b;
+            b2 = b;
             lb = 2;
             console.warn(`B - 1 - ${b}`)
         } else {
-            b = lb == 2 ? 5 : 0;
-            b1= b;
-            b2= b;
+            b = lb === 2 ? 5 : 0;
+            b1 = b;
+            b2 = b;
             lb = 1;
             console.warn(`B - 2 - ${b}`)
         }
     } else if (move.startsWith("D")) {
         if (move.endsWith("2") || move.endsWith("'")) {
-            d = ld == 1 ? 5 : 0;
-            d1= d;
-            d2= d;
+            d = ld === 1 ? 5 : 0;
+            d1 = d;
+            d2 = d;
             ld = 2;
             console.error(`D - 1 - ${d}`)
         } else {
-            d = ld == 2 ? 5 : 0;
-            d1= d;
-            d2= d;
+            d = ld === 2 ? 5 : 0;
+            d1 = d;
+            d2 = d;
             ld = 1;
-            console.error(`D - 1 - ${d}`)
+            console.error(`D - 2 - ${d}`)
         }
     }
     regen();
@@ -495,7 +495,7 @@ async function runMovement(move, sleep = 220, noCube = false) {
         console.info(cmd)
     }
     const wait = (move.startsWith("B") || move.startsWith("D") ? sleep + 40 : sleep) * (move.endsWith("2") ? 2 : 1);
-    if (!cmd || !writer) await new Promise(r => setTimeout(r, 10));
+    if (!cmd || !writer) await new Promise(r => setTimeout(r, 1));
 
     if (!noCube) {
         await sendLine(writer, cmd);
