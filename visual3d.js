@@ -213,13 +213,16 @@ function recover() {
     sdr = true;
     const savedState = localStorage.getItem('cube');
     if (savedState) {
+        console.log("Recovering cube with state:", savedState);
         newState(savedState);
-        return renderer.render(scene, camera);
+        let caca = renderer.render(scene, camera);
+        console.debug(caca, caca)
     } else {
         console.error("No saved cube state found.");
     }
     setTimeout(() => { sdr = false; }, 2000);
 }
+
 /**
  * Initializes the 3D cube scene, camera, and renderer.
  * @param {string} containerId The ID of the HTML container for the 3D scene.
