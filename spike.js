@@ -479,13 +479,13 @@ async function runMovement(move, sleep = 220, noCube = false) {
             d1= d;
             d2= d;
             ld = 2;
-            console.warn(`D - 1 - ${d}`)
+            console.error(`D - 1 - ${d}`)
         } else {
             d = ld == 2 ? 5 : 0;
             d1= d;
             d2= d;
             ld = 1;
-            console.warn(`D - 1 - ${d}`)
+            console.error(`D - 1 - ${d}`)
         }
     }
     regen();
