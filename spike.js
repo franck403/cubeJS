@@ -60,7 +60,6 @@ if (debug) {
   console.log('Debug mode disabled');
 }
 
-
 // LEFT side ports: A, C, E
 
 /*
