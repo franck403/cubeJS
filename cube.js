@@ -72,6 +72,8 @@ if (!window.debug) {
     cursorCube.style.left = e.clientX + 'px';
     cursorCube.style.top = e.clientY + 'px';
   });
+} else {
+  cursorCube.style.display = "none";
 }
 
 // Drop cube every 3s
