@@ -55,11 +55,10 @@ const music = "sound.beep(196, 800) ; time.sleep_ms(850)  # G3\nsound.beep(262, 
 const getBattery = `import hub\n\nprint("Ba" + str(hub.battery_voltage()))`
 const clearDisplay = `light_matrix.clear();\n`
 debug = new URLSearchParams(window.location.search).get('debug') === 'true';
-
-if (debug) {
-  console.log('Debug mode enabled');
-} else {
-  console.log('Debug mode disabled add ?debug=true in url to enable');
+console.debug = (...args) {
+    if (debug) {
+        console.log(args)
+    }
 }
 
 // LEFT side ports: A, C, E
@@ -470,14 +469,14 @@ async function runMovement(move, sleep = 220, noCube = false) {
             b2 = b;
             lb = 2;
             localStorage.lb = lb
-            console.warn(`B - 1 - ${b}`);
+            console.debug(`B - 1 - ${b}`);
         } else {
             b = lb === 2 ? cb : 0;
             b1 = b;
             b2 = b;
             lb = 1;
             localStorage.lb = lb
-            console.warn(`B - 2 - ${b}`);
+            console.debug(`B - 2 - ${b}`);
         }
     } else if (move.startsWith("D")) {
         if (move.endsWith("2") || move.endsWith("'")) {
@@ -486,22 +485,20 @@ async function runMovement(move, sleep = 220, noCube = false) {
             d2 = d;
             ld = 2;
             localStorage.ld = ld
-            console.error(`D - 1 - ${d}`);
+            console.debug(`D - 1 - ${d}`);
         } else {
             d = ld === 2 ? cd : 0;
             d1 = d;
             d2 = d;
             ld = 1;
             localStorage.ld = ld
-            console.error(`D - 2 - ${d}`);
+            console.debug(`D - 2 - ${d}`);
         }
     }
     regen();
     const cmd = CLP_LEFT[move] || CLP_RIGHT[move];
     const writer = CLP_LEFT[move] ? leftWriter : rightWriter;
-    if (debug) {
-        console.info(cmd)
-    }
+    console.debug(cmd)
     const wait = (move.startsWith("B") || move.startsWith("D") ? sleep + 40 : sleep) * (move.endsWith("2") ? 2 : 1);
     if (!cmd || !writer) await new Promise(r => setTimeout(r, 1));
 
