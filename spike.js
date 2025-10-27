@@ -34,6 +34,9 @@ let r2 = 0
 let b2 = 0
 let d2 = 0
 
+let lb = 0
+let ld = 0
+
 var silence = false
 
 const sexyMove1 = ["R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'"];
@@ -448,6 +451,32 @@ async function startReading(which, reader) {
 
 async function runMovement(move, sleep = 220, noCube = false) {
     if (!move || typeof move !== "string") return log(`Invalid move ${move}`);
+    if (move.startsWith("B")) {
+        if (move.endsWith("2") || move.endsWith("'")) {
+            b = lb == 1 ? 5 : 0;
+            b1= b;
+            b2= b;
+            lb = 2;
+        } else {
+            b = lb == 2 ? 5 : 0;
+            b1= b;
+            b2= b;
+            lb = 1;
+        }
+    } else if (move.startsWith("D")) {
+        if (move.endsWith("2") || move.endsWith("'")) {
+            d = ld == 1 ? 5 : 0;
+            d1= d;
+            d2= d;
+            ld = 2;
+        } else {
+            d = ld == 2 ? 5 : 0;
+            d1= d;
+            d2= d;
+            ld = 1;
+        }
+    }
+    regen();
     const cmd = CLP_LEFT[move] || CLP_RIGHT[move];
     const writer = CLP_LEFT[move] ? leftWriter : rightWriter;
     console.log(cmd)
