@@ -520,7 +520,7 @@ async function rotateFace(face, clockwise = true) {
         scene.remove(pivot);
         animating = false;
         currentFrontFace = face; // Update the current front face
-        localStorage.cube = cube.toJSON()
+        localStorage.cube = JSON.toString(cube.toJSON())
         resolve();
     });
 }
