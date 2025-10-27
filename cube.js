@@ -58,7 +58,7 @@ const cursorCube = document.getElementById('cursorCube');
 const load = document.getElementById('mouseLoad');
 
 // Cursor follow + rotation
-if (window.debug) {
+if (!window.debug) {
   document.addEventListener('mousemove', (e) => {
     const xRatio = e.clientX / window.innerWidth;
     const yRatio = e.clientY / window.innerHeight;
