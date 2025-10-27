@@ -167,7 +167,7 @@ function resetCube() {
                 const edges = new THREE.EdgesGeometry(geo);
                 const line = new THREE.LineSegments(
                     edges,
-                    new THREE.LineBasicMaterial({ color: 0x000000 })
+                    new THREE.LineBasicMaterial({ color: 0xffffff })
                 );
                 cubelet.add(line);
             }
