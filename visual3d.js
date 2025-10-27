@@ -167,7 +167,7 @@ function resetCube() {
                 const edges = new THREE.EdgesGeometry(geo);
                 const line = new THREE.LineSegments(
                     edges,
-                    new THREE.LineBasicMaterial({ color: 0xffffff })
+                    new THREE.LineBasicMaterial({ color: 0x000000 })
                 );
                 cubelet.add(line);
             }
@@ -199,9 +199,9 @@ function recover() {
     const saved = localStorage.getItem('cube');
     if (!saved) throw new Error("No saved state.");
     const parsed = JSON.parse(saved);
-    const state = typeof parsed === 'string' ? parsed : parsed.state || null;
-    if (!state || state.length !== 54) throw new Error("Corrupted save.");
-
+    console.log(parsed);
+    const state = parsed;
+    console.log(state);
     // Clear the scene
     while(scene.children.length > 0) {
         scene.remove(scene.children[0]);
