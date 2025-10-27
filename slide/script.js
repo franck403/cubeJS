@@ -9,7 +9,7 @@ function average(arr) {
 }
 
 let isErudaOpen = false;
-const bc = new BroadcastChannel("test_channel");
+const bc = new BroadcastChannel(localStorage.bc);
 
 let timerInterval = null;
 let lastStartTime = null;
