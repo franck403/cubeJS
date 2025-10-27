@@ -174,7 +174,7 @@ function resetCube() {
     sdr = true
     const solvedState = 'UUUUUUUUURRRRRRRRRFFFFFFFFFDDDDDDDDDLLLLLLLLLBBBBBBBBB';
 
-    newState(solvedState)
+    newState()
 
     window.lastStateString = solvedState;
 
@@ -193,8 +193,7 @@ function recover() {
     sdr = true;
     const savedState = localStorage.getItem('cube');
     if (savedState) {
-        window.lastStateString = savedState; // Set the global state string
-        newState(savedState);
+        newState(JSON.parse(savedState));
         document.getElementById('cube').innerHTML = savedState;
         console.log(savedState);
     } else {
@@ -521,7 +520,7 @@ async function rotateFace(face, clockwise = true) {
         scene.remove(pivot);
         animating = false;
         currentFrontFace = face; // Update the current front face
-        localStorage.cube = cube.asString()
+        localStorage.cube = cube.toJSON()
         resolve();
     });
 }
