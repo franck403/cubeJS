@@ -6,12 +6,20 @@ let leftReader = null;
 let rightReader = null;
 let leftAbort = null;
 let rightAbort = null;
+
+var store = []
+
 let SpikeState = { left: false, right: false };
-let scSecure = false
-let SolveSecure = false
+let scSecure        = false;
+let SolveSecure     = false;
+let fullscreenstate = false;
+let SpinState       = false;
+
 let scLenght = 20;
+
 let deg = 95;
 let dog = 180
+
 let u = 0
 let f = 0
 let l = 0
@@ -26,7 +34,6 @@ let r1 = 0
 let b1 = 0
 let d1 = 0
 
-
 let u2 = 0
 let f2 = 0
 let l2 = 0
@@ -40,7 +47,17 @@ let cd = 5; // down deg corr
 let lb = localStorage.lb || 0;
 let ld = localStorage.ld || 0;
 
-var silence = false
+var silence = false;
+
+let timerInterval = null;
+
+window.sleeped = 170;
+
+const oppositeFace = { U: "D", D: "U", F: "B", B: "F", L: "R", R: "L" };
+const normalize = m => m?.replace(/2|'/g, "");
+const isOpposite = (a, b) => normalize(a) && normalize(b) && oppositeFace[normalize(a)] === normalize(b);
+
+// =========================================================================================================
 
 const sexyMove1 = ["R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'"];
 const sexyMove2 = ["L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2"];
@@ -164,13 +181,6 @@ regen();
 
 // Merge into one pool
 const ALL_MOVES = Object.keys({ ...CLP_LEFT, ...CLP_RIGHT });
-
-// run all
-// SpikeCube(['U','L','F','R','B','D'])
-
-// SpikeCube(['U2','L2','F2','R2','B2','D2'])
-
-// SpikeCube(["U", "L2", "F'", "R", "D2", "B", "U'", "R2", "L", "D", "F2", "B'", "U2", "L'", "D", "R2", "F'", "B2", "U'", "D'"])
 
 /**
  * Generate a random scramble table
@@ -561,7 +571,6 @@ async function SpikeMove(move) {
     scSecure = false
 }
 
-var store = []
 var Soupdate = () => {
     if (!scSecure && store.length != 0) {
         var toPlay = store.shift()
@@ -576,8 +585,6 @@ async function playMove(move) {
     store.push(move)
     console.log(move)
 }
-
-let timerInterval = null;
 
 function startTimer(startTime) {
     bc.postMessage("last" + startTime.toString());
@@ -602,10 +609,6 @@ function stopTimer(startTime) {
     }
 }
 
-const oppositeFace = { U: "D", D: "U", F: "B", B: "F", L: "R", R: "L" };
-const normalize = m => m?.replace(/2|'/g, "");
-const isOpposite = (a, b) => normalize(a) && normalize(b) && oppositeFace[normalize(a)] === normalize(b);
-
 function simplifyMoves(moves) {
     const out = [];
     for (let i = 0; i < moves.length; i++) {
@@ -622,8 +625,6 @@ function simplifyMoves(moves) {
     }
     return out;
 }
-
-window.sleeped = 170;
 
 async function SpikeCube(moves, sleeped = 180) {
     regen()
@@ -661,9 +662,6 @@ async function SpikeCube(moves, sleeped = 180) {
     scSecure = false;
 }
 
-
-
-// hook for cube solver worker
 function sc() {
     if (!SolveSecure) {
         SolveSecure = true
@@ -697,18 +695,15 @@ function StartCube() {
     SpikeCube(['U2'], 300)
 }
 
-let SpinState = true
 async function spin() {
-    if (SpinState) {
-        SpinState = false
+    if (!SpinState) {
+        SpinState = true
         await sendLine(leftWriter, 'motor.run(port.A, 50)')
     } else {
-        SpinState = true
+        SpinState = false
         await sendLine(leftWriter, 'motor.stop(port.A)')
     }
 }
-
-let fullscreenstate = false;
 
 function fullscreen() {
     if (!fullscreenstate) {
@@ -843,14 +838,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Connection to a broadcast channel
 const bc = new BroadcastChannel(localStorage.bc);
-// Example of sending of a very simple message
-bc.postMessage("This is a test message.");
+bc.postMessage("Connected");
 
-bc.onmessage = (event) => {
-    var data = event.data
+bc.onmessage = (e) => {
+    var data = e.data
     if (data == true) {
         document.getElementById('timerBlock').style.display = 'none'
     } else if (data == false) {
         document.getElementById('timerBlock').style.display = 'block'
+    } else {
+        console.debug("Unknown message from Slide tab: ", data)
     }
 }
