@@ -457,13 +457,13 @@ async function runMovement(move, sleep = 220, noCube = false) {
             b1= b;
             b2= b;
             lb = 2;
-            console.warn("B - 1")
+            console.warn(`B - 1 - ${b}`)
         } else {
             b = lb == 2 ? 5 : 0;
             b1= b;
             b2= b;
             lb = 1;
-            console.warn("B - 2")
+            cconsole.warn(`B - 2 - ${b}`)
         }
     } else if (move.startsWith("D")) {
         if (move.endsWith("2") || move.endsWith("'")) {
@@ -471,19 +471,19 @@ async function runMovement(move, sleep = 220, noCube = false) {
             d1= d;
             d2= d;
             ld = 2;
-            console.warn("D - 2")
+            console.warn(`D - 1 - ${d}`)
         } else {
             d = ld == 2 ? 5 : 0;
             d1= d;
             d2= d;
             ld = 1;
-            console.warn("D - 1")
+            console.warn(`D - 1 - ${d}`)
         }
     }
     regen();
     const cmd = CLP_LEFT[move] || CLP_RIGHT[move];
     const writer = CLP_LEFT[move] ? leftWriter : rightWriter;
-    console.log(cmd)
+    console.info(cmd)
 
     const wait = (move.startsWith("B") || move.startsWith("D") ? sleep + 40 : sleep) * (move.endsWith("2") ? 2 : 1);
     if (!cmd || !writer) await new Promise(r => setTimeout(r, wait));

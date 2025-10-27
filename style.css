@@ -29,7 +29,7 @@ body {
     height: var(--cube-size);
     transform-style: preserve-3d;
     position: fixed;
-    z-index: 10;
+    z-index: 10000000000000000000000000;
     pointer-events: none;
     transform: translate(-50%, -50%) rotateX(var(--rot-x)) rotateY(var(--rot-y));
 }
