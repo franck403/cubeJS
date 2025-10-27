@@ -614,8 +614,8 @@ function simplifyMoves(moves) {
         const a = moves[i], b = moves[i + 1];
         if (!b) return [...out, a];
         const fa = normalize(a), fb = normalize(b);
-        if (fa !== fb) { out.push(a); continue; }
-        if (a === b) { out.push(fa + "2"); i++; continue; }
+        if (fa !== fb) { out.push(a); }
+        if (a === b) { out.push(fa + "2"); i++; ; }
         if (a.includes("'") !== b.includes("'")) { i++; continue; }
         if (a.includes("2") || b.includes("2")) {
             out.push((a.includes("2") ^ b.includes("'")) ? fa + "'" : fa);
@@ -821,14 +821,14 @@ document.addEventListener('DOMContentLoaded', () => {
         "backspace": scramble
     }
     document.body.addEventListener('keydown', (e) => {
-        console.log('Key pressed:', e.key);
+        const ctrlKeys = ['c', 'v', 'z', 'f', 'w', 't', 's'];
+        if (e.ctrlKey && ctrlKeys.includes(e.key)) {return;}
         const fn = keyboard[e.key] || keyboard[e.key.toLowerCase()];
         const fn2 = keyToCubeMove[e.key] || keyToCubeMove[e.key.toLowerCase()]
         if (fn) {
             e.preventDefault()
             e.stopImmediatePropagation()
             e.stopPropagation()
-            console.log('working')
             fn()
         };
         if (fn2) {
