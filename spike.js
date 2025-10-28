@@ -754,9 +754,7 @@ bc.onmessage = (e) => {
         document.getElementById('timerBlock').style.display = 'block'
     } else if (data.startsWith("Move: ")) {
         let move = data.replace("Move: ", "");
-        let m = move();
-        console.log(m)
-        playMove(m);
+        playMove(move);
     } 
     else {
         console.debug("Unknown message from Slide tab: ", data)

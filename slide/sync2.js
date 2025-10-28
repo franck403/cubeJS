@@ -48,8 +48,8 @@ async function move(mov) {
     window.hs(move);
 }
 
-function hs(move) {
-  bc.postMessage(`Move: ${move}`)
+function hs(move2) {
+  bc.postMessage(`Move: ${move2}`)
 }
 
 var ifr = document.getElementById('cube-view')
