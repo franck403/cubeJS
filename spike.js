@@ -205,16 +205,6 @@ async function spike(cubeed) {
     }
 }
 
-async function fullConnect() {
-    scSecure = false
-    if (!ganCubePresent()) {
-        await spike(true)
-        connect()
-    } else {
-        await spike(false)
-    }
-}
-
 async function sendLine(writer, text) {
     if (!writer) return;
     const normalized = text.replace(/\r?\n/g, '\r\n');
@@ -584,6 +574,16 @@ function simplifyMoves(moves) {
 }
 
 // NAVBAR
+
+async function fullConnect() {
+    scSecure = false
+    if (!ganCubePresent()) {
+        await spike(true)
+        connect()
+    } else {
+        await spike(false)
+    }
+}
 
 function solve() {
     if (!solveSecure) {

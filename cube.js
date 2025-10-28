@@ -36,14 +36,14 @@ worker.onmessage = function (e) {
 
     // 3D animation
     //animate3DSolution(moves, 10);
-
-    //
+    console.log("Start Solve")
+    console.debug(moves)
     var fnc = async () => {
       if (!silence) {
         await sendLine(leftWriter, solveSound);
-     }
-     await spikeCube(moves)
- 
+      }
+      await spikeCube(moves)
+      console.log("End Solve")
     }
     fnc()
     /*document.getElementById('res').innerHTML = 'Solution: ' + e.data.solution;

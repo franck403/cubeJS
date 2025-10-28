@@ -15,6 +15,7 @@ onmessage = function (e) {
   const { type, state } = e.data;
 
   if (type === 'solve') {
+    console.log("Solve Start")
     const cube = Cube.fromString(state); // reconstruct cube from string
     const solution = cube.solve();
     postMessage({ type: 'solution', solution });
