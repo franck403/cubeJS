@@ -92,7 +92,6 @@ function regen() {
 regen();
 
 const ALL_MOVES = Object.keys({ ...CLP_LEFT, ...CLP_RIGHT });
-const varToString = varObj => Object.keys(varObj)[0]
 
 // DEFAULT
 
@@ -212,8 +211,7 @@ async function spike(cubeed) {
 }
 
 async function sendLine(writer, text) {
-    let spike = varToString({writer}).replace("Writer", "")
-    console.debug(`Spike ${spike}: ${text}`);
+    console.debug(text);
     if (!writer) return;
     const normalized = text.replace(/\r?\n/g, '\r\n');
     const encoder = new TextEncoder();
@@ -355,10 +353,10 @@ function ganB() {
 
 async function updateBatteries() {
     for (const w of [rightWriter, leftWriter]) {
-        await sendLine({ writer: w }, getBattery, );
+        await sendLine(w, getBattery, );
         await new Promise(r => setTimeout(r, 200));
     }
-    await Promise.all([sendLine({ writer: leftWriter }, clearDisplay), sendLine({ writer: rightWriter }, clearDisplay)]);
+    await Promise.all([sendLine(leftWriter, clearDisplay), sendLine(rightWriter, clearDisplay)]);
     ganB();
 }
 
@@ -407,9 +405,9 @@ async function runMovement(move, sleep = 220, noCube = false) {
     if (!cmd || !writer) await new Promise(r => setTimeout(r, 1));
     if (!noCube) {
         await sendLine(writer, cmd);
-        await sendLine({ writer: leftWriter }, `light_matrix.write("${move[0]}",100)`);
+        await sendLine(leftWriter, `light_matrix.write("${move[0]}",100)`);
         const sym = move.endsWith("'") ? "'" : move.endsWith("2") ? "2" : "";
-        await sendLine({ writer: rightWriter }, `light_matrix.write("${sym}",100)`);
+        await sendLine(rightWriter, `light_matrix.write("${sym}",100)`);
     } else console.warn("Cube Not Connected");
 
     await new Promise(r => setTimeout(r, wait));
@@ -426,21 +424,21 @@ async function resetMotors() {
     // Reset all motors on the left side
     bettew = 4000
     if (SpikeState.left) {
-        await sendline({ writer: leftWriter }, "motor.run_to_absolute_position(port.A, 0, 50, direction=motor.SHORTEST_PATH, stop=motor.BRAKE, acceleration=1000, deceleration=1000);");
+        await sendLine(leftWriter, "motor.run_to_absolute_position(port.A, 0, 50, direction=motor.SHORTEST_PATH, stop=motor.BRAKE, acceleration=1000, deceleration=1000);");
         await new Promise(resolve => setTimeout(resolve, bettew));
-        await sendline({ writer: leftWriter }, "motor.run_to_absolute_position(port.C, 0, 50, direction=motor.SHORTEST_PATH, stop=motor.BRAKE, acceleration=1000, deceleration=1000);");
+        await sendLine(leftWriter, "motor.run_to_absolute_position(port.C, 0, 50, direction=motor.SHORTEST_PATH, stop=motor.BRAKE, acceleration=1000, deceleration=1000);");
         await new Promise(resolve => setTimeout(resolve, bettew));
-        await sendline({ writer: leftWriter }, "motor.run_to_absolute_position(port.E, 0, 50, direction=motor.SHORTEST_PATH, stop=motor.BRAKE, acceleration=1000, deceleration=1000);");
+        await sendLine(leftWriter, "motor.run_to_absolute_position(port.E, 0, 50, direction=motor.SHORTEST_PATH, stop=motor.BRAKE, acceleration=1000, deceleration=1000);");
         await new Promise(resolve => setTimeout(resolve, bettew));
     }
 
     // Reset all motors on the right side
     if (SpikeState.right) {
-        await sendline({ writer: rightWriter }, "motor.run_to_absolute_position(port.D, 0, 50, direction=motor.SHORTEST_PATH, stop=motor.BRAKE, acceleration=1000, deceleration=1000);");
+        await sendLine(rightWriter, "motor.run_to_absolute_position(port.D, 0, 50, direction=motor.SHORTEST_PATH, stop=motor.BRAKE, acceleration=1000, deceleration=1000);");
         await new Promise(resolve => setTimeout(resolve, bettew));
-        await sendline({ writer: rightWriter }, "motor.run_to_absolute_position(port.F, 0, 50, direction=motor.SHORTEST_PATH, stop=motor.BRAKE, acceleration=1000, deceleration=1000);");
+        await sendLine(rightWriter, "motor.run_to_absolute_position(port.F, 0, 50, direction=motor.SHORTEST_PATH, stop=motor.BRAKE, acceleration=1000, deceleration=1000);");
         await new Promise(resolve => setTimeout(resolve, bettew));
-        await sendline({ writer: rightWriter }, "motor.run_to_absolute_position(port.B, 0, 50, direction=motor.SHORTEST_PATH, stop=motor.BRAKE, acceleration=1000, deceleration=1000);");
+        await sendLine(rightWriter, "motor.run_to_absolute_position(port.B, 0, 50, direction=motor.SHORTEST_PATH, stop=motor.BRAKE, acceleration=1000, deceleration=1000);");
         await new Promise(resolve => setTimeout(resolve, bettew));
     }
 
@@ -473,8 +471,8 @@ async function spikeCube(moves, sleeped = 180) {
 
     const lenStr = String(moves.length).padStart(2, "0");
     await Promise.all([
-        sendline({ writer: leftWriter }, `light_matrix.write("${lenStr[0]}",100)`),
-        sendline({ writer: rightWriter }, `light_matrix.write("${lenStr[1]}",100)`)
+        sendLine(leftWriter, `light_matrix.write("${lenStr[0]}",100)`),
+        sendLine(rightWriter, `light_matrix.write("${lenStr[1]}",100)`)
     ]);
 
     await new Promise(r => setTimeout(r, 2000));
@@ -607,7 +605,7 @@ async function scramble() {
         console.info("Start Scramble")
         var moves = generateScramble(scLenght)
         if (!silence) {
-            await sendline({ writer: leftWriter }, scrambleSound);
+            await sendLine(leftWriter, scrambleSound);
         }
         await spikeCube(moves, 300)
         console.info("End Scramble")
@@ -623,11 +621,11 @@ async function spin() {
     if (!spinState) {
         console.info("Start Spin")
         spinState = true
-        await sendline({ writer: leftWriter }, 'motor.run(port.A, 50)')
+        await sendLine(leftWriter, 'motor.run(port.A, 50)')
     } else {
         console.info("End Spin")
         spinState = false
-        await sendline({ writer: leftWriter }, 'motor.stop(port.A)')
+        await sendLine(leftWriter, 'motor.stop(port.A)')
     }
 }
 
@@ -750,7 +748,7 @@ bc.postMessage("Connected");
 bc.onmessage = (e) => {
     var data = e.data
     if (data == true) {
-        if (bcState == false) sendline({ writer: leftWriter }, slideSound);
+        if (bcState == false) sendLine(leftWriter, slideSound);
         document.getElementById('timerBlock').style.display = 'none'
         bcState = true;
     } else if (data == false) {
