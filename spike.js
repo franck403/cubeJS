@@ -753,7 +753,11 @@ bc.onmessage = (e) => {
         bcState = true;
     } else if (data == false) {
         document.getElementById('timerBlock').style.display = 'block'
-    } else {
+    } else if (data.startsWith("Move: ")) {
+        let move = data.replace("Move: ", "");
+        playMove(move);
+    } 
+    else {
         console.debug("Unknown message from Slide tab: ", data)
     }
 }

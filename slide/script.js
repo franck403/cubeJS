@@ -85,4 +85,10 @@ bc.onmessage = (e) => {
   mid.textContent = `${average(solves).toFixed(3)} sec`;
 };
 
+function hs(move) {
+  bc.postMessage(`Move: ${move}`)
+}
+
+window.hs = hs;
+
 setInterval(() => bc.postMessage(true), 100);
