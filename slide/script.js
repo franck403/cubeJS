@@ -89,6 +89,15 @@ function hs(move) {
   bc.postMessage(`Move: ${move}`)
 }
 
+function connect() {
+  targetFrame.postMessage('connect')
+}
+
+function reset() {
+  reset2()
+  targetFrame.postMessage('reset')
+}
+
 window.hs = hs;
 
 setInterval(() => bc.postMessage(true), 100);

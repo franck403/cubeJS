@@ -64,7 +64,7 @@ async function move(mov) {
     }
     await window.rotateFace(face, clockwise);
 }
-window.mover = move
+window.mover = move;
 
 var ifr = document.getElementById('cube-view')
 const targetFrame = window.top.frames[0];
