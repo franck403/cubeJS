@@ -100,10 +100,10 @@ const ALL_MOVES = Object.keys({ ...CLP_LEFT, ...CLP_RIGHT });
  * @param {number} count - number of moves
  * @returns {string[]} - array of move notations
  */
-function generateScramble(n = 20) {
+function generateScramble(length = 20) {
     const result = [];
     let last
-    for (let i = 0; i < n; i++) {
+    for (let i = 0; i < length; i++) {
         let m;
         do m = ALL_MOVES[Math.random() * ALL_MOVES.length | 0];
         while (i && m[0] === result[i - 1][0]);
