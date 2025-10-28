@@ -1,7 +1,7 @@
-let leftPort,   rightPort = null;
+let leftPort,   rightPort   = null;
 let leftWriter, rightWriter = null;
 let leftReader, rightReader = null;
-let leftAbort,  rightAbort = null;
+let leftAbort,  rightAbort  = null;
 
 var store = [];
 
@@ -11,6 +11,7 @@ let scSecure        = false;
 let solveSecure     = false;
 let fullscreenstate = false;
 let spinState       = false;
+let bcState         = false;
 
 let scLenght = 20;
 
@@ -750,7 +751,9 @@ bc.postMessage("Connected");
 bc.onmessage = (e) => {
     var data = e.data
     if (data == true) {
+        if (bcState == false) sendLine(leftWriter, slideSound);
         document.getElementById('timerBlock').style.display = 'none'
+        bcState = true;
     } else if (data == false) {
         document.getElementById('timerBlock').style.display = 'block'
     } else {
