@@ -1,24 +1,21 @@
-let leftPort = null;
-let rightPort = null;
-let leftWriter = null;
-let rightWriter = null;
-let leftReader = null;
-let rightReader = null;
-let leftAbort = null;
-let rightAbort = null;
+let leftPort,   rightPort = null;
+let leftWriter, rightWriter = null;
+let leftReader, rightReader = null;
+let leftAbort,  rightAbort = null;
 
 var store = []
 
 let SpikeState = { left: false, right: false };
+
 let scSecure        = false;
-let SolveSecure     = false;
+let solveSecure     = false;
 let fullscreenstate = false;
-let SpinState       = false;
+let spinState       = false;
 
 let scLenght = 20;
 
-let deg = 95;
-let dog = 180
+let deg = 95;  // Moves x 1
+let dog = 180; // Moves x 2
 
 let u  = 0, f  = 0, l  = 0, r  = 0, b  = 0, d  = 0;
 let u1 = 0, f1 = 0, l1 = 0, r1 = 0, b1 = 0, d1 = 0;
@@ -225,7 +222,6 @@ async function sendLine(writer, text) {
     const bytes = encoder.encode(normalized);
     await writer.write(bytes);
     await writer.write(encoder.encode('\r\n'));
-    log("TX:", text);
 }
 
 async function disconnectSpike(which) {
@@ -269,7 +265,6 @@ async function startReading(which, reader) {
                 const { value, done } = await reader.read();
                 if (done) break;
                 if (value) {
-                    //log(`RX [${which}]:`, value);
                     value.split('\n').forEach(element => {
                         if (element.startsWith('Ba')) {
                             const batteryValue = parseFloat(element.replace('Ba', '')) / 1000;
@@ -320,6 +315,7 @@ function ganCubePresent() {
     //return b.document.getElementById("batteryLevel").value == "- n/a -"
     return false
 }
+
 function areBothSpikesConnected() {
     return SpikeState.left && SpikeState.right && leftPort && rightPort;
 }
@@ -533,6 +529,7 @@ function startTimer(startTime) {
         document.getElementById('timer').innerHTML = '<i class="fa-solid fa-clock"></i> : ' + elapsed + 'S';
     }, 1);
 }
+
 function stopTimer(startTime) {
     if (timerInterval) {
         clearInterval(timerInterval);
@@ -589,11 +586,11 @@ function simplifyMoves(moves) {
 // NAVBAR
 
 function solve() {
-    if (!SolveSecure) {
-        SolveSecure = true
+    if (!solveSecure) {
+        solveSecure = true
         worker.postMessage({ type: 'solve', state: cube.asString() });
         setTimeout(() => {
-            SolveSecure = false
+            solveSecure = false
         }, 6001)
     }
 }
@@ -609,15 +606,15 @@ async function scramble() {
 }
 
 function startCube() {
-    spikeCube(['U', 'U'], 300)
+    spikeCube(['U', "U'"], 300)
 }
 
 async function spin() {
-    if (!SpinState) {
-        SpinState = true
+    if (!spinState) {
+        spinState = true
         await sendLine(leftWriter, 'motor.run(port.A, 50)')
     } else {
-        SpinState = false
+        spinState = false
         await sendLine(leftWriter, 'motor.stop(port.A)')
     }
 }
