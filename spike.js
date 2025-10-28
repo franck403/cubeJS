@@ -608,15 +608,18 @@ async function scramble() {
     }
 }
 
-function startCube() {
-    spikeCube(['U', "U'"], 300)
+async function startCube() {
+    console.log("Start Cube")
+    await spikeCube(['U', "U'"], 300)
 }
 
 async function spin() {
     if (!spinState) {
+        console.log("Start Spin")
         spinState = true
         await sendLine(leftWriter, 'motor.run(port.A, 50)')
     } else {
+        console.log("End Spin")
         spinState = false
         await sendLine(leftWriter, 'motor.stop(port.A)')
     }
@@ -656,14 +659,22 @@ document.addEventListener("fullscreenchange", (e) => {
 
 // SEXY MOVES
 
-function sexyMoves1() {
-    spikeCube(sexyMove1, 200)
+async function sexyMoves1() {
+    console.log("Start Sexy Move 1")
+    await spikeCube(sexyMove1, 200)
+    console.log("End Sexy Move 1")
 }
-function sexyMoves2() {
-    spikeCube(sexyMove2, 200)
+
+async function sexyMoves2() {
+    console.log("Start Sexy Move 2")
+    await spikeCube(sexyMove2, 200)
+    console.log("End Sexy Move 2")
 }
-function sexyMoves3() {
-    spikeCube(sexyMove3, 200)
+
+async function sexyMoves3() {
+    console.log("Start Sexy Move 3")
+    await spikeCube(sexyMove3, 200)
+    console.log("End Sexy Move 3")
 }
 
 // KEYBOARD MAPPIMG
@@ -728,7 +739,9 @@ document.addEventListener('DOMContentLoaded', () => {
 // BROADCAST
 
 const bc = new BroadcastChannel(localStorage.bc);
+
 bc.postMessage("Connected");
+
 bc.onmessage = (e) => {
     var data = e.data
     if (data == true) {
