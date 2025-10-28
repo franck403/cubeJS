@@ -614,17 +614,17 @@ async function scramble() {
 }
 
 async function startCube() {
-    console.log("Start Cube")
+    console.info("Start Cube")
     await spikeCube(['U', "U'"], 300)
 }
 
 async function spin() {
     if (!spinState) {
-        console.log("Start Spin")
+        console.info("Start Spin")
         spinState = true
         await sendLine(leftWriter, 'motor.run(port.A, 50)')
     } else {
-        console.log("End Spin")
+        console.info("End Spin")
         spinState = false
         await sendLine(leftWriter, 'motor.stop(port.A)')
     }
