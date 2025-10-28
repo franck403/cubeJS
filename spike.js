@@ -53,8 +53,6 @@ let timerInterval = null;
 
 window.sleeped = 170;
 
-// =========================================================================================================
-
 const sexyMove1 = ["R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'"];
 const sexyMove2 = ["L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2"];
 const sexyMove3 = ["R2", "L2", "U2", "R2", "L2", "U2", "R2", "L2", "U2", "R2", "L2", "U2"];
@@ -69,6 +67,8 @@ const clearDisplay = `light_matrix.clear();\n`
 
 let CLP_LEFT;
 let CLP_RIGHT;
+
+// =========================================================================================================
 
 function regen() {
     CLP_LEFT = {
@@ -769,4 +769,11 @@ bc.onmessage = (e) => {
     } else {
         console.debug("Unknown message from Slide tab: ", data)
     }
+}
+let caca
+async function go(file) {
+    return await fetch(file).then((data) => {
+        caca = data.text();
+        return data.text();
+    })
 }
