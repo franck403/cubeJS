@@ -111,6 +111,8 @@ async function pythonFile(path) {
     const response = await fetch(path);
     const content = await response.text();
     const parsed = content.replace(/[\r\n]+/g, '\\n');
+    console.debug("Python file:", path);
+    console.debug("Content:", parsed);
     return parsed;
 }
 
