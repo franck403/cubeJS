@@ -7,10 +7,10 @@ document.getElementById('cube-view').onload = function () {
 
     const iframeWindow = document.getElementById('cube-view').contentWindow;
 
-    var macs = "AB:12:34:60:7E:DA";
+    var mac = "AB:12:34:60:7E:DA";
     iframeWindow.prompt = function (...args) {
         console.log(...args);
-        return macs
+        return mac
     };
 
     if (iframeWindow) {
@@ -21,6 +21,8 @@ document.getElementById('cube-view').onload = function () {
                 const move1 = args[1].move;
                 moves.push(move1);
                 move(move1)
+            } else {
+                console.log("cacac")
             }
         }
     }
