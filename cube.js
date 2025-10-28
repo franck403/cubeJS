@@ -37,7 +37,6 @@ worker.onmessage = function (e) {
     // 3D animation
     //animate3DSolution(moves, 10);
     console.log("Start Solve")
-    console.debug(moves)
     var fnc = async () => {
       if (!silence) {
         await sendLine(leftWriter, solveSound);

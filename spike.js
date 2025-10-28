@@ -319,8 +319,8 @@ function areBothSpikesConnected() {
 function batteryPercentage(voltage, minVolt, maxVolt) {
     if (voltage <= minVolt) return 0;
     if (voltage >= maxVolt) return 100;
-    console.warn(voltage)
-    console.warn(Math.round(((voltage - minVolt) / (maxVolt - minVolt)) * 100))
+    console.info(voltage)
+    console.info(Math.round(((voltage - minVolt) / (maxVolt - minVolt)) * 100))
     return Math.round(((voltage - minVolt) / (maxVolt - minVolt)) * 100);
 }
 
@@ -400,7 +400,7 @@ async function runMovement(move, sleep = 220, noCube = false) {
     const cmd = CLP_LEFT[move] || CLP_RIGHT[move];
     const writer = CLP_LEFT[move] ? leftWriter : rightWriter;
     console.log(move);
-    console.debug(cmd)
+    console.debug(cmd);
     const wait = (move.startsWith("B") || move.startsWith("D") ? sleep + 40 : sleep) * (move.endsWith("2") ? 2 : 1);
     if (!cmd || !writer) await new Promise(r => setTimeout(r, 1));
     if (!noCube) {
@@ -468,6 +468,7 @@ async function spikeCube(moves, sleeped = 180) {
     if (noCube) return console.warn("Cube Not Connected")
     const sleep = sleeped || window.sleeped;
     moves = simplifyMoves(moves);
+    console.info(moves)
 
     const lenStr = String(moves.length).padStart(2, "0");
     await Promise.all([
@@ -602,14 +603,13 @@ function solve() {
 
 async function scramble() {
     if (!scSecure) {
-        console.log("Start Scramble")
+        console.info("Start Scramble")
         var moves = generateScramble(scLenght)
-        console.debug(moves)
         if (!silence) {
             await sendLine(leftWriter, scrambleSound);
         }
         await spikeCube(moves, 300)
-        console.log("End Scramble")
+        console.info("End Scramble")
     }
 }
 

@@ -17,8 +17,11 @@
     if (debug) {eruda.show()};
     console.debug = (...args) => {
       if (debug) {
-        console.log(`%c${args}`, "color:green;")
+        console.log(`%c${args}`, "color:#2bff00;")
       }
+    }
+    console.info = (...args) => {
+      console.log(`%c${args}`, "color:#006aff;")
     }
   </script>
   <script src="spike.js"></script>
