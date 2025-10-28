@@ -47,15 +47,3 @@ async function move(mov) {
     window.hs(move);
 }
 window.mover = move
-
-var ifr = document.getElementById('cube-view')
-const targetFrame = window.top.frames[0];
-
-function connect() {
-    targetFrame.postMessage('connect')
-}
-
-function reset() {
-    reset2()
-    targetFrame.postMessage('reset')
-}
