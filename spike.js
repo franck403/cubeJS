@@ -212,7 +212,7 @@ async function spike(cubeed) {
 
 async function sendLine(writer, text) {
     console.debug(text);
-    if (!writer) return console.warn("Spikes Not Connected");
+    if (!writer) return;
     const normalized = text.replace(/\r?\n/g, '\r\n');
     const encoder = new TextEncoder();
     const bytes = encoder.encode(normalized);
