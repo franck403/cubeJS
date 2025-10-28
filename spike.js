@@ -107,15 +107,6 @@ function regen() {
 }
 regen();
 
-async function pythonFile(path) {
-    const response = await fetch(path);
-    const content = await response.text();
-    const parsed = content.replace(/\\n/g, '\\n')
-    console.debug("Python file:", path);
-    console.debug("Content:", parsed);
-    return parsed;
-}
-
 // Merge into one pool
 const ALL_MOVES = Object.keys({ ...CLP_LEFT, ...CLP_RIGHT });
 
@@ -452,7 +443,6 @@ async function runMovement(move, sleep = 220, noCube = false) {
     await new Promise(r => setTimeout(r, wait));
 }
 
-
 function ganCubePresent() {
     var b = document.getElementById('cube-view').contentWindow;
     //return b.document.getElementById("batteryLevel").value == "- n/a -"
@@ -546,10 +536,11 @@ function stopTimer(startTime) {
     }
 }
 
+const oppositeFace = { U: "D", D: "U", F: "B", B: "F", L: "R", R: "L" };
+const normalize = m => m?.replace(/2|'/g, "");
+const isOpposite = (a, b) => normalize(a) && normalize(b) && oppositeFace[normalize(a)] === normalize(b);
+
 function simplifyMoves(moves) {
-    const oppositeFace = { U: "D", D: "U", F: "B", B: "F", L: "R", R: "L" };
-    const normalize = m => m?.replace(/2|'/g, "");
-    const isOpposite = (a, b) => normalize(a) && normalize(b) && oppositeFace[normalize(a)] === normalize(b);
     const out = [];
     for (let i = 0; i < moves.length; i++) {
         const a = moves[i], b = moves[i + 1];
