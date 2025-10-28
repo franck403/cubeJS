@@ -597,11 +597,14 @@ function solve() {
 
 async function scramble() {
     if (!scSecure) {
+        console.log("Start Scramble")
         var moves = generateScramble(scLenght)
+        console.debug(moves)
         if (!silence) {
             await sendLine(leftWriter, scrambleSound);
         }
-        spikeCube(moves, 300)
+        await spikeCube(moves, 300)
+        console.log("End Scramble")
     }
 }
 
