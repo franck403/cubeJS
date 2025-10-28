@@ -748,7 +748,6 @@ bc.postMessage("Connected");
 bc.onmessage = (e) => {
     var data = e.data
     if (data == true) {
-        if (bcState == false) sendLine(leftWriter, slideSound);
         document.getElementById('timerBlock').style.display = 'none'
         bcState = true;
     } else if (data == false) {
