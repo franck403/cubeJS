@@ -45,7 +45,7 @@ async function move(mov) {
     if (reversedMoves.has(face)) {
         clockwise = !clockwise;
     }
-    window.hs(mov);
+    hs(mov);
 }
 
 function hs(move2) {
