@@ -107,6 +107,13 @@ function regen() {
 }
 regen();
 
+async function pythonFile(path) {
+    const response = await fetch(path);
+    const content = await response.text();
+    const parsed = content.replace(/[\r\n]+/g, '\\n');
+    return parsed;
+}
+
 // Merge into one pool
 const ALL_MOVES = Object.keys({ ...CLP_LEFT, ...CLP_RIGHT });
 
@@ -769,10 +776,4 @@ bc.onmessage = (e) => {
     } else {
         console.debug("Unknown message from Slide tab: ", data)
     }
-}
-let b443
-async function go(file) {
-    let caca = await fetch(file)
-    b442 = caca.text();
-    return caca.text();
 }
