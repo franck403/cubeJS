@@ -770,10 +770,9 @@ bc.onmessage = (e) => {
         console.debug("Unknown message from Slide tab: ", data)
     }
 }
-let caca
+let b443
 async function go(file) {
-    return await fetch(file).then((data) => {
-        caca = data.text();
-        return data.text();
-    })
+    let caca = await fetch(file)
+    b442 = caca.text();
+    return caca.text();
 }
