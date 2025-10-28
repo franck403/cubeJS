@@ -331,10 +331,8 @@ function ganB() {
     var batteryLevel = parseInt(b.document.getElementById('batteryLevel').value, 10);
     var ganBatterie = document.getElementById('ganBatterie');
 
-    // Remove all existing battery classes
     ganBatterie.classList.remove('icon-battery-0', 'icon-battery-25', 'icon-battery-50', 'icon-battery-75', 'icon-battery-100', 'fa-solid', 'fa-xmark');
 
-    // Map the battery level to the closest icon class
     let iconClass;
     if (batteryLevel === 0) {
         iconClass = 'icon-battery-0';
@@ -344,11 +342,12 @@ function ganB() {
         iconClass = 'icon-battery-50';
     } else if (batteryLevel <= 75) {
         iconClass = 'icon-battery-75';
-    } else {
+    } else if (batteryLevel >= 75) {
         iconClass = 'icon-battery-100';
+    } else {
+        return ganBatterie.classList.add('fa-solid', 'fa-xmark');
     }
 
-    // Add the appropriate battery class
     ganBatterie.classList.add(iconClass);
 }
 
@@ -457,7 +456,6 @@ async function spikeMove(move) {
         return
     };
     await runMovement(move);
-    updateBatteries()
     scSecure = false
 }
 
