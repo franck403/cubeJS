@@ -117,11 +117,18 @@ const ALL_MOVES = Object.keys({ ...CLP_LEFT, ...CLP_RIGHT });
  */
 function generateScramble(n = 20) {
     const result = [];
+    let last
     for (let i = 0; i < n; i++) {
         let m;
         do m = ALL_MOVES[Math.random() * ALL_MOVES.length | 0];
         while (i && m[0] === result[i - 1][0]);
-        result.push(m);
+        if (!last) {
+            result.push(m);
+            last = m;
+        } else if (!last.startsWith(m.charAt(0))) {
+            result.push(m);
+            last = m;
+        }
     }
     return result;
 }
@@ -135,20 +142,7 @@ function log(...args) {
     }
 }
 
-/**
- * Calculate battery percentage given current voltage.
- * @param {number} voltage Current voltage (e.g. in millivolts or volts)
- * @param {number} minVolt Voltage corresponding to 0% (dead)
- * @param {number} maxVolt Voltage corresponding to 100% (full)
- * @returns {number} Battery percentage (clamped between 0 and 100)
- */
-function batteryPercentage(voltage, minVolt, maxVolt) {
-    if (voltage <= minVolt) return 0;
-    if (voltage >= maxVolt) return 100;
-    console.warn(voltage)
-    console.warn(Math.round(((voltage - minVolt) / (maxVolt - minVolt)) * 100))
-    return Math.round(((voltage - minVolt) / (maxVolt - minVolt)) * 100);
-}
+// CONNECTIONS
 
 async function openSpike(which) {
     let port, writer, reader, abortCtrl;
@@ -284,10 +278,6 @@ async function disconnectSpike(which) {
     }
 }
 
-function areBothSpikesConnected() {
-    return SpikeState.left && SpikeState.right && leftPort && rightPort;
-}
-
 async function startReading(which, reader) {
     if (!reader) return;
     (async () => {
@@ -340,56 +330,63 @@ async function startReading(which, reader) {
     })();
 }
 
+// CHECKUPS
 
-/*async function runMovement(move, sleep = 220, noCube = false) {
-    // Validate input
-    if (!move || typeof move !== 'string') {
-        log(`Error: Invalid move '${move}'`);
-        return;
-    }
+function ganCubePresent() {
+    var b = document.getElementById('cube-view').contentWindow;
+    //return b.document.getElementById("batteryLevel").value == "- n/a -"
+    return false
+}
+function areBothSpikesConnected() {
+    return SpikeState.left && SpikeState.right && leftPort && rightPort;
+}
 
-    // Determine command and writer
-    let cmd, writer;
-    if (CLP_LEFT[move]) {
-        cmd = CLP_LEFT[move];
-        writer = leftWriter;
-    } else if (CLP_RIGHT[move]) {
-        cmd = CLP_RIGHT[move];
-        writer = rightWriter;
+// BATTERIES
+
+function batteryPercentage(voltage, minVolt, maxVolt) {
+    if (voltage <= minVolt) return 0;
+    if (voltage >= maxVolt) return 100;
+    console.warn(voltage)
+    console.warn(Math.round(((voltage - minVolt) / (maxVolt - minVolt)) * 100))
+    return Math.round(((voltage - minVolt) / (maxVolt - minVolt)) * 100);
+}
+
+function ganB() {
+    var b = document.getElementById('cube-view').contentWindow;
+    var batteryLevel = parseInt(b.document.getElementById('batteryLevel').value, 10);
+    var ganBatterie = document.getElementById('ganBatterie');
+
+    // Remove all existing battery classes
+    ganBatterie.classList.remove('icon-battery-0', 'icon-battery-25', 'icon-battery-50', 'icon-battery-75', 'icon-battery-100', 'fa-solid', 'fa-xmark');
+
+    // Map the battery level to the closest icon class
+    let iconClass;
+    if (batteryLevel === 0) {
+        iconClass = 'icon-battery-0';
+    } else if (batteryLevel <= 25) {
+        iconClass = 'icon-battery-25';
+    } else if (batteryLevel <= 50) {
+        iconClass = 'icon-battery-50';
+    } else if (batteryLevel <= 75) {
+        iconClass = 'icon-battery-75';
     } else {
-        log(`Error: Movement '${move}' not found or no Spike connected`);
-        return;
+        iconClass = 'icon-battery-100';
     }
 
-    // Handle cube movement
-    if (!noCube) {
-        log(`Running move '${move}'`);
-        await sendLine(writer, cmd);
-        await sendLine(leftWriter, `light_matrix.write("${move.charAt(0)}",100)`);
+    // Add the appropriate battery class
+    ganBatterie.classList.add(iconClass);
+}
 
-        // Adjust wait time for B/D moves
-        const waitTimer = (move.startsWith('B') || move.startsWith('D')) ? sleep + 40 : sleep;
-
-        // Handle move suffix (', 2, or none)
-        if (move.endsWith("'")) {
-            await sendLine(rightWriter, 'light_matrix.write("\'",100)');
-        } else if (move.endsWith("2")) {
-            await sendLine(rightWriter, 'light_matrix.write("2",100)');
-        } else {
-            await sendLine(rightWriter, 'light_matrix.write("",100)');
-        }
-
-        // Wait based on move suffix
-        const waitMultiplier = move.endsWith("'") ? 1 : move.endsWith("2") ? 2 : 1;
-        await new Promise(r => setTimeout(r, waitTimer * waitMultiplier));
-    } else {
-        // No cube: use window.mover
-        window.mover(move);
-        const waitTimer = (move.startsWith('B') || move.startsWith('D')) ? sleep + 40 : sleep;
-        const waitMultiplier = move.endsWith("'") ? 1 : move.endsWith("2") ? 2 : 1;
-        await new Promise(r => setTimeout(r, waitTimer * waitMultiplier));
+async function updateBatteries() {
+    for (const w of [rightWriter, leftWriter]) {
+        await sendLine(w, getBattery);
+        await new Promise(r => setTimeout(r, 200));
     }
-}*/
+    await Promise.all([sendLine(leftWriter, clearDisplay), sendLine(rightWriter, clearDisplay)]);
+    ganB();
+}
+
+// MOVE
 
 async function runMovement(move, sleep = 220, noCube = false) {
     if (!move || typeof move !== "string") return log(`Invalid move ${move}`);
@@ -443,209 +440,6 @@ async function runMovement(move, sleep = 220, noCube = false) {
     await new Promise(r => setTimeout(r, wait));
 }
 
-function ganCubePresent() {
-    var b = document.getElementById('cube-view').contentWindow;
-    //return b.document.getElementById("batteryLevel").value == "- n/a -"
-    return false
-}
-
-function ganB() {
-    var b = document.getElementById('cube-view').contentWindow;
-    var batteryLevel = parseInt(b.document.getElementById('batteryLevel').value, 10);
-    var ganBatterie = document.getElementById('ganBatterie');
-
-    // Remove all existing battery classes
-    ganBatterie.classList.remove('icon-battery-0', 'icon-battery-25', 'icon-battery-50', 'icon-battery-75', 'icon-battery-100', 'fa-solid', 'fa-xmark');
-
-    // Map the battery level to the closest icon class
-    let iconClass;
-    if (batteryLevel === 0) {
-        iconClass = 'icon-battery-0';
-    } else if (batteryLevel <= 25) {
-        iconClass = 'icon-battery-25';
-    } else if (batteryLevel <= 50) {
-        iconClass = 'icon-battery-50';
-    } else if (batteryLevel <= 75) {
-        iconClass = 'icon-battery-75';
-    } else {
-        iconClass = 'icon-battery-100';
-    }
-
-    // Add the appropriate battery class
-    ganBatterie.classList.add(iconClass);
-}
-
-async function updateBatteries() {
-    for (const w of [rightWriter, leftWriter]) {
-        await sendLine(w, getBattery);
-        await new Promise(r => setTimeout(r, 200));
-    }
-    await Promise.all([sendLine(leftWriter, clearDisplay), sendLine(rightWriter, clearDisplay)]);
-    ganB();
-}
-
-async function spikeMove(move) {
-    if (scSecure) {
-        return
-    }
-    scSecure = true
-    if (!SpikeState.left && !SpikeState.right) {
-        scSecure = false
-        return
-    };
-    await runMovement(move);
-    updateBatteries()
-    scSecure = false
-}
-
-var Soupdate = () => {
-    if (!scSecure && store.length != 0) {
-        var toPlay = store.shift()
-        try {
-            spikeMove(toPlay)
-        } catch { }
-    }
-}
-
-async function playMove(move) {
-    regen()
-    store.push(move)
-    console.log(move)
-}
-
-function startTimer(startTime) {
-    bc.postMessage("last" + startTime.toString());
-    if (timerInterval) clearInterval(timerInterval);
-    timerInterval = setInterval(() => {
-        let elapsed = ((new Date() - startTime) / 1000).toFixed(3);
-        document.getElementById('timer').innerHTML = '<i class="fa-solid fa-clock"></i> : ' + elapsed + 'S';
-    }, 1);
-}
-
-function stopTimer(startTime) {
-    if (timerInterval) {
-        clearInterval(timerInterval);
-        try {
-            let elapsed = ((new Date() - startTime) / 1000).toFixed(3);
-            bc.postMessage(Number(elapsed));
-        } catch {
-
-        }
-        timerInterval = null;
-
-    }
-}
-
-const oppositeFace = { U: "D", D: "U", F: "B", B: "F", L: "R", R: "L" };
-const normalize = m => m?.replace(/2|'/g, "");
-const isOpposite = (a, b) => normalize(a) && normalize(b) && oppositeFace[normalize(a)] === normalize(b);
-
-function simplifyMoves(moves) {
-    const out = [];
-    for (let i = 0; i < moves.length; i++) {
-        const a = moves[i], b = moves[i + 1];
-        if (!b) return [...out, a];
-        const fa = normalize(a), fb = normalize(b);
-        if (fa !== fb) { out.push(a); }
-        if (a === b) { out.push(fa + "2"); i++; }
-        if (a.includes("'") !== b.includes("'")) { i++; }
-        if (a.includes("2") || b.includes("2")) {
-            out.push((a.includes("2") ^ b.includes("'")) ? fa + "'" : fa);
-            i++;
-        } else out.push(a);
-    }
-    return out;
-}
-
-async function spikeCube(moves, sleeped = 180) {
-    regen()
-    if (scSecure) return;
-    scSecure = true;
-    const noCube = ganCubePresent();
-    const sleep = sleeped || window.sleeped;
-    moves = simplifyMoves(moves);
-
-    const lenStr = String(moves.length).padStart(2, "0");
-    await Promise.all([
-        sendLine(leftWriter, `light_matrix.write("${lenStr[0]}",100)`),
-        sendLine(rightWriter, `light_matrix.write("${lenStr[1]}",100)`)
-    ]);
-
-    await new Promise(r => setTimeout(r, 2000));
-    const start = new Date();
-    startTimer(start);
-
-    for (let i = 0; i < moves.length; i++) {
-        const m = moves[i], n = moves[i + 1];
-        if (isOpposite(m, n)) {
-            await Promise.all([
-                runMovement(m, sleep, noCube),
-                runMovement(n, sleep + 10, noCube)
-            ]);
-            i++;
-        } else await runMovement(m, sleep, noCube);
-    }
-    if (areBothSpikesConnected()) {
-        stopTimer(start);
-    }
-    await new Promise(r => setTimeout(r, 200));
-    await updateBatteries();
-    scSecure = false;
-}
-
-function solve() {
-    if (!SolveSecure) {
-        SolveSecure = true
-        worker.postMessage({ type: 'solve', state: cube.asString() });
-        setTimeout(() => {
-            SolveSecure = false
-        }, 6001)
-    }
-}
-
-async function scramble() {
-    if (!scSecure) {
-        var moves = generateScramble(scLenght)
-        if (!silence) {
-            await sendLine(leftWriter, scrambleSound);
-        }
-        spikeCube(moves, 300)
-    }
-}
-
-function startCube() {
-    spikeCube(['U2'], 300)
-}
-
-async function spin() {
-    if (!SpinState) {
-        SpinState = true
-        await sendLine(leftWriter, 'motor.run(port.A, 50)')
-    } else {
-        SpinState = false
-        await sendLine(leftWriter, 'motor.stop(port.A)')
-    }
-}
-
-function fullscreen() {
-    if (!fullscreenstate) {
-        document.getElementById('cube3d').requestFullscreen()
-            .then(() => {
-                document.getElementById('full').innerHTML = `<i class="fa-solid fa-compress"></i>`;
-            })
-            .catch(err => {
-                console.error("Error attempting to enable fullscreen:", err);
-            });
-        fullscreenstate = true;
-    } else {
-        document.exitFullscreen()
-            .then(() => {
-                document.getElementById('full').innerHTML = `<i class="fa-solid fa-expand"></i>`;
-            })
-        fullscreenstate = false;
-    }
-}
-
 async function resetMotors() {
     if (!SpikeState.left && !SpikeState.right) {
         log("No Spike connected");
@@ -679,6 +473,190 @@ async function resetMotors() {
     scSecure = false;
 }
 
+async function spikeMove(move) {
+    if (scSecure) {
+        return
+    }
+    scSecure = true
+    if (!SpikeState.left && !SpikeState.right) {
+        scSecure = false
+        return
+    };
+    await runMovement(move);
+    updateBatteries()
+    scSecure = false
+}
+
+async function spikeCube(moves, sleeped = 180) {
+    regen()
+    if (scSecure) return;
+    scSecure = true;
+    const noCube = ganCubePresent();
+    const sleep = sleeped || window.sleeped;
+    moves = simplifyMoves(moves);
+
+    const lenStr = String(moves.length).padStart(2, "0");
+    await Promise.all([
+        sendLine(leftWriter, `light_matrix.write("${lenStr[0]}",100)`),
+        sendLine(rightWriter, `light_matrix.write("${lenStr[1]}",100)`)
+    ]);
+
+    await new Promise(r => setTimeout(r, 2000));
+    const start = new Date();
+    startTimer(start);
+
+    for (let i = 0; i < moves.length; i++) {
+        const m = moves[i], n = moves[i + 1];
+        if (isOpposite(m, n)) {
+            await Promise.all([
+                runMovement(m, sleep, noCube),
+                runMovement(n, sleep + 10, noCube)
+            ]);
+            i++;
+        } else await runMovement(m, sleep, noCube);
+    }
+    if (areBothSpikesConnected() || debug) {
+        stopTimer(start);
+    }
+    await new Promise(r => setTimeout(r, 200));
+    await updateBatteries();
+    scSecure = false;
+}
+
+// KEYBOARD MOVES
+
+var Soupdate = () => {
+    if (!scSecure && store.length != 0) {
+        var toPlay = store.shift()
+        try {
+            spikeMove(toPlay)
+        } catch { }
+    }
+}
+
+async function playMove(move) {
+    regen()
+    store.push(move)
+    console.log(move)
+}
+
+// TIMER
+
+function startTimer(startTime) {
+    bc.postMessage("last" + startTime.toString());
+    if (timerInterval) clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+        let elapsed = ((new Date() - startTime) / 1000).toFixed(3);
+        document.getElementById('timer').innerHTML = '<i class="fa-solid fa-clock"></i> : ' + elapsed + 'S';
+    }, 1);
+}
+function stopTimer(startTime) {
+    if (timerInterval) {
+        clearInterval(timerInterval);
+        try {
+            let elapsed = ((new Date() - startTime) / 1000).toFixed(3);
+            bc.postMessage(Number(elapsed));
+        } catch {
+
+        }
+        timerInterval = null;
+
+    }
+}
+
+// SIMPLIFY MOVES
+
+const oppositeFace = { U: "D", D: "U", F: "B", B: "F", L: "R", R: "L" };
+const normalize = m => m?.replace(/2|'/g, "");
+const isOpposite = (a, b) => normalize(a) && normalize(b) && oppositeFace[normalize(a)] === normalize(b);
+
+function simplifyMoves(moves) {
+    const out = [];
+    for (let i = 0; i < moves.length; i++) {
+        const a = moves[i], b = moves[i + 1];
+        if (!b) return [...out, a];
+        const fa = normalize(a), fb = normalize(b);
+        if (fa !== fb) { out.push(a); }
+        if (a === b) { out.push(fa + "2"); i++; }
+        if (a.includes("'") !== b.includes("'")) { i++; }
+        if (a.includes("2") || b.includes("2")) {
+            out.push((a.includes("2") ^ b.includes("'")) ? fa + "'" : fa);
+            i++;
+        } else out.push(a);
+    }
+    return out;
+}
+
+// NAVBAR
+
+function solve() {
+    if (!SolveSecure) {
+        SolveSecure = true
+        worker.postMessage({ type: 'solve', state: cube.asString() });
+        setTimeout(() => {
+            SolveSecure = false
+        }, 6001)
+    }
+}
+
+async function scramble() {
+    if (!scSecure) {
+        var moves = generateScramble(scLenght)
+        if (!silence) {
+            await sendLine(leftWriter, scrambleSound);
+        }
+        spikeCube(moves, 300)
+    }
+}
+
+function startCube() {
+    spikeCube(['U', 'U'], 300)
+}
+
+async function spin() {
+    if (!SpinState) {
+        SpinState = true
+        await sendLine(leftWriter, 'motor.run(port.A, 50)')
+    } else {
+        SpinState = false
+        await sendLine(leftWriter, 'motor.stop(port.A)')
+    }
+}
+
+// FULLSCREEN
+
+function fullscreen() {
+    if (!fullscreenstate) {
+        document.getElementById('cube3d').requestFullscreen()
+            .then(() => {
+                document.getElementById('full').innerHTML = `<i class="fa-solid fa-compress"></i>`;
+            })
+            .catch(err => {
+                console.error("Error attempting to enable fullscreen:", err);
+            });
+        fullscreenstate = true;
+    } else {
+        document.exitFullscreen()
+            .then(() => {
+                document.getElementById('full').innerHTML = `<i class="fa-solid fa-expand"></i>`;
+            })
+        fullscreenstate = false;
+    }
+}
+
+document.addEventListener("fullscreenchange", (e) => {
+    if (!document.fullscreenElement) {
+        document.getElementById('full').innerHTML = `<i class="fa-solid fa-expand"></i>`;
+        fullscreenstate = false;
+    }
+    if (document.fullscreenElement) {
+        document.getElementById('full').innerHTML = `<i class="fa-solid fa-compress"></i>`;
+        fullscreenstate = true;
+    }
+});
+
+// SEXY MOVES
+
 function sexyMoves1() {
     spikeCube(sexyMove1, 200)
 }
@@ -689,16 +667,7 @@ function sexyMoves3() {
     spikeCube(sexyMove3, 200)
 }
 
-document.addEventListener("fullscreenchange", (event) => {
-    if (!document.fullscreenElement) {
-        document.getElementById('full').innerHTML = `<i class="fa-solid fa-expand"></i>`;
-        fullscreenstate = false;
-    }
-    if (document.fullscreenElement) {
-        document.getElementById('full').innerHTML = `<i class="fa-solid fa-compress"></i>`;
-        fullscreenstate = true;
-    }
-});
+// KEYBOARD MAPPIMG
 
 document.addEventListener('DOMContentLoaded', () => {
     const keyToCubeMove = {
@@ -757,9 +726,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
+// BROADCAST
+
 const bc = new BroadcastChannel(localStorage.bc);
 bc.postMessage("Connected");
-
 bc.onmessage = (e) => {
     var data = e.data
     if (data == true) {
