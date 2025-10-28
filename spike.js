@@ -567,22 +567,37 @@ function stopTimer(startTime) {
 // SIMPLIFY MOVES
 
 const oppositeFace = { U: "D", D: "U", F: "B", B: "F", L: "R", R: "L" };
-const normalize = m => m?.replace(/2|'/g, "");
-const isOpposite = (a, b) => normalize(a) && normalize(b) && oppositeFace[normalize(a)] === normalize(b);
+const normalize = (m) => m?.replace(/2|'/g, "");
 
 function simplifyMoves(moves) {
     const out = [];
     for (let i = 0; i < moves.length; i++) {
-        const a = moves[i], b = moves[i + 1];
-        if (!b) return [...out, a];
-        const fa = normalize(a), fb = normalize(b);
-        if (fa !== fb) { out.push(a); }
-        if (a === b) { out.push(fa + "2"); i++; }
-        if (a.includes("'") !== b.includes("'")) { i++; }
-        if (a.includes("2") || b.includes("2")) {
-            out.push((a.includes("2") ^ b.includes("'")) ? fa + "'" : fa);
+        const a = moves[i];
+        const b = moves[i + 1];
+
+        if (!b) {
+            out.push(a);
+            continue;
+        }
+
+        const fa = normalize(a);
+        const fb = normalize(b);
+
+        if (fa === fb && !a.includes("'") && !b.includes("'")) {
+            out.push(fa + "2");
             i++;
-        } else out.push(a);
+        } else if (fa === fb && a.includes("'") !== b.includes("'")) {
+            i++;
+        } else if (oppositeFace[fa] === fb) {
+            out.push(a);
+        } else if (fa === fb && (a.includes("2") || b.includes("2"))) {
+            const isA2 = a.includes("2");
+            const isBPrime = b.includes("'");
+            out.push(isA2 ? (isBPrime ? fa : fa + "'") : (isBPrime ? fa + "'" : fa + "2"));
+            i++;
+        } else {
+            out.push(a);
+        }
     }
     return out;
 }
