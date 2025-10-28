@@ -20,26 +20,9 @@ let scLenght = 20;
 let deg = 95;
 let dog = 180
 
-let u = 0
-let f = 0
-let l = 0
-let r = 0
-let b = 0
-let d = 0
-
-let u1 = 0
-let f1 = 0
-let l1 = 0
-let r1 = 0
-let b1 = 0
-let d1 = 0
-
-let u2 = 0
-let f2 = 0
-let l2 = 0
-let r2 = 0
-let b2 = 0
-let d2 = 0
+let u  = 0, f  = 0, l  = 0, r  = 0, b  = 0, d  = 0;
+let u1 = 0, f1 = 0, l1 = 0, r1 = 0, b1 = 0, d1 = 0;
+let u2 = 0, f2 = 0, l2 = 0, r2 = 0, b2 = 0, d2 = 0;
 
 let cb = 3; // back deg corr
 let cd = 3; // down deg corr
@@ -568,6 +551,7 @@ function stopTimer(startTime) {
 
 const oppositeFace = { U: "D", D: "U", F: "B", B: "F", L: "R", R: "L" };
 const normalize = (m) => m?.replace(/2|'/g, "");
+const isOpposite = (a, b) => normalize(a) && normalize(b) && oppositeFace[normalize(a)] === normalize(b);
 
 function simplifyMoves(moves) {
     const out = [];
