@@ -3,7 +3,7 @@ let leftWriter, rightWriter = null;
 let leftReader, rightReader = null;
 let leftAbort,  rightAbort = null;
 
-var store = []
+var store = [];
 
 let SpikeState = { left: false, right: false };
 
@@ -50,6 +50,8 @@ let CLP_RIGHT;
 
 // =========================================================================================================
 
+// COMMANDS
+
 function regen() {
     CLP_LEFT = {
         // Face U
@@ -85,10 +87,12 @@ function regen() {
         "D2": `motor.run_to_absolute_position(port.B, motor.absolute_position(port.B)+ ${dog + d2}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n`,
     };
 }
+
 regen();
 
-// Merge into one pool
 const ALL_MOVES = Object.keys({ ...CLP_LEFT, ...CLP_RIGHT });
+
+// DEFAULT
 
 /**
  * Generate a random scramble table
@@ -395,16 +399,16 @@ async function runMovement(move, sleep = 220, noCube = false) {
     regen();
     const cmd = CLP_LEFT[move] || CLP_RIGHT[move];
     const writer = CLP_LEFT[move] ? leftWriter : rightWriter;
+    console.log(move);
     console.debug(cmd)
     const wait = (move.startsWith("B") || move.startsWith("D") ? sleep + 40 : sleep) * (move.endsWith("2") ? 2 : 1);
     if (!cmd || !writer) await new Promise(r => setTimeout(r, 1));
-
     if (!noCube) {
         await sendLine(writer, cmd);
         await sendLine(leftWriter, `light_matrix.write("${move[0]}",100)`);
         const sym = move.endsWith("'") ? "'" : move.endsWith("2") ? "2" : "";
         await sendLine(rightWriter, `light_matrix.write("${sym}",100)`);
-    } else window.mover(move);
+    } else console.warn("Cube Not Connected");
 
     await new Promise(r => setTimeout(r, wait));
 }
@@ -458,9 +462,10 @@ async function spikeMove(move) {
 
 async function spikeCube(moves, sleeped = 180) {
     regen()
-    if (scSecure) return;
+    if (scSecure) return console.warn("NO SPAM !!!");
     scSecure = true;
     const noCube = ganCubePresent();
+    if (noCube) return console.warn("Cube Not Connected")
     const sleep = sleeped || window.sleeped;
     moves = simplifyMoves(moves);
 
