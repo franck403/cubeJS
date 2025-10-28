@@ -717,7 +717,7 @@ document.addEventListener('DOMContentLoaded', () => {
         "backspace": scramble
     }
     document.body.addEventListener('keydown', (e) => {
-        const ctrlKeys = ['c', 'v', 'z', 'f', 'w', 't', 's'];
+        const ctrlKeys = ['c', 'v', 'z', 'f', 'w', 't', 's', 'r'];
         if (e.ctrlKey && ctrlKeys.includes(e.key)) {return;}
         const fn = keyboard[e.key] || keyboard[e.key.toLowerCase()];
         const fn2 = keyToCubeMove[e.key] || keyToCubeMove[e.key.toLowerCase()]
