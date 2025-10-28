@@ -400,7 +400,7 @@ async function runMovement(move, sleep = 220, noCube = false) {
     regen();
     const cmd = CLP_LEFT[move] || CLP_RIGHT[move];
     const writer = CLP_LEFT[move] ? leftWriter : rightWriter;
-    console.log(`%c${move}`, 'color:#c300ff;');
+    console.log(`%cMain: ${move}`, 'color:#c300ff;');
     const wait = (move.startsWith("B") || move.startsWith("D") ? sleep + 40 : sleep) * (move.endsWith("2") ? 2 : 1);
     if (!cmd || !writer) await new Promise(r => setTimeout(r, 1));
     if (!noCube) {
@@ -511,7 +511,6 @@ var Soupdate = () => {
 async function playMove(move) {
     regen()
     store.push(move)
-    console.log(move)
 }
 
 // TIMER
@@ -754,6 +753,7 @@ bc.onmessage = (e) => {
         document.getElementById('timerBlock').style.display = 'block'
     } else if (data.startsWith("Move: ")) {
         let move = data.replace("Move: ", "");
+        console.log(`%cSec:  ${move}`, 'color:#c300ff;');
         playMove(move);
     } 
     else {
