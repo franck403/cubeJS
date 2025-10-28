@@ -42,7 +42,7 @@ worker.onmessage = function (e) {
       if (!silence) {
         await sendLine(leftWriter, solveSound);
      }
-     await SpikeCube(moves)
+     await spikeCube(moves)
  
     }
     fnc()
