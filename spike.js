@@ -92,6 +92,7 @@ function regen() {
 regen();
 
 const ALL_MOVES = Object.keys({ ...CLP_LEFT, ...CLP_RIGHT });
+const varToString = varObj => Object.keys(varObj)[0]
 
 // DEFAULT
 
@@ -211,8 +212,8 @@ async function spike(cubeed) {
 }
 
 async function sendLine(writer, text) {
-    console.debug(text);
-    console.info(writer)
+    let spike = varToString({writer}).replace("Writer", "")
+    console.debug(`Spike ${spike}: ${text}`);
     if (!writer) return;
     const normalized = text.replace(/\r?\n/g, '\r\n');
     const encoder = new TextEncoder();
@@ -354,7 +355,7 @@ function ganB() {
 
 async function updateBatteries() {
     for (const w of [rightWriter, leftWriter]) {
-        await sendLine(w, getBattery);
+        await sendLine(w, getBattery, );
         await new Promise(r => setTimeout(r, 200));
     }
     await Promise.all([sendLine(leftWriter, clearDisplay), sendLine(rightWriter, clearDisplay)]);
