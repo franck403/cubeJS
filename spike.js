@@ -41,8 +41,8 @@ let r2 = 0
 let b2 = 0
 let d2 = 0
 
-let cb = 5; // back deg corr
-let cd = 5; // down deg corr
+let cb = 3; // back deg corr
+let cd = 3; // down deg corr
 
 let lb = localStorage.lb || 0;
 let ld = localStorage.ld || 0;
