@@ -53,10 +53,6 @@ let timerInterval = null;
 
 window.sleeped = 170;
 
-const oppositeFace = { U: "D", D: "U", F: "B", B: "F", L: "R", R: "L" };
-const normalize = m => m?.replace(/2|'/g, "");
-const isOpposite = (a, b) => normalize(a) && normalize(b) && oppositeFace[normalize(a)] === normalize(b);
-
 // =========================================================================================================
 
 const sexyMove1 = ["R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'"];
@@ -110,8 +106,6 @@ function regen() {
     };
 }
 regen();
-
-
 
 // Merge into one pool
 const ALL_MOVES = Object.keys({ ...CLP_LEFT, ...CLP_RIGHT });
@@ -237,7 +231,7 @@ async function spike(cubeed) {
     }
 }
 
-async function FullConnect() {
+async function fullConnect() {
     scSecure = false
     if (!ganCubePresent()) {
         await spike(true)
@@ -491,7 +485,7 @@ async function updateBatteries() {
     ganB();
 }
 
-async function SpikeMove(move) {
+async function spikeMove(move) {
     if (scSecure) {
         return
     }
@@ -509,7 +503,7 @@ var Soupdate = () => {
     if (!scSecure && store.length != 0) {
         var toPlay = store.shift()
         try {
-            SpikeMove(toPlay)
+            spikeMove(toPlay)
         } catch { }
     }
 }
@@ -544,6 +538,9 @@ function stopTimer(startTime) {
 }
 
 function simplifyMoves(moves) {
+    const oppositeFace = { U: "D", D: "U", F: "B", B: "F", L: "R", R: "L" };
+    const normalize = m => m?.replace(/2|'/g, "");
+    const isOpposite = (a, b) => normalize(a) && normalize(b) && oppositeFace[normalize(a)] === normalize(b);
     const out = [];
     for (let i = 0; i < moves.length; i++) {
         const a = moves[i], b = moves[i + 1];
@@ -560,7 +557,7 @@ function simplifyMoves(moves) {
     return out;
 }
 
-async function SpikeCube(moves, sleeped = 180) {
+async function spikeCube(moves, sleeped = 180) {
     regen()
     if (scSecure) return;
     scSecure = true;
@@ -612,12 +609,12 @@ async function scramble() {
         if (!silence) {
             await sendLine(leftWriter, scrambleSound);
         }
-        SpikeCube(moves, 300)
+        spikeCube(moves, 300)
     }
 }
 
 function startCube() {
-    SpikeCube(['U2'], 300)
+    spikeCube(['U2'], 300)
 }
 
 async function spin() {
@@ -648,17 +645,6 @@ function fullscreen() {
         fullscreenstate = false;
     }
 }
-
-document.addEventListener("fullscreenchange", (event) => {
-    if (!document.fullscreenElement) {
-        document.getElementById('full').innerHTML = `<i class="fa-solid fa-expand"></i>`;
-        fullscreenstate = false;
-    }
-    if (document.fullscreenElement) {
-        document.getElementById('full').innerHTML = `<i class="fa-solid fa-compress"></i>`;
-        fullscreenstate = true;
-    }
-});
 
 async function resetMotors() {
     if (!SpikeState.left && !SpikeState.right) {
@@ -694,14 +680,25 @@ async function resetMotors() {
 }
 
 function sexyMoves1() {
-    SpikeCube(sexyMove1, 200)
+    spikeCube(sexyMove1, 200)
 }
 function sexyMoves2() {
-    SpikeCube(sexyMove2, 200)
+    spikeCube(sexyMove2, 200)
 }
 function sexyMoves3() {
-    SpikeCube(sexyMove3, 200)
+    spikeCube(sexyMove3, 200)
 }
+
+document.addEventListener("fullscreenchange", (event) => {
+    if (!document.fullscreenElement) {
+        document.getElementById('full').innerHTML = `<i class="fa-solid fa-expand"></i>`;
+        fullscreenstate = false;
+    }
+    if (document.fullscreenElement) {
+        document.getElementById('full').innerHTML = `<i class="fa-solid fa-compress"></i>`;
+        fullscreenstate = true;
+    }
+});
 
 document.addEventListener('DOMContentLoaded', () => {
     const keyToCubeMove = {
@@ -728,7 +725,7 @@ document.addEventListener('DOMContentLoaded', () => {
         "1": sexyMoves1,
         "2": sexyMoves2,
         "3": sexyMoves3,
-        "c": FullConnect,
+        "c": fullConnect,
         "r": reset,
         "enter": solve,
         "w": startCube,
