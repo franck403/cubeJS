@@ -17,7 +17,7 @@
     if (debug) {eruda.show()};
     console.debug = (...args) => {
       if (debug) {
-        console.log(...args)
+        console.log(`%c${args}`, "color:green;")
       }
     }
   </script>
