@@ -688,6 +688,40 @@ async function sexyMoves3() {
     console.log("End Sexy Move 3")
 }
 
+async function solve2ndCube(mvs) {
+    if (!bc) return console.warn("No bc connection found");
+    if (!mvs || !Array.isArray(mvs) || mvs.length === 0) return console.warn("No moves for 2nd cube");
+
+    window.dontMove = true;
+    console.info("Starting 2nd cube solve");
+    console.info("Moves: ", mvs);
+    let still = [...mvs];
+    await new Promise((resolve) => {
+        bc.onmessage = (e) => {
+            const data = e.data;
+            if (typeof data !== "string" || !data.startsWith("Move: ")) return;
+
+            const move = data.replace("Move: ", "").trim();
+            const expected = still[0];
+
+            if (move === expected) {
+                still.shift();
+            } else {
+                console.warn(`No: ${move}, expected: ${expected}`);
+                console.info(`Correct move: `, )
+            }
+
+            if (still.length === 0) {
+                console.log("All moves completed!");
+                resolve(); // done
+            }
+        };
+    });
+
+    window.dontMove = false;
+    console.info("2nd cube solved");
+}
+
 // KEYBOARD MAPPIMG
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -754,7 +788,7 @@ document.addEventListener('DOMContentLoaded', () => {
         bcState = true;
     } else if (data == false) {
         document.getElementById('timerBlock').style.display = 'block'
-    } else if (data.startsWith("Move: ")) {
+    } else if (data.startsWith("Move: ") && !window.dontMove) {
         let move = data.replace("Move: ", "");
         console.log(`%cSec:  ${move}`, 'color:#eb34d8;');
         playMove(move);
@@ -766,3 +800,5 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 const bc = new BroadcastChannel(localStorage.bc);
+
+window.solve2ndCube = solve2ndCube;
