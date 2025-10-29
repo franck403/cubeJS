@@ -736,15 +736,8 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.addEventListener('keyup', (e) => {
         bc.postMessage('ked' + e.key)
     });
-});
-
-// BROADCAST
-
-const bc = new BroadcastChannel(localStorage.bc);
-
-bc.postMessage("Connected");
-
-bc.onmessage = (e) => {
+    
+    bc.onmessage = (e) => {
     var data = e.data
     if (data == true) {
         document.getElementById('timerBlock').style.display = 'none'
@@ -760,3 +753,10 @@ bc.onmessage = (e) => {
         console.debug("Unknown message from Slide tab: ", data)
     }
 }
+});
+
+// BROADCAST
+
+const bc = new BroadcastChannel(localStorage.bc);
+
+bc.postMessage("Connected");
