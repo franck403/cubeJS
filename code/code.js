@@ -117,6 +117,7 @@ function startAutoScroll(column, fileIds, filenames, filetypes) {
         if (bannerFilename && bannerFiletype) {
           bannerFilename.textContent = filenames[currentIndex];
           bannerFiletype.textContent = filetypes[currentIndex];
+          console.log(filetypes, currentIndex)
         }
       }
     } else {
