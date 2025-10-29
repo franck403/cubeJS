@@ -400,7 +400,6 @@ async function runMovement(move, sleep = 220, noCube = false) {
     regen();
     const cmd = CLP_LEFT[move] || CLP_RIGHT[move];
     const writer = CLP_LEFT[move] ? leftWriter : rightWriter;
-    console.log(`%cMain: ${move}`, 'color:#9534eb;');
     const wait = (move.startsWith("B") || move.startsWith("D") ? sleep + 40 : sleep) * (move.endsWith("2") ? 2 : 1);
     if (!cmd || !writer) await new Promise(r => setTimeout(r, 1));
     if (!noCube) {
