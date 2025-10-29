@@ -2,13 +2,11 @@ let files = window.initialFiles;
 let speed = 1.2;
 let ogSpeed = speed;
 
-// Initialization
 document.addEventListener('DOMContentLoaded', () => {
   createColumns();
   loadFiles();
 });
 
-// Create columns for HTML, CSS, JS
 function createColumns() {
   if (!files) return;
   const container = document.getElementById('container');
