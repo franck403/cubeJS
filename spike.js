@@ -92,7 +92,7 @@ function regen() {
 
 regen();
 
-async function sleep(ms) {
+async function sleepT(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
@@ -360,7 +360,7 @@ function ganB() {
 async function updateBatteries() {
     for (const w of [rightWriter, leftWriter]) {
         await sendLine(w, getBattery);
-        await sleep(200)
+        await sleepT(200)
     }
     await Promise.all([sendLine(leftWriter, clearDisplay), sendLine(rightWriter, clearDisplay)]);
     ganB();
@@ -374,14 +374,14 @@ async function runMovement(move, sleep = 220, sleepL = 40, noCube = false) {
     const cmd = CLP_LEFT[move] || CLP_RIGHT[move];
     const writer = CLP_LEFT[move] ? leftWriter : rightWriter;
     const wait = (move.startsWith("B") || move.startsWith("D") ? sleep + sleepL : sleep) * (move.endsWith("2") ? 2 : 1);
-    if (!cmd || !writer) await sleep(1);
+    if (!cmd || !writer) await sleepT(1);
     if (noCube) return console.warn("Cube Not Connected");
     await sendLine(writer, cmd);
     const mov = move.charAt(0);
     const sym = move.charAt(1);
     await sendLine(leftWriter,  `light_matrix.write("${mov}",100)`);
     await sendLine(rightWriter, `light_matrix.write("${sym}",100)`);
-    await sleep(wait);
+    await sleepT(wait);
 }
 
 function degCorrection(move) {
@@ -433,21 +433,21 @@ async function resetMotors() {
     bettew = 4000
     if (SpikeState.left) {
         await sendLine(leftWriter, "motor.run_to_absolute_position(port.A, 0, 50, direction=motor.SHORTEST_PATH, stop=motor.BRAKE, acceleration=1000, deceleration=1000);");
-        await sleep(bettew)
+        await sleepT(bettew)
         await sendLine(leftWriter, "motor.run_to_absolute_position(port.C, 0, 50, direction=motor.SHORTEST_PATH, stop=motor.BRAKE, acceleration=1000, deceleration=1000);");
-        await sleep(bettew)
+        await sleepT(bettew)
         await sendLine(leftWriter, "motor.run_to_absolute_position(port.E, 0, 50, direction=motor.SHORTEST_PATH, stop=motor.BRAKE, acceleration=1000, deceleration=1000);");
-        await sleep(bettew)
+        await sleepT(bettew)
     }
 
     // Reset all motors on the right side
     if (SpikeState.right) {
         await sendLine(rightWriter, "motor.run_to_absolute_position(port.D, 0, 50, direction=motor.SHORTEST_PATH, stop=motor.BRAKE, acceleration=1000, deceleration=1000);");
-        await sleep(bettew)
+        await sleepT(bettew)
         await sendLine(rightWriter, "motor.run_to_absolute_position(port.F, 0, 50, direction=motor.SHORTEST_PATH, stop=motor.BRAKE, acceleration=1000, deceleration=1000);");
-        await sleep(bettew)
+        await sleepT(bettew)
         await sendLine(rightWriter, "motor.run_to_absolute_position(port.B, 0, 50, direction=motor.SHORTEST_PATH, stop=motor.BRAKE, acceleration=1000, deceleration=1000);");
-        await sleep(bettew)
+        await sleepT(bettew)
     }
 
     log("Motors reset complete");
@@ -484,7 +484,7 @@ async function spikeCube(moves, sleeped = 180, sleepL) {
         sendLine(rightWriter, `light_matrix.write("${lenStr[1]}",100)`)
     ]);
 
-    await sleep(2000)
+    await sleepT(2000)
     const start = new Date();
     startTimer(start);
 
@@ -501,7 +501,7 @@ async function spikeCube(moves, sleeped = 180, sleepL) {
     if (areBothSpikesConnected() || debug) {
         stopTimer(start);
     }
-    await sleep(200)
+    await sleepT(200)
     await updateBatteries();
     scSecure = false;
 }
