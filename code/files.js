@@ -11,13 +11,13 @@ window.initialFiles = {
       path: 'index.html',
       name: 'code.html',
       type: 'HTML',
-    }
+    },
     {
       id: 'html3',
       path: './terminal.html',
       name: 'terminal.html',
       type: 'HTML',
-    },
+    }
   ],
   css: [
     { 
@@ -105,8 +105,8 @@ window.initialFiles = {
       path: './visual.js',
       name: 'visual.js',
       type: 'JavaScript',
-    },
+    }
   ],
 };
 
-console.log(window.initialFiles)
+console.log(window.initialFiles || "no files")
