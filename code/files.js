@@ -2,7 +2,7 @@ window.initialFiles = {
   html: [
     {
       id: 'html1',
-      path: './index.html',
+      path: 'https://robotganspike.netlify.app/index.html',
       name: 'index.html',
       type: 'HTML',
     },
