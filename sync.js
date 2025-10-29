@@ -1,12 +1,3 @@
-async function sleep2(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-function sleep(miliseconds) {
-    const currentTime = new Date().getTime();
-    while (currentTime + miliseconds >= new Date().getTime()) {}
-}
-
 // Copy MAC address
 function copy_mac() {
     const mac = document.getElementById("mac");
@@ -56,7 +47,7 @@ const reversedMoves = new Set(["D", "L", "F"]);
 async function move(mov) {
     moves.push(mov)
     cube.move(mov)
-    console.log(`%cMain: ${mov}`, 'color:#9534eb;'); /// CACACSCSASCSACSACASASCas
+    console.log(`%cMain: ${mov}`, 'color:#9534eb;');
     let clockwise = !mov.endsWith("'");;
     let face = mov.replace("'", "");
     if (reversedMoves.has(face)) {
