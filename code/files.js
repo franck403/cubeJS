@@ -108,3 +108,5 @@ window.initialFiles = {
     },
   ],
 };
+
+console.log(window.initialFiles)
