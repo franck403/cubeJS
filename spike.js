@@ -33,7 +33,6 @@ var silence = false;
 let timerInterval = null;
 
 window.sleeped = 170;
-window.sleepLarge = 40; // More time for large motors
 
 const sexyMove1 = ["R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'"];
 const sexyMove2 = ["L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2"];
@@ -368,12 +367,12 @@ async function updateBatteries() {
 
 // MOVE
 
-async function runMovement(move, sleep = 220, sleepL = 40, noCube = false) {
+async function runMovement(move, sleep = 220, noCube = false) {
     if (!move || typeof move !== "string") return log(`Invalid move ${move}`);
     degCorrection(move);
     const cmd = CLP_LEFT[move] || CLP_RIGHT[move];
     const writer = CLP_LEFT[move] ? leftWriter : rightWriter;
-    const wait = (move.startsWith("B") || move.startsWith("D") ? sleep + sleepL : sleep) * (move.endsWith("2") ? 2 : 1);
+    const wait = (move.startsWith("B") || move.startsWith("D") ? sleep + 40 : sleep) * (move.endsWith("2") ? 2 : 1);
     if (!cmd || !writer) await sleepT(1);
     if (noCube) return console.warn("Cube Not Connected");
     await sendLine(writer, cmd);
@@ -467,14 +466,13 @@ async function spikeMove(move) {
     scSecure = false
 }
 
-async function spikeCube(moves, sleeped = 180, sleepL) {
+async function spikeCube(moves, sleeped = 180) {
     regen()
     if (scSecure) return console.warn("NO SPAM !!!");
     scSecure = true;
     const noCube = ganCubePresent();
     if (noCube) return console.warn("Cube Not Connected")
     const sleep = sleeped || window.sleeped;
-    const sleepL = sleepL || window.sleepLagrge;
     moves = simplifyMoves(moves);
     console.info(moves)
 
@@ -492,11 +490,11 @@ async function spikeCube(moves, sleeped = 180, sleepL) {
         const m = moves[i], n = moves[i + 1];
         if (isOpposite(m, n)) {
             await Promise.all([
-                runMovement(m, sleep, sleepL,  noCube),
-                runMovement(n, sleep + 10, sleepL, noCube)
+                runMovement(m, sleep, noCube),
+                runMovement(n, sleep + 10, noCube)
             ]);
             i++;
-        } else await runMovement(m, sleep, sleepL, noCube);
+        } else await runMovement(m, sleep, noCube);
     }
     if (areBothSpikesConnected() || debug) {
         stopTimer(start);
