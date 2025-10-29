@@ -196,7 +196,7 @@ async function reconnectSpike(side) {
             try { await p.close(); } catch { }
         }
     }
-    console.log(`No ${side} port found, retrying in 5s`);
+    console.info(`No ${side} port found, retrying in 5s`);
     setTimeout(() => reconnectSpike(side), 5000);
 }
 
@@ -736,7 +736,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.addEventListener('keyup', (e) => {
         bc.postMessage('ked' + e.key)
     });
-    
+
     bc.onmessage = (e) => {
     var data = e.data
     if (data == true) {
