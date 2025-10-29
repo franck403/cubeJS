@@ -463,6 +463,7 @@ async function spikeMove(move) {
         return
     };
     await runMovement(move);
+    await Promise.all([sendLine(leftWriter, clearDisplay), sendLine(rightWriter, clearDisplay)]);
     scSecure = false
 }
 
