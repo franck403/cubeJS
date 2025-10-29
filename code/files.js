@@ -14,7 +14,7 @@ window.initialFiles = {
     },
     {
       id: 'html3',
-      path: './terminal.html',
+      path: 'https://robotganspike.netlify.app/terminal.html',
       name: 'terminal.html',
       type: 'HTML',
     }
@@ -22,7 +22,7 @@ window.initialFiles = {
   css: [
     { 
       id: 'css1', 
-      path: './style.css', 
+      path: 'https://robotganspike.netlify.app/style.css', 
       name: 'style.css', 
       type: 'CSS' 
     },
@@ -34,7 +34,7 @@ window.initialFiles = {
     },
     { 
       id: 'css3', 
-      path: './batteries.css', 
+      path: 'https://robotganspike.netlify.app/batteries.css', 
       name: 'batteries.css', 
       type: 'CSS' 
     }
@@ -42,67 +42,67 @@ window.initialFiles = {
   js: [
     {
       id: 'js1',
-      path: './spike.js',
+      path: 'https://robotganspike.netlify.app/spike.js',
       name: 'spike.js',
       type: 'JavaScript',
     },
     {
       id: 'js2',
-      path: './visual3d.js',
+      path: 'https://robotganspike.netlify.app/visual3d.js',
       name: 'visual3d.js',
       type: 'JavaScript',
     },
     {
       id: 'js3',
-      path: './sync.js',
+      path: 'https://robotganspike.netlify.app/sync.js',
       name: 'sync.js',
       type: 'JavaScript',
     },
     {
       id: 'js4',
-      path: './cube.js',
+      path: 'https://robotganspike.netlify.app/cube.js',
       name: 'cube.js',
       type: 'JavaScript',
     },
     {
       id: 'js5',
-      path: './orbit.js',
+      path: 'https://robotganspike.netlify.app/orbit.js',
       name: 'orbit.js',
       type: 'JavaScript',
     },
     {
       id: 'js6',
-      path: './plugin.js',
+      path: 'https://robotganspike.netlify.app/plugin.js',
       name: 'plugin.js',
       type: 'JavaScript',
     },
     {
       id: 'js7',
-      path: './plugin.js',
+      path: 'https://robotganspike.netlify.app/plugin.js',
       name: 'plugin.js',
       type: 'JavaScript',
     },
     {
       id: 'js8',
-      path: './Corker.js',
+      path: 'https://robotganspike.netlify.app/Corker.js',
       name: 'Corker.js',
       type: 'JavaScript',
     },
     {
       id: 'js9',
-      path: './keyboard.js',
+      path: 'https://robotganspike.netlify.app/keyboard.js',
       name: 'keyboard.js',
       type: 'JavaScript',
     },
     {
       id: 'js10',
-      path: './secure.js',
+      path: 'https://robotganspike.netlify.app/secure.js',
       name: 'secure.js',
       type: 'JavaScript',
     },
     {
       id: 'js11',
-      path: './visual.js',
+      path: 'https://robotganspike.netlify.app/visual.js',
       name: 'visual.js',
       type: 'JavaScript',
     }
