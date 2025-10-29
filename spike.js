@@ -469,13 +469,13 @@ async function spikeMove(move) {
 
 async function spikeCube(moves, sleeped = 180) {
     regen()
+    moves = simplifyMoves(moves);
+    console.info(moves)
     if (scSecure) return console.warn("NO SPAM !!!");
     scSecure = true;
     const noCube = ganCubePresent();
     if (noCube) return console.warn("Cube Not Connected")
     const sleep = sleeped || window.sleeped;
-    moves = simplifyMoves(moves);
-    console.info(moves)
 
     const lenStr = String(moves.length).padStart(2, "0");
     await Promise.all([
