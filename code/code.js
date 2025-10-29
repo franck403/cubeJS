@@ -1,156 +1,92 @@
 let files = window.initialFiles;
 let speed = 1.2;
+let ogSpeed = speed;
 
-// Initialisation
+// Initialization
 document.addEventListener('DOMContentLoaded', () => {
   createColumns();
   loadFiles();
 });
 
-// Créer les colonnes
+// Create columns for HTML, CSS, JS
 function createColumns() {
-    if (!files) return;
+  if (!files) return;
   const container = document.getElementById('container');
   container.innerHTML = '';
 
-  // Colonne HTML
-  const htmlColumn = document.createElement('div');
-  htmlColumn.className = 'scroll-column';
-  htmlColumn.innerHTML = `
-  <div class="banner">
-    <span class="filename">${files.html[0].name}</span>
-    <span class="filetype" id="html">HTML</span>
-  </div>
-  ${files.html
-    .map(
-      (file) =>
-        `<pre><code id="${file.id}" class="language-html"></code></pre>`
-    )
-    .join('')}
-  `;
-  container.appendChild(htmlColumn);
+  ['html', 'css', 'js'].forEach(type => {
+    const column = document.createElement('div');
+    column.className = 'scroll-column';
 
-  // Colonne CSS
-  const cssColumn = document.createElement('div');
-  cssColumn.className = 'scroll-column';
-  cssColumn.innerHTML = `
-  <div class="banner">
-    <span class="filename">${files.css[0].name}</span>
-    <span class="filetype" id="css">CSS</span>
-  </div>
-  ${files.css
-    .map(
-      (file) =>
-        `<pre><code id="${file.id}" class="language-css"></code></pre>`
-    )
-    .join('')}
-  `;
-  container.appendChild(cssColumn);
+    const banner = document.createElement('div');
+    banner.className = 'banner';
+    const filenameSpan = document.createElement('span');
+    filenameSpan.className = 'filename';
+    filenameSpan.textContent = files[type][0].name;
+    const filetypeSpan = document.createElement('span');
+    filetypeSpan.className = 'filetype';
+    filetypeSpan.id = type;
+    filetypeSpan.textContent = type.toUpperCase();
 
-  // Colonne JS
-  const jsColumn = document.createElement('div');
-  jsColumn.className = 'scroll-column';
-  jsColumn.innerHTML = `
-  <div class="banner">
-    <span class="filename">${files.js[0].name}</span>
-    <span class="filetype" id="js">JavaScript</span>
-  </div>
-  ${files.js
-    .map(
-      (file) =>
-        `<pre><code id="${file.id}" class="language-javascript"></code></pre>`
-    )
-    .join('')}
-  `;
-  container.appendChild(jsColumn);
+    banner.appendChild(filenameSpan);
+    banner.appendChild(filetypeSpan);
+    column.appendChild(banner);
+
+    files[type].forEach(file => {
+      const pre = document.createElement('pre');
+      const code = document.createElement('code');
+      code.id = file.id;
+      code.className = `language-${type}`;
+      pre.appendChild(code);
+      column.appendChild(pre);
+    });
+
+    container.appendChild(column);
+  });
 }
 
-// Charger les fichiers
+// Load files and populate code blocks
 function loadFiles() {
-  const htmlPromises = files.html.map((file) =>
-    fetch(file.path)
-      .then((res) => res.text())
-      .then((code) => ({ id: file.id, code }))
-      .catch((error) => ({
-        id: file.id,
-        code: `<!-- Erreur: ${error.message} -->`,
-      }))
-  );
+  const promises = [];
+  ['html', 'css', 'js'].forEach(type => {
+    files[type].forEach(file => {
+      promises.push(
+        fetch(file.path)
+          .then(res => res.text())
+          .then(code => ({ id: file.id, code }))
+          .catch(error => ({
+            id: file.id,
+            code: `<!-- Error: ${error.message} -->`
+          }))
+      );
+    });
+  });
 
-  const cssPromises = files.css.map((file) =>
-    fetch(file.path)
-      .then((res) => res.text())
-      .then((code) => ({ id: file.id, code }))
-      .catch((error) => ({
-        id: file.id,
-        code: `/* Erreur: ${error.message} */`,
-      }))
-  );
-
-  const jsPromises = files.js.map((file) =>
-    fetch(file.path)
-      .then((res) => res.text())
-      .then((code) => ({ id: file.id, code }))
-      .catch((error) => ({
-        id: file.id,
-        code: `// Erreur: ${error.message}`,
-      }))
-  );
-
-  Promise.all([...htmlPromises, ...cssPromises, ...jsPromises]).then((results) => {
-    results.forEach((result) => {
+  Promise.all(promises).then(results => {
+    results.forEach(result => {
       const el = document.getElementById(result.id);
       if (!el) return;
       el.textContent = result.code;
       hljs.highlightElement(el);
     });
-
-    startAutoScroll(
-      document.querySelector('.scroll-column:nth-child(1)'),
-      files.html.map((f) => f.id),
-      files.html.map((f) => f.name),
-      files.html.map(() => 'HTML')
-    );
-
-    startAutoScroll(
-      document.querySelector('.scroll-column:nth-child(2)'),
-      files.css.map((f) => f.id),
-      files.css.map((f) => f.name),
-      files.css.map(() => 'CSS')
-    );
-
-    startAutoScroll(
-      document.querySelector('.scroll-column:nth-child(3)'),
-      files.js.map((f) => f.id),
-      files.js.map((f) => f.name),
-      files.js.map(() => 'JavaScript')
-    );
+    startAutoScrollForAllColumns();
   });
 }
 
-// Recharger uniquement les fichiers JS
-function reloadJsFiles() {
-  const jsPromises = files.js.map((file) =>
-    fetch(file.path)
-      .then((res) => res.text())
-      .then((code) => ({ id: file.id, code }))
-      .catch((error) => ({
-        id: file.id,
-        code: `// Erreur: ${error.message}`,
-      }))
-  );
-
-  Promise.all(jsPromises).then((results) => {
-    results.forEach((result) => {
-      document.getElementById(result.id).textContent = result.code;
-      hljs.highlightElement(document.getElementById(result.id));
-    });
+// Start auto-scroll for all columns
+function startAutoScrollForAllColumns() {
+  ['html', 'css', 'js'].forEach((type, colIndex) => {
+    const column = document.querySelector(`.scroll-column:nth-child(${colIndex + 1})`);
+    const fileIds = files[type].map(f => f.id);
+    const filenames = files[type].map(f => f.name);
+    const filetypes = files[type].map(() => type.toUpperCase());
+    startAutoScroll(column, fileIds, filenames, filetypes);
   });
 }
 
-// Animation de défilement
+// Auto-scroll animation
 function startAutoScroll(column, fileIds, filenames, filetypes) {
-  const elements = fileIds.map((id) => document.getElementById(id));
+  const elements = fileIds.map(id => document.getElementById(id));
   const bannerFilename = column.querySelector('.filename');
   const bannerFiletype = column.querySelector('.filetype');
   let currentIndex = 0;
@@ -170,18 +106,16 @@ function startAutoScroll(column, fileIds, filenames, filetypes) {
     const currentElement = elements[currentIndex];
     const currentHeight = currentElement.scrollHeight;
     const containerHeight = column.clientHeight - 30;
-    pos += speed;
 
+    pos += speed;
     if (pos >= currentHeight - containerHeight) {
       pos = 0;
       currentElement.style.top = '30px';
-
       if (elements.length > 1) {
         currentElement.style.display = 'none';
         const nextIndex = (currentIndex + 1) % elements.length;
         elements[nextIndex].style.display = 'block';
         currentIndex = nextIndex;
-
         if (bannerFilename && bannerFiletype) {
           bannerFilename.textContent = filenames[currentIndex];
           bannerFiletype.textContent = filetypes[currentIndex];
@@ -190,20 +124,17 @@ function startAutoScroll(column, fileIds, filenames, filetypes) {
     } else {
       currentElement.style.top = `-${pos}px`;
     }
-
     requestAnimationFrame(scroll);
   }
-
   scroll();
 }
 
-let ogSpeed = speed;
-
+// Keyboard controls for scroll speed
 document.addEventListener("keydown", (e) => {
   if (e.key === "ArrowDown") {
     speed = e.shiftKey ? 20 : 10;
   } else if (e.key === "Shift" && speed === 10) {
-    speed = 20; // press Shift while holding ArrowDown
+    speed = 20;
   } else if (e.key === "ArrowUp") {
     speed = 0;
   }
@@ -211,10 +142,8 @@ document.addEventListener("keydown", (e) => {
 
 document.addEventListener("keyup", (e) => {
   if (e.key === "Shift" && speed === 20) {
-    speed = 10; // release Shift, still holding ArrowDown
-  } else if (e.key === "ArrowDown") {
-    speed = ogSpeed; // release ArrowDown
-  } else if (e.key === "ArrowUp") {
+    speed = 10;
+  } else if (e.key === "ArrowDown" || e.key === "ArrowUp") {
     speed = ogSpeed;
   }
 });
