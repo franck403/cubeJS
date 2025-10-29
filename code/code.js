@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Créer les colonnes
 function createColumns() {
-    if (|files) return;
+    if (!files) return;
   const container = document.getElementById('container');
   container.innerHTML = '';
 
