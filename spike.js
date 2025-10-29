@@ -33,6 +33,7 @@ var silence = false;
 let timerInterval = null;
 
 window.sleeped = 170;
+window.sleepLarge = 40; // More time for large motors
 
 const sexyMove1 = ["R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'"];
 const sexyMove2 = ["L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2"];
@@ -367,8 +368,23 @@ async function updateBatteries() {
 
 // MOVE
 
-async function runMovement(move, sleep = 220, noCube = false) {
+async function runMovement(move, sleep = 220, sleepL = 40, noCube = false) {
     if (!move || typeof move !== "string") return log(`Invalid move ${move}`);
+    degCorrection(move);
+    const cmd = CLP_LEFT[move] || CLP_RIGHT[move];
+    const writer = CLP_LEFT[move] ? leftWriter : rightWriter;
+    const wait = (move.startsWith("B") || move.startsWith("D") ? sleep + sleepL : sleep) * (move.endsWith("2") ? 2 : 1);
+    if (!cmd || !writer) await sleep(1);
+    if (noCube) return console.warn("Cube Not Connected");
+    await sendLine(writer, cmd);
+    const mov = move.charAt(0);
+    const sym = move.charAt(1);
+    await sendLine(leftWriter,  `light_matrix.write("${mov}",100)`);
+    await sendLine(rightWriter, `light_matrix.write("${sym}",100)`);
+    await sleep(wait);
+}
+
+function degCorrection(move) {
     if (move.startsWith("B")) {
         if (move.endsWith("2") || move.endsWith("'")) {
             b = lb === 1 ? cb : 0;
@@ -403,18 +419,6 @@ async function runMovement(move, sleep = 220, noCube = false) {
         }
     }
     regen();
-    const cmd = CLP_LEFT[move] || CLP_RIGHT[move];
-    const writer = CLP_LEFT[move] ? leftWriter : rightWriter;
-    const wait = (move.startsWith("B") || move.startsWith("D") ? sleep + 40 : sleep) * (move.endsWith("2") ? 2 : 1);
-    if (!cmd || !writer) await sleep(1);
-    if (!noCube) {
-        await sendLine(writer, cmd);
-        await sendLine(leftWriter, `light_matrix.write("${move[0]}",100)`);
-        const sym = move.endsWith("'") ? "'" : move.endsWith("2") ? "2" : "";
-        await sendLine(rightWriter, `light_matrix.write("${sym}",100)`);
-    } else console.warn("Cube Not Connected");
-
-    await sleep(wait);
 }
 
 async function resetMotors() {
@@ -463,13 +467,14 @@ async function spikeMove(move) {
     scSecure = false
 }
 
-async function spikeCube(moves, sleeped = 180) {
+async function spikeCube(moves, sleeped = 180, sleepL) {
     regen()
     if (scSecure) return console.warn("NO SPAM !!!");
     scSecure = true;
     const noCube = ganCubePresent();
     if (noCube) return console.warn("Cube Not Connected")
     const sleep = sleeped || window.sleeped;
+    const sleepL = sleepL || window.sleepLagrge;
     moves = simplifyMoves(moves);
     console.info(moves)
 
@@ -487,11 +492,11 @@ async function spikeCube(moves, sleeped = 180) {
         const m = moves[i], n = moves[i + 1];
         if (isOpposite(m, n)) {
             await Promise.all([
-                runMovement(m, sleep, noCube),
-                runMovement(n, sleep + 10, noCube)
+                runMovement(m, sleep, sleepL,  noCube),
+                runMovement(n, sleep + 10, sleepL, noCube)
             ]);
             i++;
-        } else await runMovement(m, sleep, noCube);
+        } else await runMovement(m, sleep, sleepL, noCube);
     }
     if (areBothSpikesConnected() || debug) {
         stopTimer(start);
