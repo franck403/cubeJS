@@ -400,7 +400,7 @@ async function runMovement(move, sleep = 220, noCube = false) {
     regen();
     const cmd = CLP_LEFT[move] || CLP_RIGHT[move];
     const writer = CLP_LEFT[move] ? leftWriter : rightWriter;
-    console.log(`%cMain: ${move}`, 'color:#c300ff;');
+    console.log(`%cMain: ${move}`, 'color:#9534eb;');
     const wait = (move.startsWith("B") || move.startsWith("D") ? sleep + 40 : sleep) * (move.endsWith("2") ? 2 : 1);
     if (!cmd || !writer) await new Promise(r => setTimeout(r, 1));
     if (!noCube) {
@@ -737,6 +737,8 @@ document.addEventListener('DOMContentLoaded', () => {
         bc.postMessage('ked' + e.key)
     });
 
+    bc.postMessage("Connected");
+
     bc.onmessage = (e) => {
     var data = e.data
     if (data == true) {
@@ -746,7 +748,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('timerBlock').style.display = 'block'
     } else if (data.startsWith("Move: ")) {
         let move = data.replace("Move: ", "");
-        console.log(`%cSec:  ${move}`, 'color:#c300ff;');
+        console.log(`%cSec:  ${move}`, 'color:#eb34d8;');
         playMove(move);
     } 
     else {
@@ -755,8 +757,4 @@ document.addEventListener('DOMContentLoaded', () => {
 }
 });
 
-// BROADCAST
-
 const bc = new BroadcastChannel(localStorage.bc);
-
-bc.postMessage("Connected");
