@@ -695,14 +695,14 @@ async function solve2ndCube(mvs) {
 
     window.dontMove = true;
     console.info("Starting 2nd cube solve");
-    console.info("Moves: ", mvs);
+    console.info("Moves: ", mvs.replace(",", ""));
     let still = [...mvs];
     await new Promise((resolve) => {
         bc.onmessage = (e) => {
             const data = e.data;
             if (typeof data !== "string" || !data.startsWith("Move: ")) return;
 
-            const move = data.replace("Move: ,", "").trim();
+            const move = data.replace("Move: ", "").trim();
             const expected = still[0];
             const next = still[1]
 
