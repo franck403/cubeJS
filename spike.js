@@ -800,4 +800,6 @@ document.addEventListener('DOMContentLoaded', () => {
 }
 });
 
+// BROADCAST
+
 const bc = new BroadcastChannel(localStorage.bc);
