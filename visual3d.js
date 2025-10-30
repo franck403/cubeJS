@@ -613,7 +613,7 @@ async function animate3DSolution(moves, delay = 200) {
 }
 
 async function animate3DSolution2(moves, delay = 200) {
-    console.log(moves)
+    console.info(moves)
     for (const move of moves) {
         const face = move;
         let times = 1;

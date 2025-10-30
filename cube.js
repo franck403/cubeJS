@@ -1,6 +1,6 @@
 let cube; // keep cube instance global
 document.getElementById('res').innerHTML = 'Initializing solver in worker...';
-let load = document.getElementById('load');
+let loader = document.getElementById('load');
 
 // Draw scrambled cube immediately
 function initCube() {
@@ -15,7 +15,7 @@ initCube();
 // Start the worker
 setTimeout(()=> {
   try {
-    if (load) load.remove()
+    if (loader) loader.remove()
   } catch {}
 },10000)
 const worker = new Worker('Corker.js');
@@ -23,18 +23,16 @@ const worker = new Worker('Corker.js');
 worker.onmessage = function (e) {
   if (e.data.type === 'ready') {
     document.getElementById('res').innerHTML = 'Solver ready!';
-    if (load) load.remove();
+    if (loader) loader.remove();
   }
 
   if (e.data.type === 'solution') {
-    //return;
     document.getElementById("res").innerHTML =
       "Solution: " + e.data.solution;
 
     const moves = e.data.solution.trim().split(/\s+/);
 
-    // 3D animation
-    //animate3DSolution(moves, 10);
+    // animate3DSolution2(moves, 10);
     console.info("Start Solve")
     var fnc = async () => {
       if (!silence) {
@@ -45,11 +43,6 @@ worker.onmessage = function (e) {
       await solve2ndCube(moves);
     }
     fnc()
-    /*document.getElementById('res').innerHTML = 'Solution: ' + e.data.solution;
-
-    const moves = e.data.solution.trim().split(/\s+/);
-    // Animate the cube solving step by step
-    animateSolution(cube, moves, 'cubeCanvas', 600);*/
   }
 };
 
