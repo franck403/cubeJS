@@ -711,7 +711,7 @@ async function solve2ndCube(mvs) {
                 if (still.length !== 0) console.info(`Next: ${next}`);
             } else {
                 console.warn(`No: ${move}, expected: ${expected}`);
-                console.info(`Correct move: `, )
+                console.info(`Correct move: `, move)
             }
 
             if (still.length === 0) {
