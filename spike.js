@@ -703,9 +703,11 @@ async function solve2ndCube(mvs) {
 
             const move = data.replace("Move: ", "").trim();
             const expected = still[0];
+            const next = still[1]
 
             if (move === expected) {
                 still.shift();
+                console.info(`Next: ${next}`)
             } else {
                 console.warn(`No: ${move}, expected: ${expected}`);
                 console.info(`Correct move: `, )
