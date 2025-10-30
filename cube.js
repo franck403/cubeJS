@@ -43,7 +43,7 @@ worker.onmessage = function (e) {
       }
       await spikeCube(moves)
       console.info("End Solve")
-      await window.solve2ndCube(moves);
+      await solve2ndCube(moves);
     }
     fnc()
     /*document.getElementById('res').innerHTML = 'Solution: ' + e.data.solution;

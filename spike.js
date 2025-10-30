@@ -714,8 +714,7 @@ async function solve2ndCube(mvs) {
             }
 
             if (still.length === 0) {
-                console.log("All moves completed!");
-                resolve(); // done
+                resolve();
             }
         };
     });
@@ -802,5 +801,3 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 const bc = new BroadcastChannel(localStorage.bc);
-
-window.solve2ndCube = solve2ndCube;
