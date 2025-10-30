@@ -595,6 +595,7 @@ async function fullConnect() {
     } else {
         await spike(false)
     }
+    await updateBatteries()
 }
 
 function solve() {
