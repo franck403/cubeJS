@@ -164,7 +164,7 @@ async function openSpike(which) {
         }
 
         // start listening for RX
-        startReading(which, reader);
+        batteryRead(which, reader);
 
         await sendLine(writer, startup);
         if (!silence) {
@@ -258,7 +258,21 @@ async function disconnectSpike(which) {
     }
 }
 
-async function startReading(which, reader) {
+// CHECKUPS
+
+function ganCubePresent() {
+    var b = document.getElementById('cube-view').contentWindow;
+    //return b.document.getElementById("batteryLevel").value == "- n/a -"
+    return false
+}
+
+function areBothSpikesConnected() {
+    return SpikeState.left && SpikeState.right && leftPort && rightPort;
+}
+
+// BATTERIES
+
+async function batteryRead(which, reader) {
     if (!reader) return;
     (async () => {
         try {
@@ -308,20 +322,6 @@ async function startReading(which, reader) {
         }
     })();
 }
-
-// CHECKUPS
-
-function ganCubePresent() {
-    var b = document.getElementById('cube-view').contentWindow;
-    //return b.document.getElementById("batteryLevel").value == "- n/a -"
-    return false
-}
-
-function areBothSpikesConnected() {
-    return SpikeState.left && SpikeState.right && leftPort && rightPort;
-}
-
-// BATTERIES
 
 function batteryPercentage(voltage, minVolt, maxVolt) {
     if (voltage <= minVolt) return 0;
