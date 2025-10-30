@@ -1,5 +1,6 @@
 let cube; // keep cube instance global
 document.getElementById('res').innerHTML = 'Initializing solver in worker...';
+let load = document.getElementById('load');
 
 // Draw scrambled cube immediately
 function initCube() {
@@ -14,7 +15,7 @@ initCube();
 // Start the worker
 setTimeout(()=> {
   try {
-    document.getElementById('load').remove()
+    if (load) load.remove()
   } catch {}
 },10000)
 const worker = new Worker('Corker.js');
@@ -22,9 +23,7 @@ const worker = new Worker('Corker.js');
 worker.onmessage = function (e) {
   if (e.data.type === 'ready') {
     document.getElementById('res').innerHTML = 'Solver ready!';
-    document.getElementById('load').remove()
-    // Now that solver is ready, send the cube state
-    //worker.postMessage({ type: 'solve', state: cube.asString() });
+    if (load) load.remove();
   }
 
   if (e.data.type === 'solution') {
