@@ -712,7 +712,8 @@ async function solve2ndCube(mvs) {
     nxt.clasList.add("active")
     console.info("Starting 2nd cube solve");
     console.info("Moves: " + mvs.join(","));
-    let still = [...mvs];   
+    let still = [...mvs];
+    nxt.innerHTML = still[0];
     await new Promise((resolve) => {
         bc.onmessage = (e) => {
             const data = e.data;
