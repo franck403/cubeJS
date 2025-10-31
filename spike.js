@@ -695,7 +695,7 @@ async function solve2ndCube(mvs) {
 
     window.dontMove = true;
     console.info("Starting 2nd cube solve");
-    console.info("Moves: ", mvs.join(",").replace(",", ""));
+    console.info("Moves: " + mvs.join(","));
     let still = [...mvs];
     await new Promise((resolve) => {
         bc.onmessage = (e) => {
