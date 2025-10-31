@@ -3,6 +3,8 @@ let leftWriter, rightWriter = null;
 let leftReader, rightReader = null;
 let leftAbort,  rightAbort  = null;
 
+const nxt = document.getElementById("move")
+
 var store = [];
 
 let SpikeState = { left: false, right: false };
@@ -585,6 +587,20 @@ function simplifyMoves(moves) {
     return out;
 }
 
+function rvsMove(move) {
+  if (!move) return;
+  const lastChar = move[move.length - 1];
+  const face = move[0];
+  if (lastChar === "'") {
+    return face; // R' → R
+  } else if (lastChar === "2") {
+    return move; // R2 → R2
+  } else {
+    return face + "'"; // R → R'
+  }
+}
+
+
 // NAVBAR
 
 async function fullConnect() {
@@ -708,10 +724,21 @@ async function solve2ndCube(mvs) {
 
             if (move === expected) {
                 still.shift();
-                if (still.length !== 0) console.info(`Next: ${next}`);
+                if (still.length !== 0) {
+                    console.info(`Next: ${next}`);
+                    nxt.innerHTML = next;
+                    if (wrong) {
+                        nxt.classList.remove("wrong")
+                        wrong = false;
+                    }
+                }
             } else {
-                console.warn(`No: ${move}, expected: ${expected}`);
-                console.info(`Correct move: `, move)
+                console.warn(`No: ${move}, expected: ${expected}`)  
+                const rvs = rvsMove(move)
+                still.push(rvs)
+                nxt.innerHTML = rvs;
+                nxt.classList.add("wrong")
+                wrong = true;
             }
 
             if (still.length === 0) {

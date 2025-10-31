@@ -279,3 +279,17 @@ body {
 .topBar button {background:#39ADAD;}
 .btn  {background:#114B5F;}
 .bat {background: #7A306C;color: #FF84E8;}
+
+.move {
+    position:fixed;
+    top: 48vh;
+    right: 2vw;
+}
+
+.move:not(.wrong) {
+    background:rgba(50, 250, 40, 0.4);
+}
+
+.move.wrong {
+    background:rgba(250, 50, 40, 0.4);
+}
