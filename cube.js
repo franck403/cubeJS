@@ -23,7 +23,7 @@ const worker = new Worker('Corker.js');
 worker.onmessage = function (e) {
   if (e.data.type === 'ready') {
     document.getElementById('res').innerHTML = 'Solver ready!';
-    if (loader) loader.remove();
+    loader.remove();
   }
 
   if (e.data.type === 'solution') {
