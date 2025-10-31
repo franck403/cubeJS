@@ -737,7 +737,7 @@ async function solve2ndCube(mvs) {
                 }
             } else {
                 const rvs = rvsMove(move)
-                console.warn(`No: ${move}, do: ${}, expected: ${expected}`)  
+                console.warn(`No: ${move}, do: ${rvs}, expected: ${expected}`)  
                 still.push(rvs)
                 nxt.innerHTML = rvs;
                 nxt.classList.add("wrong")
