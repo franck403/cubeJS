@@ -710,6 +710,7 @@ async function solve2ndCube(mvs) {
     if (!mvs || mvs.length === 0) return console.warn("No moves for 2nd cube");
 
     window.dontMove = true;
+    nxt.clasList.add("active")
     console.info("Starting 2nd cube solve");
     console.info("Moves: " + mvs.join(","));
     let still = [...mvs];   
@@ -748,6 +749,7 @@ async function solve2ndCube(mvs) {
     });
 
     window.dontMove = false;
+    nxt.clasList.remove("active")
     console.info("2nd cube solved");
 }
 

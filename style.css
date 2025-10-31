@@ -284,6 +284,11 @@ body {
     position:fixed;
     top: 48vh;
     right: 2vw;
+    display: none;
+}
+
+.move.active {
+    display: block;
 }
 
 .move:not(.wrong) {
