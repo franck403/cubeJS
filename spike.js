@@ -706,6 +706,7 @@ async function sexyMoves3() {
     console.log("End Sexy Move 3")
 }
 
+let still = [];
 async function solve2ndCube(mvs) {
     if (!bc) return console.warn("No bc connection found");
     if (!mvs || mvs.length === 0) return console.warn("No moves for 2nd cube");
@@ -713,7 +714,7 @@ async function solve2ndCube(mvs) {
     nxt.classList.add("active")
     console.info("Starting 2nd cube solve");
     console.info("Moves: " + mvs.join(","));
-    let still = [...mvs];
+    still = [...mvs];
     nxt.innerHTML = still[0];
     await new Promise((resolve) => {
         bc.onmessage = (e) => {
@@ -735,8 +736,8 @@ async function solve2ndCube(mvs) {
                     }
                 }
             } else {
-                console.warn(`No: ${move}, expected: ${expected}`)  
                 const rvs = rvsMove(move)
+                console.warn(`No: ${move}, do: ${}, expected: ${expected}`)  
                 still.push(rvs)
                 nxt.innerHTML = rvs;
                 nxt.classList.add("wrong")
