@@ -1,3 +1,5 @@
+window.n
+
 // Copy MAC address
 function copy_mac() {
     const mac = document.getElementById("mac");

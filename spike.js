@@ -3,8 +3,6 @@ let leftWriter, rightWriter = null;
 let leftReader, rightReader = null;
 let leftAbort,  rightAbort  = null;
 
-const nxt = document.getElementById("move")
-
 var store = [];
 
 let SpikeState = { left: false, right: false };
@@ -35,6 +33,8 @@ var silence = false;
 let timerInterval = null;
 
 window.sleeped = 170;
+
+let nxt
 
 const sexyMove1 = ["R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'"];
 const sexyMove2 = ["L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2"];
@@ -708,7 +708,6 @@ async function sexyMoves3() {
 async function solve2ndCube(mvs) {
     if (!bc) return console.warn("No bc connection found");
     if (!mvs || mvs.length === 0) return console.warn("No moves for 2nd cube");
-
     window.dontMove = true;
     nxt.clasList.add("active")
     console.info("Starting 2nd cube solve");
@@ -756,6 +755,7 @@ async function solve2ndCube(mvs) {
 // KEYBOARD MAPPIMG
 
 document.addEventListener('DOMContentLoaded', () => {
+    nxt = document.getElementById("nxt");
     const keyToCubeMove = {
         5: 'U',
         t: "U'",
