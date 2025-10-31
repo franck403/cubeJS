@@ -813,21 +813,21 @@ document.addEventListener('DOMContentLoaded', () => {
     bc.postMessage("Connected");
 
     bc.onmessage = (e) => {
-    var data = e.data
-    if (data == true) {
-        document.getElementById('timerBlock').style.display = 'none'
-        bcState = true;
-    } else if (data == false) {
-        document.getElementById('timerBlock').style.display = 'block'
-    } else if (data.startsWith("Move: ") && !window.dontMove) {
-        let move = data.replace("Move: ", "");
-        console.log(`%cSec:  ${move}`, 'color:#eb34d8;');
-        playMove(move);
-    } 
-    else {
-        console.debug("Unknown message from Slide tab: ", data)
+        var data = e.data
+        if (data == true) {
+            document.getElementById('timerBlock').style.display = 'none'
+            bcState = true;
+        } else if (data == false) {
+            document.getElementById('timerBlock').style.display = 'block'
+        } else if (data.startsWith("Move: ") && !window.dontMove) {
+            let move = data.replace("Move: ", "");
+            console.log(`%cSec:  ${move}`, 'color:#eb34d8;');
+            playMove(move);
+        } 
+        else {
+            console.debug("Unknown message from Slide tab: ", data)
+        }
     }
-}
 });
 
 // BROADCAST
