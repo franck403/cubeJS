@@ -1,29 +1,22 @@
-let leftPort,   rightPort   = null;
+let leftPort, rightPort = null;
 let leftWriter, rightWriter = null;
 let leftReader, rightReader = null;
-let leftAbort,  rightAbort  = null;
+let leftAbort, rightAbort = null;
 
 var store = [];
 
 let SpikeState = { left: false, right: false };
 
-let scSecure        = false;
-let solveSecure     = false;
+let scSecure = false;
+let solveSecure = false;
 let fullscreenstate = false;
-let spinState       = false;
-let bcState         = false;
+let spinState = false;
+let bcState = false;
 
 let scLenght = 20;
 
 let deg = 95;  // Moves x 1
 let dog = 180; // Moves x 2
-
-let u  = 0, f  = 0, l  = 0, r  = 0, b  = 0, d  = 0;
-let u1 = 0, f1 = 0, l1 = 0, r1 = 0, b1 = 0, d1 = 0;
-let u2 = 0, f2 = 0, l2 = 0, r2 = 0, b2 = 0, d2 = 0;
-
-let cb = 3; // back deg corr
-let cd = 3; // down deg corr
 
 let lb = localStorage.lb || 0;
 let ld = localStorage.ld || 0;
@@ -337,36 +330,34 @@ async function updateBatteries() {
 // MOVE
 
 async function runMovement(move, sleep = 220, noCube = false) {
-  if (!move || typeof move !== 'string') return console.log(`Invalid move ${move}`);
+    if (!move || typeof move !== 'string') return console.log(`Invalid move ${move}`);
 
-  const face = move.charAt(0);
-  const sym  = move.charAt(1) || '';
+    const face = move.charAt(0);
+    const sym = move.charAt(1) || '';
 
-  const left = leftFaces.includes(face);
-  const idx  = left ? leftFaces.indexOf(face) : rightFaces.indexOf(face);
+    const left = leftFaces.includes(face);
+    const idx = left ? leftFaces.indexOf(face) : rightFaces.indexOf(face);
 
-  const port = left ? leftPorts[idx] : rightPorts[idx];
+    const port = left ? leftPorts[idx] : rightPorts[idx];
 
-  const deg =
-    (sym === '2' ? 180 :
-     sym === "'" ? -90 :
-     90) + cor;
+    const c = largeFaces.includes(face) ? cor : 0; 
+    const deg = (sym === '2' ? dog : sym === "'" ? -deg : deg) + c;
 
-  const wait =
-    (largeFaces.includes(face) ? sleep + 40 : sleep) *
-    (move.endsWith('2') ? 2 : 1);
+    const wait =
+        (largeFaces.includes(face) ? sleep + 40 : sleep) *
+        (move.endsWith('2') ? 2 : 1);
 
-  const cmd =
-    `motor.run_to_absolute_position(port.${port}, motor.absolute_position(port.${port}) - ${deg}, 1110, stop=motor.SMART_BRAKE, acceleration=${acc}, deceleration=${dec});\n`;
+    const cmd =
+        `motor.run_to_absolute_position(port.${port}, motor.absolute_position(port.${port}) - ${deg}, 1110, stop=motor.SMART_BRAKE, acceleration=${acc}, deceleration=${dec});\n`;
 
-  const writer = left ? leftWriter : rightWriter;
+    const writer = left ? leftWriter : rightWriter;
 
-  if (noCube) return console.warn('Cube Not Connected');
+    if (noCube) return console.warn('Cube Not Connected');
 
-  await sendLine(writer, cmd);
-  await sendLine(leftWriter, `light_matrix.write("${face}",100)`);
-  await sendLine(rightWriter, `light_matrix.write("${sym}",100)`);
-  await sleepT(wait);
+    await sendLine(writer, cmd);
+    await sendLine(leftWriter, `light_matrix.write("${face}",100)`);
+    await sendLine(rightWriter, `light_matrix.write("${sym}",100)`);
+    await sleepT(wait);
 }
 
 function degCorrection(move) {
@@ -453,7 +444,7 @@ async function spikeMove(move) {
 }
 
 async function spikeCube(moves, sleeped = 180) {
-    
+
     moves = simplifyMoves(moves);
     console.info(moves)
     if (scSecure) return console.warn("NO SPAM !!!");
@@ -502,7 +493,7 @@ var Soupdate = () => {
 }
 
 async function playMove(move) {
-    
+
     store.push(move)
 }
 
@@ -571,16 +562,16 @@ function simplifyMoves(moves) {
 }
 
 function rvsMove(move) {
-  if (!move) return;
-  const lastChar = move[move.length - 1];
-  const face = move[0];
-  if (lastChar === "'") {
-    return face; // R' → R
-  } else if (lastChar === "2") {
-    return move; // R2 → R2
-  } else {
-    return face + "'"; // R → R'
-  }
+    if (!move) return;
+    const lastChar = move[move.length - 1];
+    const face = move[0];
+    if (lastChar === "'") {
+        return face; // R' → R
+    } else if (lastChar === "2") {
+        return move; // R2 → R2
+    } else {
+        return face + "'"; // R → R'
+    }
 }
 
 
@@ -816,7 +807,7 @@ document.addEventListener('DOMContentLoaded', () => {
             let move = data.replace("Move: ", "");
             console.log(`%cSec:  ${move}`, 'color:#eb34d8;');
             playMove(move);
-        } 
+        }
         else {
             console.debug("Unknown message from Slide tab: ", data)
         }
