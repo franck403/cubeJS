@@ -403,7 +403,6 @@ function degCorrection(move) {
             console.debug(`D - 2 - ${d}`);
         }
     }
-    regen();
 }
 
 async function resetMotors() {
@@ -454,7 +453,7 @@ async function spikeMove(move) {
 }
 
 async function spikeCube(moves, sleeped = 180) {
-    regen()
+    
     moves = simplifyMoves(moves);
     console.info(moves)
     if (scSecure) return console.warn("NO SPAM !!!");
@@ -503,7 +502,7 @@ var Soupdate = () => {
 }
 
 async function playMove(move) {
-    regen()
+    
     store.push(move)
 }
 
