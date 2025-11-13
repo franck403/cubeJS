@@ -690,7 +690,7 @@ async function sexyMoves3() {
 
 let still = [];
 async function solve2ndCube(mvs) {
-    if (!bc) return console.warn("No bc connection found");
+    if (!bcState) return console.warn("No bc connection found");
     if (!mvs || mvs.length === 0) return console.warn("No moves for 2nd cube");
     window.dontMove = true;
     nxt.classList.add("active")
