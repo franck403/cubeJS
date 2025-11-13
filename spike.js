@@ -36,6 +36,15 @@ window.sleeped = 170;
 
 let nxt;
 let wrong;
+
+let leftFaces = ['U', 'L', 'F'];
+let leftPorts = ['A', 'C', 'E'];
+let rightFaces = ['R', 'B', 'D'];
+let rightPorts = ['D', 'F', 'B'];
+let largeFaces = ['D', 'B'];
+
+let cor = 5;
+let acc = 100000000;
 let dec = 11000;
 
 const sexyMove1 = ["R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'"];
@@ -50,57 +59,13 @@ const music = "sound.beep(196, 800) ; time.sleep_ms(850)  # G3\nsound.beep(262, 
 const getBattery = `import hub\n\nprint("Ba" + str(hub.battery_voltage()))`
 const clearDisplay = `light_matrix.clear();\n`
 
-let CLP_LEFT;
-let CLP_RIGHT;
-
 // =========================================================================================================
 
 // COMMANDS
 
-function regen() {
-    CLP_LEFT = {
-        // Face U
-        "U": `motor.run_to_absolute_position(port.A,  motor.absolute_position(port.A)- ${deg + u}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=${dec});\n`,
-        "U'": `motor.run_to_absolute_position(port.A, motor.absolute_position(port.A)+ ${deg + u1}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=${dec});\n`,
-        "U2": `motor.run_to_absolute_position(port.A, motor.absolute_position(port.A)+ ${dog + u2}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=${dec});\n`,
-
-        // Face L
-        "L": `motor.run_to_absolute_position(port.C,  motor.absolute_position(port.C) - ${deg + l}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=${dec});\n`,
-        "L'": `motor.run_to_absolute_position(port.C, motor.absolute_position(port.C) + ${deg + l1}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=${dec});\n`,
-        "L2": `motor.run_to_absolute_position(port.C, motor.absolute_position(port.C) + ${dog + l2}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=${dec});\n`,
-
-        // Face F
-        "F": `motor.run_to_absolute_position(port.E,  motor.absolute_position(port.E)- ${deg + f}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=${dec});\n`,
-        "F'": `motor.run_to_absolute_position(port.E, motor.absolute_position(port.E)+ ${deg + f1}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=${dec});\n`,
-        "F2": `motor.run_to_absolute_position(port.E, motor.absolute_position(port.E)+ ${dog + f2}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=${dec});\n`,
-    };
-
-    CLP_RIGHT = {
-        // Face R
-        "R": `motor.run_to_absolute_position(port.D,  motor.absolute_position(port.D)- ${deg + r}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=${dec});\n`,
-        "R'": `motor.run_to_absolute_position(port.D, motor.absolute_position(port.D)+ ${deg + r1}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=${dec});\n`,
-        "R2": `motor.run_to_absolute_position(port.D, motor.absolute_position(port.D)+ ${dog + r2}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=${dec});\n`,
-
-        // Face B
-        "B": `motor.run_to_absolute_position(port.F,  motor.absolute_position(port.F) - ${deg + b}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=${dec});\n`,
-        "B'": `motor.run_to_absolute_position(port.F, motor.absolute_position(port.F) + ${deg + b1}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=${dec});\n`,
-        "B2": `motor.run_to_absolute_position(port.F, motor.absolute_position(port.F) + ${dog + b2}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=${dec});\n`,
-
-        // Face D
-        "D": `motor.run_to_absolute_position(port.B,  motor.absolute_position(port.B)- ${deg + d}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=${dec});\n`,
-        "D'": `motor.run_to_absolute_position(port.B, motor.absolute_position(port.B)+ ${deg + d1}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=${dec});\n`,
-        "D2": `motor.run_to_absolute_position(port.B, motor.absolute_position(port.B)+ ${dog + d2}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=${dec});\n`,
-    };
-}
-
-regen();
-
 async function sleepT(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
-
-
-const ALL_MOVES = Object.keys({ ...CLP_LEFT, ...CLP_RIGHT });
 
 // DEFAULT
 
@@ -372,19 +337,36 @@ async function updateBatteries() {
 // MOVE
 
 async function runMovement(move, sleep = 220, noCube = false) {
-    if (!move || typeof move !== "string") return log(`Invalid move ${move}`);
-    degCorrection(move);
-    const cmd = CLP_LEFT[move] || CLP_RIGHT[move];
-    const writer = CLP_LEFT[move] ? leftWriter : rightWriter;
-    const wait = (move.startsWith("B") || move.startsWith("D") ? sleep + 40 : sleep) * (move.endsWith("2") ? 2 : 1);
-    if (!cmd || !writer) await sleepT(1);
-    if (noCube) return console.warn("Cube Not Connected");
-    await sendLine(writer, cmd);
-    const mov = move.charAt(0);
-    const sym = move.charAt(1);
-    await sendLine(leftWriter,  `light_matrix.write("${mov}",100)`);
-    await sendLine(rightWriter, `light_matrix.write("${sym}",100)`);
-    await sleepT(wait);
+  if (!move || typeof move !== 'string') return console.log(`Invalid move ${move}`);
+
+  const face = move.charAt(0);
+  const sym  = move.charAt(1) || '';
+
+  const left = leftFaces.includes(face);
+  const idx  = left ? leftFaces.indexOf(face) : rightFaces.indexOf(face);
+
+  const port = left ? leftPorts[idx] : rightPorts[idx];
+
+  const deg =
+    (sym === '2' ? 180 :
+     sym === "'" ? -90 :
+     90) + cor;
+
+  const wait =
+    (largeFaces.includes(face) ? sleep + 40 : sleep) *
+    (move.endsWith('2') ? 2 : 1);
+
+  const cmd =
+    `motor.run_to_absolute_position(port.${port}, motor.absolute_position(port.${port}) - ${deg}, 1110, stop=motor.SMART_BRAKE, acceleration=${acc}, deceleration=${dec});\n`;
+
+  const writer = left ? leftWriter : rightWriter;
+
+  if (noCube) return console.warn('Cube Not Connected');
+
+  await sendLine(writer, cmd);
+  await sendLine(leftWriter, `light_matrix.write("${face}",100)`);
+  await sendLine(rightWriter, `light_matrix.write("${sym}",100)`);
+  await sleepT(wait);
 }
 
 function degCorrection(move) {
