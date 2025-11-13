@@ -716,6 +716,14 @@ async function solve2ndCube(mvs) {
     console.info("Starting 2nd cube solve");
     console.info("Moves: " + mvs.join(","));
     still = [...mvs];
+    for (let i = 0; i < still.length; i++) {
+        const mv = still[i];
+        if (mv.charAt(1) == '2') {
+            const char = mv.charAt(0);
+            still.splice(i, 1, char, char);
+            i++;
+        }
+    }
     nxt.innerHTML = still[0];
     await new Promise((resolve) => {
         bc.onmessage = (e) => {
