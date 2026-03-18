@@ -348,7 +348,7 @@ async function runMovement(move, sleep = 220, noCube = false) {
         (move.endsWith('2') ? 2 : 1);
 
     const cmd =
-        `motor.run_to_absolute_position(port.${port}, motor.absolute_position(port.${port}) - ${deg}, 1110, stop=motor.SMART_BRAKE, acceleration=${acc}, deceleration=${dec});\n`;
+        `motor.run_to_absolute_position(port.${port}, motor.absolute_position(port.${port}) - ${deg}, 1110, stop=motor.STOP_HOLD, acceleration=${acc}, deceleration=${dec});\n`;
 
     const writer = left ? leftWriter : rightWriter;
 
@@ -407,21 +407,21 @@ async function resetMotors() {
     // Reset all motors on the left side
     bettew = 4000
     if (SpikeState.left) {
-        await sendLine(leftWriter, "motor.run_to_absolute_position(port.A, 0, 50, direction=motor.SHORTEST_PATH, stop=motor.BRAKE, acceleration=1000, deceleration=1000);");
+        await sendLine(leftWriter, "motor.run_to_absolute_position(port.A, 0, 50, direction=motor.SHORTEST_PATH, stop=motor.STOP_HOLD, acceleration=1000, deceleration=1000);");
         await sleepT(bettew)
-        await sendLine(leftWriter, "motor.run_to_absolute_position(port.C, 0, 50, direction=motor.SHORTEST_PATH, stop=motor.BRAKE, acceleration=1000, deceleration=1000);");
+        await sendLine(leftWriter, "motor.run_to_absolute_position(port.C, 0, 50, direction=motor.SHORTEST_PATH, stop=motor.STOP_HOLD, acceleration=1000, deceleration=1000);");
         await sleepT(bettew)
-        await sendLine(leftWriter, "motor.run_to_absolute_position(port.E, 0, 50, direction=motor.SHORTEST_PATH, stop=motor.BRAKE, acceleration=1000, deceleration=1000);");
+        await sendLine(leftWriter, "motor.run_to_absolute_position(port.E, 0, 50, direction=motor.SHORTEST_PATH, stop=motor.STOP_HOLD, acceleration=1000, deceleration=1000);");
         await sleepT(bettew)
     }
 
     // Reset all motors on the right side
     if (SpikeState.right) {
-        await sendLine(rightWriter, "motor.run_to_absolute_position(port.D, 0, 50, direction=motor.SHORTEST_PATH, stop=motor.BRAKE, acceleration=1000, deceleration=1000);");
+        await sendLine(rightWriter, "motor.run_to_absolute_position(port.D, 0, 50, direction=motor.SHORTEST_PATH, stop=motor.STOP_HOLD, acceleration=1000, deceleration=1000);");
         await sleepT(bettew)
-        await sendLine(rightWriter, "motor.run_to_absolute_position(port.F, 0, 50, direction=motor.SHORTEST_PATH, stop=motor.BRAKE, acceleration=1000, deceleration=1000);");
+        await sendLine(rightWriter, "motor.run_to_absolute_position(port.F, 0, 50, direction=motor.SHORTEST_PATH, stop=motor.STOP_HOLD, acceleration=1000, deceleration=1000);");
         await sleepT(bettew)
-        await sendLine(rightWriter, "motor.run_to_absolute_position(port.B, 0, 50, direction=motor.SHORTEST_PATH, stop=motor.BRAKE, acceleration=1000, deceleration=1000);");
+        await sendLine(rightWriter, "motor.run_to_absolute_position(port.B, 0, 50, direction=motor.SHORTEST_PATH, stop=motor.STOP_HOLD, acceleration=1000, deceleration=1000);");
         await sleepT(bettew)
     }
 
