@@ -462,7 +462,7 @@ async function spikeCube(moves, sleeped = 180) {
     await sleepT(2000)
     const start = new Date();
     startTimer(start);
-
+    console.log(window.moves)
     for (let i = 0; i < moves.length; i++) {
         const m = moves[i], n = moves[i + 1];
         if (isOpposite(m, n)) {
