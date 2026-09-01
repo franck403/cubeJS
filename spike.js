@@ -843,8 +843,33 @@ document.addEventListener('DOMContentLoaded', () => {
             let move = data.replace("Move: ", "");
             console.log(`%cSec:  ${move}`, 'color:#eb34d8;');
             playMove(move);
-        }
-        else {
+        } else if (typeof data !== "string" || !data.startsWith("Watch: ")) {
+            command = data.replace('"Watch: ','')
+            switch (move) {
+                case "solve":
+                  console.log("Solving");
+                  solve();
+                  break;
+                case "scramble":
+                  console.log("Scrambling");
+                  scramble();
+                  break;
+                case "move1":
+                  console.log("Move 1");
+                  sexyMoves1();
+                  break;
+                case "move2":
+                  console.log("Move 2");
+                  sexyMoves2();
+                  break;
+                case "move3":
+                  console.log("Move 3");
+                  sexyMoves3();
+                  break;
+                default:
+                  console.log("Invalid move");
+              }
+        } else {
             console.debug("Unknown message from Slide tab: ", data)
         }
     }
