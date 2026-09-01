@@ -708,6 +708,7 @@ async function solve2ndCube(mvs) {
     await new Promise((resolve) => {
         bc.onmessage = (e) => {
             const data = e.data;
+            console.log(e.data)
             if (typeof data !== "string" || !data.startsWith("Watch: ")) {
                 command = data.replace('"Watch: ','')
                 switch (move) {
@@ -850,5 +851,6 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // BROADCAST
-
+localStorage.bc = 'COM'
 const bc = new BroadcastChannel(localStorage.bc);
+
