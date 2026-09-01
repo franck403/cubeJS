@@ -21,7 +21,7 @@ let dog = 180; // Moves x 2
 let lb = localStorage.lb || 0;
 let ld = localStorage.ld || 0;
 
-var silence = false;
+var silence = true;
 
 let timerInterval = null;
 
