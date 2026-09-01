@@ -853,4 +853,4 @@ document.addEventListener('DOMContentLoaded', () => {
 // BROADCAST
 localStorage.bc = 'app_channel'
 const bc = new BroadcastChannel(localStorage.bc);
-
+ 
