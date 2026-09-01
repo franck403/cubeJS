@@ -834,6 +834,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     bc.onmessage = (e) => {
         var data = e.data
+        console.log(data)
         if (data == true) {
             document.getElementById('timerBlock').style.display = 'none'
             bcState = true;
@@ -843,9 +844,10 @@ document.addEventListener('DOMContentLoaded', () => {
             let move = data.replace("Move: ", "");
             console.log(`%cSec:  ${move}`, 'color:#eb34d8;');
             playMove(move);
-        } else if (typeof data !== "string" || !data.startsWith("Watch: ")) {
-            command = data.replace('"Watch: ','')
-            switch (move) {
+        } else if (typeof data !== "string" || data.startsWith("Watch: ")) {
+            command = data.replace('Watch: ','')
+            console.log(command)
+            switch (command) {
                 case "solve":
                   console.log("Solving");
                   solve();

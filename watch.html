@@ -420,7 +420,7 @@
             rxBuf = rxBuf.slice(idx + 1);
             if (line.endsWith('\r')) line = line.slice(0, -1);
             handleIncomingLine(line);
-            bc.postMessage('"Watch: ' + line)
+            bc.postMessage('Watch: ' + line)
           }
         }
 
