@@ -342,14 +342,14 @@ async function runMovement(move, sleep = 220, noCube = false) {
     const port = left ? leftPorts[idx] : rightPorts[idx];
 
     const c = largeFaces.includes(face) ? cor : 0; 
-    const deg = (sym === '2' ? dog : sym === "'" ? -deg : deg) + c;
+    const deg0 = (sym === '2' ? dog : sym === "'" ? -deg : deg) + c;
 
     const wait =
         (largeFaces.includes(face) ? sleep + 40 : sleep) *
         (move.endsWith('2') ? 2 : 1);
 
     const cmd =
-        `motor.run_to_absolute_position(port.${port}, motor.absolute_position(port.${port}) - ${deg}, 1110, stop=motor.STOP_HOLD, acceleration=${acc}, deceleration=${dec});\n`;
+        `motor.run_to_absolute_position(port.${port}, motor.absolute_position(port.${port}) - ${deg0}, 1110, stop=motor.STOP_HOLD, acceleration=${acc}, deceleration=${dec});\n`;
 
     const writer = left ? leftWriter : rightWriter;
 
@@ -708,6 +708,33 @@ async function solve2ndCube(mvs) {
     await new Promise((resolve) => {
         bc.onmessage = (e) => {
             const data = e.data;
+            if (typeof data !== "string" || !data.startsWith("Watch: ")) {
+                command = data.replace('"Watch: ','')
+                switch (move) {
+                    case "solve":
+                      console.log("Solving");
+                      solve();
+                      break;
+                    case "scramble":
+                      console.log("Scrambling");
+                      scramble();
+                      break;
+                    case "move1":
+                      console.log("Move 1");
+                      sexyMoves1();
+                      break;
+                    case "move2":
+                      console.log("Move 2");
+                      sexyMoves2();
+                      break;
+                    case "move3":
+                      console.log("Move 3");
+                      sexyMoves3();
+                      break;
+                    default:
+                      console.log("Invalid move");
+                  }
+            };
             if (typeof data !== "string" || !data.startsWith("Move: ")) return;
 
             const move = data.replace("Move: ", "").trim();
