@@ -1,438 +1,415 @@
 <!DOCTYPE html>
 <html lang="fr">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Clockstar — Mode Contrôle BLE</title >
-    <style>
-      @import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@700&display=swap');
-    </style>
-  </head>
-  <body style="
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Clockstar — Control Mode</title>
+  <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@700&display=swap" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" rel="stylesheet">
+  <link rel="icon" type="image/png" href="icon.png" />
+  <style>
+    :root *:not(.fa-solid) {
+      font-family: "Comfortaa", sans-serif;
+      font-optical-sizing: auto;
+      font-weight: 800;
+      font-style: normal;
+    }
+
+    :root {
+      --dim: Black;
+      --accent: #39adad;
+      --yellow: #ffd500;
+      --ok: #3fb950;
+      --danger: #e5534b;
+      --mono: 'SF Mono', 'Cascadia Code', Consolas, monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
       margin: 0;
       padding: 0;
-      min-height: 100vh;
-      background: #000000;
-      color: #ffffff;
-      font-family: 'Comfortaa', sans-serif;
-      font-optical-sizing: auto;
-      font-weight: 700;
-      font-style: normal;
+      height: 100%;
+      background-color: black;
+      color: white;
       overflow-x: hidden;
-    ">
-    <div id="app" style="
-        max-width: 720px;
-        margin: 0 auto;
-        padding: 28px 16px 48px;
-        display: flex;
-        flex-direction: column;
-        gap: 18px;
-        min-height: 100vh;
-        box-sizing: border-box;
-      ">
-      <header style="
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 12px;
-          background: #114b5f;
-          color: #ffffff;
-          border-radius: 60px;
-          padding: 14px 22px;
-        ">
-        <h1 style="
-            font-size: 17px;
-            margin: 0;
-            font-weight: 700;
-            letter-spacing: 0.2px;
-            color: #ffffff;
-          ">
-          Clockstar <span style="color: #ffffff; opacity: 0.75; font-weight: 700">· Remote</span>
-        </h1>
-        <div
-          id="statusPill"
-          style="
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px 14px;
-            border-radius: 999px;
-            font-size: 12px;
-            font-weight: 700;
-            background: #39adad;
-            color: #020202;
-            white-space: nowrap;
-          "
-        >
-          <span
-            id="statusDot"
-            style="
-              width: 8px;
-              height: 8px;
-              border-radius: 50%;
-              background: #020202;
-              flex-shrink: 0;
-              display: inline-block;
-            "
-          ></span>
-          <span id="statusText">Montre non connectée</span>
-        </div>
-      </header>
+    }
 
-      <div
-        id="unsupportedNotice"
-        style="
-          display: none;
-          background: #7a306c;
-          border: none;
-          color: #ff84e8;
-          border-radius: 15px;
-          padding: 14px 16px;
-          font-size: 13px;
-          line-height: 1.5;
-        "
-      >
-        Le Bluetooth Web n'est pas disponible dans ce navigateur. Utilise Chrome
-        ou Edge sur ordinateur ou Android, en HTTPS ou en localhost — Safari et
-        Firefox ne supportent pas cette fonctionnalité.
+    #app {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 110px 16px 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      min-height: 100%;
+    }
+
+    /* Top bar, styled like .controls.topBar */
+    header.controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      width: calc(100% - 32px);
+      max-width: 690px;
+      height: 70px;
+      position: fixed;
+      top: 25px;
+      left: 50%;
+      transform: translate(-50%, 0%);
+      padding: 0 20px;
+      border-radius: 51px;
+      background: #114B5F;
+      z-index: 10;
+    }
+
+    header h1 {
+      font-size: 1.1rem;
+      margin: 0;
+      color: White;
+    }
+
+    header h1 span {
+      color: var(--dim);
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+
+    /* Buttons, matching .btn / .controls button pill style */
+    .controlsRow {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      font-family: "Comfortaa", sans-serif;
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: #fff;
+      border: none;
+      margin: 0;
+      background: #020202;
+      cursor: pointer;
+      height: 50px;
+      padding: 0 22px;
+      border-radius: 60px;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+
+    button:hover:not(:disabled) {
+      opacity: 0.85;
+    }
+
+    button:active:not(:disabled) {
+      transform: scale(0.96);
+    }
+
+    button:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    button.primary {
+      background: #114B5F;
+      color: #39ADAD;
+    }
+
+    button.ghost {
+      background: #ffe98a;
+      color: Black;
+    }
+
+    button.yellow {
+      background: #7A306C;
+      color: White;
+    }
+
+    /* Cards, matching .btn.bat / .stats block feel */
+    .card {
+      background: #fccd03;
+      border-radius: 24px;
+      padding: 18px;
+    }
+
+    .log-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .log-header h2 {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: black;
+      margin: 0;
+    }
+
+    .log-header button {
+      padding: 6px 16px;
+      font-size: 12px;
+      height: 34px;
+    }
+
+    #log {
+      font-family: var(--mono);
+      font-weight: 400;
+      font-size: 12.5px;
+      line-height: 1.55;
+      background: #ffe98a;
+      border-radius: 16px;
+      padding: 12px 14px;
+      height: 340px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    #log .line {
+      display: flex;
+      gap: 8px;
+    }
+
+    #log .ts {
+      color: rgb(49, 49, 49);
+      flex-shrink: 0;
+    }
+
+    #log .raw {
+      color: Black;
+    }
+
+    #log .empty-hint {
+      color: var(--dim);
+    }
+
+    .autoscroll-toggle {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--dim);
+      user-select: none;
+    }
+
+    footer {
+      text-align: center;
+      font-size: 11.5px;
+      color: var(--dim);
+      padding-bottom: 10px;
+    }
+
+    .unsupported {
+      background: #7A306C;
+      color: #FF84E8;
+      border-radius: 24px;
+      padding: 16px 18px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .hidden, 
+    .hidden * {
+      display: none !important;
+      opacity: 0;
+    }
+
+    :disabled {
+      display: none !important;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="innerBody">
+    <header class="controls">
+      <h1>Robot Gan Spike</h1>
+
+      <div class="controlsRow">
+        <button id="connectBtn" class="yellow"><i class="fa-solid fa-plug"></i> Connecter</button>
+        <button id="disconnectBtn" disabled><i class="fa-solid fa-right-to-bracket"></i> Déconnecter</button>
       </div>
+    </header>
 
-      <div class="controls" style="
-          display: flex;
-          justify-content: center;
-          flex-direction: row;
-          width: fit-content;
-          margin: 0 auto;
-          height: 70px;
-          padding-left: 10px;
-          padding-right: 10px;
-          border-radius: 51px;
-          line-height: 0;
-          background: #114b5f;
-          align-content: center;
-          align-items: center;
-        ">
-        <button
-          id="connectBtn"
-          style="
-            font-size: 1.1rem;
-            width: max-content;
-            min-width: 170px;
-            line-height: normal;
-            padding: 14px 20px;
-            color: #020202;
-            background: #ffe98a;
-            border: none;
-            margin: 5px;
-            cursor: pointer;
-            height: 50px;
-            border-radius: 60px;
-            font-family: 'Comfortaa', sans-serif;
-            font-weight: 700;
-          "
-        >
-          Connecter la montre
-        </button>
-        <button
-          id="disconnectBtn"
-          disabled
-          style="
-            font-size: 1.1rem;
-            width: max-content;
-            min-width: 170px;
-            line-height: normal;
-            padding: 14px 20px;
-            color: #020202;
-            border: none;
-            margin: 5px;
-            background: #ffe98a;
-            cursor: not-allowed;
-            opacity: 0.4;
-            height: 50px;
-            border-radius: 60px;
-            font-family: 'Comfortaa', sans-serif;
-            font-weight: 700;
-          "
-        >
-          Déconnecter
-        </button>
+    <div id="app hidden">
+      <div id="unsupportedNotice" class="unsupported" style="display: none">
+        Web Bluetooth n'est pas disponible dans ce navigateur (nécessite
+        Chrome/Edge sur desktop ou Android, en HTTPS ou localhost). Safari et
+        Firefox ne sont pas supportés.
       </div>
-
-      <div style="
-          background: #0f0f0f;
-          color: #ffffff;
-          border-radius: 25px;
-          padding: 18px;
-          border: 1px solid #262b33;
-        ">
-        <div style="
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 4px;
-            flex-wrap: wrap;
-            gap: 10px;
-          ">
-          <h2 style="
-              font-size: 12px;
-              text-transform: uppercase;
-              letter-spacing: 0.6px;
-              color: #ffffff;
-              margin: 0;
-              font-weight: 700;
-            ">
-            Trafic BLE reçu de la montre
-          </h2>
+      <div class="card hidden">
+        <div class="log-header">
+          <h2>Commandes</h2>
           <div style="display: flex; align-items: center; gap: 14px">
-            <label style="
-                display: flex;
-                align-items: center;
-                gap: 6px;
-                font-size: 12px;
-                color: #b0b6bd;
-                user-select: none;
-                font-weight: 700;
-              ">
+            <label class="autoscroll-toggle hidden">
               <input type="checkbox" id="autoscrollChk" checked />
-              défilement auto
+              auto-scroll
             </label>
-            <button
-              id="clearBtn"
-              style="
-                font-size: 0.85rem;
-                padding: 8px 16px;
-                color: #020202;
-                background: #ffe98a;
-                border: none;
-                cursor: pointer;
-                height: 34px;
-                border-radius: 60px;
-                font-family: 'Comfortaa', sans-serif;
-                font-weight: 700;
-              "
-            >
-              Vider
-            </button>
+            <button id="clearBtn" class="ghost">Effacer</button>
           </div>
         </div>
-        <p style="margin: 0 0 10px; font-size: 11.5px; color: #7d8590; font-weight: 400; line-height: 1.4;">
-          Chaque ligne ci-dessous est une notification brute reçue sur la
-          caractéristique TX (…0003) du service NUS de la montre.
-        </p>
-        <div
-          id="log"
-          style="
-            font-family: 'SF Mono', 'Cascadia Code', Consolas, monospace;
-            font-weight: 400;
-            font-size: 12.5px;
-            line-height: 1.55;
-            background: #000000;
-            border-radius: 15px;
-            padding: 12px 14px;
-            height: 420px;
-            overflow-y: auto;
-            white-space: pre-wrap;
-            word-break: break-all;
-            color: #ffffff;
-            border: 1px solid #262b33;
-          "
-        >
-          <div style="color: #7d8590">
-            Connecte la montre pour voir apparaître ici les lignes qu'elle envoie…
+        <div id="log">
+          <div class="empty-hint hidden">
+            Connecte-toi pour voir les lignes reçues de la montre…
           </div>
         </div>
       </div>
-
-      <footer style="text-align: center; font-size: 11.5px; color: #7d8590; font-weight: 700;">
-        Service Nordic UART · 6e400001-b5a3-f393-e0a9-e50e24dcca9e — écoute la caractéristique TX (…0003)
-      </footer>
     </div>
+  </div>
 
-    <script>
-      (function () {
-        'use strict';
+  <script>
+    (function () {
+      'use strict';
 
-        const NUS_SERVICE = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
-        const NUS_TX_CHAR = '6e400003-b5a3-f393-e0a9-e50e24dcca9e'; // watch -> site (notify)
-        const NUS_RX_CHAR = '6e400002-b5a3-f393-e0a9-e50e24dcca9e'; // site -> watch (unused here, receive-only)
+      const NUS_SERVICE = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
+      const NUS_TX_CHAR = '6e400003-b5a3-f393-e0a9-e50e24dcca9e'; // watch -> site (notify)
+      const NUS_RX_CHAR = '6e400002-b5a3-f393-e0a9-e50e24dcca9e'; // site -> watch (unused here, receive-only)
 
-        const el = {
-          connectBtn: document.getElementById('connectBtn'),
-          disconnectBtn: document.getElementById('disconnectBtn'),
-          clearBtn: document.getElementById('clearBtn'),
-          statusPill: document.getElementById('statusPill'),
-          statusDot: document.getElementById('statusDot'),
-          statusText: document.getElementById('statusText'),
-          log: document.getElementById('log'),
-          autoscrollChk: document.getElementById('autoscrollChk'),
-          unsupportedNotice: document.getElementById('unsupportedNotice'),
-        };
+      const el = {
+        connectBtn: document.getElementById('connectBtn'),
+        disconnectBtn: document.getElementById('disconnectBtn'),
+        clearBtn: document.getElementById('clearBtn'),
+        statusText: document.getElementById('statusText'),
+        log: document.getElementById('log'),
+        autoscrollChk: document.getElementById('autoscrollChk'),
+        unsupportedNotice: document.getElementById('unsupportedNotice'),
+      };
 
-        let device = null;
-        let rxBuf = ''; // accumule les fragments de notify jusqu'à un \n
-        let logHasContent = false;
+      let device = null;
+      let rxBuf = ''; // accumulates partial notify chunks until a \n is found
+      let logHasContent = false;
 
-        // Couleurs choisies pour rester lisibles sur le fond noir de la page
-        // et sur le fond bleu (#114b5f) du bandeau de statut.
-        const STATUS_STYLES = {
-          '': { bg: '#39adad', color: '#020202', dot: '#020202' },
-          connecting: { bg: '#ffe98a', color: '#020202', dot: '#020202' },
-          connected: { bg: '#3fb950', color: '#020202', dot: '#020202' },
-          error: { bg: '#7a306c', color: '#ff84e8', dot: '#ff84e8' },
-        };
+      function setStatus(state, text) {
+        return;
+      }
 
-        function setStatus(state, text) {
-          const s = STATUS_STYLES[state] || STATUS_STYLES[''];
-          el.statusPill.style.background = s.bg;
-          el.statusPill.style.color = s.color;
-          el.statusDot.style.background = s.dot;
-          el.statusText.textContent = text;
+      function pad(n) {
+        return n.toString().padStart(2, '0');
+      }
+
+      function appendLogLine(raw) {
+        if (!logHasContent) {
+          el.log.innerHTML = '';
+          logHasContent = true;
         }
-
-        function pad(n) {
-          return n.toString().padStart(2, '0');
+        const now = new Date();
+        const ts =
+          pad(now.getHours()) +
+          ':' +
+          pad(now.getMinutes()) +
+          ':' +
+          pad(now.getSeconds());
+        const row = document.createElement('div');
+        row.className = 'line';
+        const tsSpan = document.createElement('span');
+        tsSpan.className = 'ts';
+        tsSpan.textContent = ts;
+        const rawSpan = document.createElement('span');
+        rawSpan.className = 'raw';
+        rawSpan.textContent = raw;
+        row.appendChild(tsSpan);
+        row.appendChild(rawSpan);
+        el.log.appendChild(row);
+        if (el.autoscrollChk.checked) {
+          el.log.scrollTop = el.log.scrollHeight;
         }
+      }
 
-        // sysLine=true -> ligne de diagnostic interne (état de la connexion),
-        // pas une donnée réellement reçue de la montre
-        function appendLogLine(raw, sysLine) {
-          if (!logHasContent) {
-            el.log.innerHTML = '';
-            logHasContent = true;
-          }
-          const now = new Date();
-          const ts =
-            pad(now.getHours()) +
-            ':' +
-            pad(now.getMinutes()) +
-            ':' +
-            pad(now.getSeconds());
-          const row = document.createElement('div');
-          row.style.display = 'flex';
-          row.style.gap = '8px';
-          const tsSpan = document.createElement('span');
-          tsSpan.style.color = sysLine ? '#ffe98a' : '#7d8590';
-          tsSpan.style.flexShrink = '0';
-          tsSpan.textContent = ts;
-          const rawSpan = document.createElement('span');
-          rawSpan.style.color = sysLine ? '#ffe98a' : '#ffffff';
-          rawSpan.textContent = raw;
-          row.appendChild(tsSpan);
-          row.appendChild(rawSpan);
-          el.log.appendChild(row);
-          if (el.autoscrollChk.checked) {
-            el.log.scrollTop = el.log.scrollHeight;
-          }
+      function handleIncomingLine(line) {
+        if (!line) return;
+        appendLogLine(line);
+      }
+
+      const bc = new BroadcastChannel(localStorage.bc);
+      console.log(bc);
+
+      function handleNotify(event) {
+        const value = event.target.value; // DataView
+        const chunk = new TextDecoder('utf-8').decode(value);
+        rxBuf += chunk;
+        let idx;
+        while ((idx = rxBuf.indexOf('\n')) !== -1) {
+          let line = rxBuf.slice(0, idx);
+          rxBuf = rxBuf.slice(idx + 1);
+          if (line.endsWith('\r')) line = line.slice(0, -1);
+          handleIncomingLine(line);
+          bc.postMessage('Watch: ' + line);
         }
+      }
 
-        function handleIncomingLine(line) {
-          if (!line) return;
-          appendLogLine(line, false);
-        }
+      function onDisconnected() {
+        setStatus('', 'Déconnecté');
+        el.connectBtn.disabled = false;
+        el.disconnectBtn.disabled = true;
+        device = null;
+        rxBuf = '';
+      }
 
-        const bc = new BroadcastChannel(localStorage.bc);
-        console.log(bc);
-
-        function handleNotify(event) {
-          const value = event.target.value; // DataView
-          const chunk = new TextDecoder('utf-8').decode(value);
-          rxBuf += chunk;
-          let idx;
-          while ((idx = rxBuf.indexOf('\n')) !== -1) {
-            let line = rxBuf.slice(0, idx);
-            rxBuf = rxBuf.slice(idx + 1);
-            if (line.endsWith('\r')) line = line.slice(0, -1);
-            handleIncomingLine(line);
-            bc.postMessage('Watch: ' + line);
-          }
-        }
-
-        function onDisconnected() {
-          setStatus('', 'Montre non connectée');
-          appendLogLine('[système] montre déconnectée', true);
-          el.connectBtn.disabled = false;
-          el.connectBtn.style.opacity = '1';
-          el.connectBtn.style.cursor = 'pointer';
-          el.disconnectBtn.disabled = true;
-          el.disconnectBtn.style.opacity = '0.4';
-          el.disconnectBtn.style.cursor = 'not-allowed';
-          device = null;
-          rxBuf = '';
-        }
-
-        async function connect() {
-          if (!navigator.bluetooth) {
-            el.unsupportedNotice.style.display = 'block';
-            return;
-          }
-          el.connectBtn.disabled = true;
-          el.connectBtn.style.opacity = '0.4';
-          el.connectBtn.style.cursor = 'not-allowed';
-          setStatus('connecting', 'Recherche de la montre…');
-          try {
-            device = await navigator.bluetooth.requestDevice({
-              filters: [{ services: [NUS_SERVICE] }],
-              optionalServices: [NUS_SERVICE],
-            });
-
-            device.addEventListener('gattserverdisconnected', onDisconnected);
-
-            setStatus('connecting', 'Connexion à la montre…');
-            const server = await device.gatt.connect();
-            const service = await server.getPrimaryService(NUS_SERVICE);
-            const txChar = await service.getCharacteristic(NUS_TX_CHAR);
-
-            await txChar.startNotifications();
-            txChar.addEventListener('characteristicvaluechanged', handleNotify);
-
-            setStatus(
-              'connected',
-              'Connecté' + (device.name ? ' à ' + device.name : ' à la montre')
-            );
-            appendLogLine(
-              '[système] connecté à ' +
-                (device.name || 'la montre') +
-                ' — abonné aux notifications TX, en attente de données…',
-              true
-            );
-            el.disconnectBtn.disabled = false;
-            el.disconnectBtn.style.opacity = '1';
-            el.disconnectBtn.style.cursor = 'pointer';
-          } catch (err) {
-            console.error(err);
-            setStatus('error', err.message || 'Échec de connexion');
-            appendLogLine('[système] erreur : ' + (err.message || err), true);
-            el.connectBtn.disabled = false;
-            el.connectBtn.style.opacity = '1';
-            el.connectBtn.style.cursor = 'pointer';
-          }
-        }
-
-        async function disconnect() {
-          if (device && device.gatt.connected) {
-            device.gatt.disconnect();
-          } else {
-            onDisconnected();
-          }
-        }
-
-        function clearLog() {
-          logHasContent = false;
-          el.log.innerHTML =
-            '<div style="color: #7d8590">Journal vidé.</div>';
-        }
-
-        el.connectBtn.addEventListener('click', connect);
-        el.disconnectBtn.addEventListener('click', disconnect);
-        el.clearBtn.addEventListener('click', clearLog);
-
+      async function connect() {
         if (!navigator.bluetooth) {
           el.unsupportedNotice.style.display = 'block';
-          el.connectBtn.disabled = true;
-          el.connectBtn.style.opacity = '0.4';
-          el.connectBtn.style.cursor = 'not-allowed';
+          return;
         }
-      })();
-    </script>
-  </body>
+        el.connectBtn.disabled = true;
+        setStatus('connecting', 'Recherche…');
+        try {
+          device = await navigator.bluetooth.requestDevice({
+            filters: [{ services: [NUS_SERVICE] }],
+            optionalServices: [NUS_SERVICE],
+          });
+
+          device.addEventListener('gattserverdisconnected', onDisconnected);
+
+          setStatus('connecting', 'Connexion…');
+          const server = await device.gatt.connect();
+          const service = await server.getPrimaryService(NUS_SERVICE);
+          const txChar = await service.getCharacteristic(NUS_TX_CHAR);
+
+          await txChar.startNotifications();
+          txChar.addEventListener('characteristicvaluechanged', handleNotify);
+
+          setStatus(
+            'connected',
+            'Connecté' + (device.name ? ' · ' + device.name : '')
+          );
+          el.disconnectBtn.disabled = false;
+        } catch (err) {
+          console.error(err);
+          setStatus('error', err.message || 'Échec de connexion');
+          el.connectBtn.disabled = false;
+        }
+      }
+
+      async function disconnect() {
+        if (device && device.gatt.connected) {
+          device.gatt.disconnect();
+        } else {
+          onDisconnected();
+        }
+      }
+
+      function clearLog() {
+        logHasContent = false;
+        el.log.innerHTML = '<div class="empty-hint">Journal effacé.</div>';
+      }
+
+      el.connectBtn.addEventListener('click', connect);
+      el.disconnectBtn.addEventListener('click', disconnect);
+      el.clearBtn.addEventListener('click', clearLog);
+
+      if (!navigator.bluetooth) {
+        el.unsupportedNotice.style.display = 'block';
+        el.connectBtn.disabled = true;
+      }
+    })();
+  </script>
+</body>
+
 </html>
