@@ -97,6 +97,84 @@ function log(...args) {
 
 // CONNECTIONS
 
+// ---- Spike identity persistence (left/right regardless of plug order) ----
+// We ask each hub for a stable identity string (its own on-board unique id file,
+// created the first time we ever see it) and remember which side that identity
+// belongs to in localStorage. On reconnect we identify every available port
+// before assigning left/right, instead of trusting getPorts() order.
+
+const SPIKE_ID_STORAGE_KEY = 'spikeIds'; // { [hubId]: 'left' | 'right' }
+
+function loadSpikeIdMap() {
+    try {
+        return JSON.parse(localStorage.getItem(SPIKE_ID_STORAGE_KEY) || '{}');
+    } catch {
+        return {};
+    }
+}
+
+function saveSpikeIdMap(map) {
+    localStorage.setItem(SPIKE_ID_STORAGE_KEY, JSON.stringify(map));
+}
+
+function rememberSpikeSide(hubId, side) {
+    if (!hubId) return;
+    const map = loadSpikeIdMap();
+    map[hubId] = side;
+    saveSpikeIdMap(map);
+}
+
+function getRememberedSide(hubId) {
+    if (!hubId) return null;
+    const map = loadSpikeIdMap();
+    return map[hubId] || null;
+}
+
+// Command sent to the hub: makes sure a persistent id file exists on the hub's
+// own storage, then prints it back to us so we can read it over serial.
+const getHubIdCmd =
+`try:\n    with open('gilaxy_id.txt') as f:\n        _gid = f.read().strip()\nexcept:\n    import urandom\n    _gid = ''.join(['{:02x}'.format(urandom.getrandbits(8)) for _ in range(4)])\n    with open('gilaxy_id.txt', 'w') as f:\n        f.write(_gid)\nprint('Id' + _gid)`;
+
+/**
+ * Sends the id-fetch command to a hub and resolves with the hub's persistent id.
+ * Reads from the given reader until a line starting with "Id" is seen, or times out.
+ */
+async function identifyHub(writer, reader, timeoutMs = 3000) {
+    return new Promise(async (resolve) => {
+        let settled = false;
+        const finish = (val) => {
+            if (settled) return;
+            settled = true;
+            resolve(val);
+        };
+
+        const timer = setTimeout(() => finish(null), timeoutMs);
+
+        (async () => {
+            try {
+                await sendLine(writer, getHubIdCmd);
+                while (!settled) {
+                    const { value, done } = await reader.read();
+                    if (done) break;
+                    if (value) {
+                        const lines = value.split('\n');
+                        for (const line of lines) {
+                            if (line.startsWith('Id')) {
+                                clearTimeout(timer);
+                                finish(line.replace('Id', '').trim());
+                                return;
+                            }
+                        }
+                    }
+                }
+            } catch (err) {
+                clearTimeout(timer);
+                finish(null);
+            }
+        })();
+    });
+}
+
 async function openSpike(which) {
     let port, writer, reader, abortCtrl;
     try {
@@ -126,10 +204,15 @@ async function openSpike(which) {
             SpikeState.right = true;
         }
 
+        await sendLine(writer, startup);
+
+        // Learn/confirm this hub's identity and remember which side it is.
+        const hubId = await identifyHub(writer, reader);
+        if (hubId) rememberSpikeSide(hubId, which);
+
         // start listening for RX
         batteryRead(which, reader);
 
-        await sendLine(writer, startup);
         if (!silence) {
             await sendLine(writer, connectSound);
         }
@@ -140,32 +223,76 @@ async function openSpike(which) {
     }
 }
 
+/**
+ * Reconnects to all previously authorized Spike ports and figures out which
+ * one is "left" and which is "right" by asking each hub for its remembered
+ * identity, instead of relying on plug order.
+ */
 async function reconnectSpike(side) {
-    const filters = []; // optional: restrict by vendorId/productId
     const ports = await navigator.serial.getPorts();
+    const unassigned = [];
+
     for (const p of ports) {
+        // Skip ports we've already wired up in this pass.
+        if (p === leftPort || p === rightPort) continue;
+
         try {
             await p.open({ baudRate: 115200 });
-            const encoder = new TextEncoderStream();
-            encoder.readable.pipeTo(p.writable);
-            const writer = encoder.writable.getWriter();
 
-            if (side === 'left') leftWriter = writer;
-            if (side === 'right') rightWriter = writer;
+            const decoderStream = new TextDecoderStream();
+            p.readable.pipeTo(decoderStream.writable);
+            const reader = decoderStream.readable.getReader();
 
-            SpikeState[side] = p;
-            console.log(`${side} reconnected`);
-            const textDecoder = new TextDecoderStream();
-            p.readable.pipeTo(textDecoder.writable);
-            const reader = textDecoder.readable.getReader();
-            autoReconnectLoop(side, p, reader);
-            return;
+            const encoderStream = new TextEncoderStream();
+            encoderStream.readable.pipeTo(p.writable);
+            const writer = encoderStream.writable.getWriter();
+
+            const hubId = await identifyHub(writer, reader);
+            const rememberedSide = getRememberedSide(hubId);
+
+            if (rememberedSide === 'left' || rememberedSide === 'right') {
+                assignSpikeSide(rememberedSide, p, writer, reader);
+                console.log(`${rememberedSide} reconnected (identified as ${hubId})`);
+            } else {
+                // Unknown hub (first time seen this session, or id lookup failed):
+                // hold onto it and assign to whichever side is still missing.
+                unassigned.push({ port: p, writer, reader, hubId });
+            }
         } catch {
             try { await p.close(); } catch { }
         }
     }
-    console.info(`No ${side} port found, retrying in 5s`);
-    setTimeout(() => reconnectSpike(side), 5000);
+
+    // Fill any remaining empty side with unassigned hubs, remembering the
+    // choice for next time.
+    for (const entry of unassigned) {
+        const openSide = !SpikeState.left ? 'left' : (!SpikeState.right ? 'right' : null);
+        if (!openSide) break;
+        assignSpikeSide(openSide, entry.port, entry.writer, entry.reader);
+        if (entry.hubId) rememberSpikeSide(entry.hubId, openSide);
+        console.log(`${openSide} reconnected (new/unidentified hub, assigned by fallback)`);
+    }
+
+    if (!SpikeState.left || !SpikeState.right) {
+        const missing = !SpikeState.left && !SpikeState.right ? 'left/right' : (!SpikeState.left ? 'left' : 'right');
+        console.info(`No ${missing} port found, retrying in 5s`);
+        setTimeout(() => reconnectSpike(side), 5000);
+    }
+}
+
+function assignSpikeSide(side, port, writer, reader) {
+    if (side === 'left') {
+        leftPort = port;
+        leftWriter = writer;
+        leftReader = reader;
+        SpikeState.left = true;
+    } else {
+        rightPort = port;
+        rightWriter = writer;
+        rightReader = reader;
+        SpikeState.right = true;
+    }
+    autoReconnectLoop(side, port, reader);
 }
 
 async function spike(cubeed) {
@@ -825,6 +952,7 @@ document.addEventListener('DOMContentLoaded', () => {
             playMove(fn2)
         };
         bc.postMessage('key' + e.key)
+        
     });
     document.body.addEventListener('keyup', (e) => {
         bc.postMessage('ked' + e.key)
@@ -884,4 +1012,3 @@ document.addEventListener('DOMContentLoaded', () => {
 // BROADCAST
 localStorage.bc = 'app_channel'
 const bc = new BroadcastChannel(localStorage.bc);
- 
