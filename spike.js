@@ -869,7 +869,11 @@ document.addEventListener('DOMContentLoaded', () => {
                   sexyMoves3();
                   break;
                 default:
-                  console.log("Invalid move");
+                    try {
+                        globalThis[command]();
+                    } catch {
+                        console.log("Invalid move");
+                    }
               }
         } else {
             console.debug("Unknown message from Slide tab: ", data)

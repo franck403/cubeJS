@@ -7,6 +7,7 @@
   <title>Clockstar — Control Mode</title>
   <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@700&display=swap" rel="stylesheet" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" rel="stylesheet">
+  <link rel="icon" type="image/png" href="icon.png" />
   <style>
     :root *:not(.fa-solid) {
       font-family: "Comfortaa", sans-serif;
@@ -214,8 +215,10 @@
       line-height: 1.5;
     }
 
-    .hidden {
+    .hidden, 
+    .hidden * {
       display: none !important;
+      opacity: 0;
     }
 
     :disabled {
@@ -235,13 +238,13 @@
       </div>
     </header>
 
-    <div id="app">
+    <div id="app hidden">
       <div id="unsupportedNotice" class="unsupported" style="display: none">
         Web Bluetooth n'est pas disponible dans ce navigateur (nécessite
         Chrome/Edge sur desktop ou Android, en HTTPS ou localhost). Safari et
         Firefox ne sont pas supportés.
       </div>
-      <div class="card">
+      <div class="card hidden">
         <div class="log-header">
           <h2>Commandes</h2>
           <div style="display: flex; align-items: center; gap: 14px">
