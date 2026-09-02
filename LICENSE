@@ -8,8 +8,7 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 The Software may be used **solely for personal, educational, or research purposes**.  
 Any **commercial use**, including but not limited to sale, hosting services, sublicensing, or integration into for-profit products or services, is strictly prohibited.
 
-## 2. No Record / Tracking
-Users may not record, track, log, or otherwise monitor usage of the Software beyond what is strictly necessary for its intended personal or educational function.  
+## 2. No Tracking
 Any form of telemetry, analytics, or unauthorized data collection is prohibited.
 
 ## 3. Competition or World Record Useage

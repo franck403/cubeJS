@@ -686,7 +686,7 @@ async function cubecubes() {
     await spikeCube(cubecube, 200)
     console.log("End cubecube Move 3")
 }
-/*
+
 let still = [];
 async function solve2ndCube(mvs) {
     if (!bcState) return console.warn("No bc connection found");
@@ -771,7 +771,7 @@ async function solve2ndCube(mvs) {
     nxt.clasList.remove("active")
     console.info("2nd cube solved");
 }
-*/
+
 // KEYBOARD MAPPIMG
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -869,11 +869,7 @@ document.addEventListener('DOMContentLoaded', () => {
                   sexyMoves3();
                   break;
                 default:
-                    try {
-                        globalThis[command]();
-                    } catch {
-                        console.log("Invalid move");
-                    }
+                  console.log("Invalid move");
               }
         } else {
             console.debug("Unknown message from Slide tab: ", data)
