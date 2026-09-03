@@ -2,6 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
+<link rel="icon" type="image/png" href="icon.png" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Clockstar — Control Mode</title>
 <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@700&display=swap" rel="stylesheet" />
@@ -120,7 +121,7 @@
   }
   .slide p{font-size:15.5px; line-height:1.75; color:#cfcfca; margin:0 0 18px; max-width:60ch;}
   .panel-body{
-    display:grid; grid-template-columns:1.3fr 1fr; gap:48px; align-items:start;
+    display:flex; align-items: center; justify-content: center;
   }
   .panel-stats{display:flex; flex-direction:column;}
   .panel-stats .stat-row{
@@ -210,7 +211,6 @@
 
   /* -------- responsive -------- */
   @media (max-width:900px){
-    .panel-body{grid-template-columns:1fr; gap:28px;}
     .panel-stats .desc{text-align:left; max-width:none;}
     .carousel{padding:0 4px;}
   }
@@ -254,20 +254,6 @@
               <p>Offerte de la 1<sup>re</sup> à la 5<sup>e</sup> secondaire, la concentration multimédia permet aux élèves d'explorer le monde des médias et des technologies dans un encadrement pédagogique structuré, à raison de plusieurs périodes par cycle.</p>
               <p>Le programme se construit en deux volets complémentaires : une base solide en informatique et en éthique numérique, puis une mise en pratique concrète à travers la production de contenu. Les projets réalisés varient d'une année à l'autre selon les élèves et les initiatives du moment.</p>
             </div>
-            <div class="panel-stats">
-              <div class="stat-row">
-                <div class="num">5</div>
-                <div class="desc">années de parcours, de secondaire 1 à secondaire 5</div>
-              </div>
-              <div class="stat-row">
-                <div class="num">2</div>
-                <div class="desc">volets : bases numériques et production</div>
-              </div>
-              <div class="stat-row">
-                <div class="num">2017</div>
-                <div class="desc">création de la concentration multimédia</div>
-              </div>
-            </div>
           </div>
         </article>
 
@@ -293,9 +279,6 @@
           <span class="tag">Apprentissages</span>
           <h3>Compétences et outils développés</h3>
           <div class="panel-body">
-            <div class="panel-text">
-              <p>Le contenu exact varie d'une année à l'autre, mais voici le genre d'activités qui reviennent régulièrement dans la concentration multimédia.</p>
-            </div>
             <div class="skills-grid">
               <div class="skill-item">
                 <span class="skill-tag">Scratch</span>

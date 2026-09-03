@@ -38,7 +38,11 @@ let largeFaces = ['D', 'B'];
 
 let cor = 5;
 let acc = 100000000;
-let dec = 11000;
+let dec = 100;
+
+// KILL SWITCH
+
+let killed = false;
 
 const sexyMove1 = ["R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'"];
 const sexyMove2 = ["L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2"];
@@ -592,6 +596,7 @@ async function spikeCube(moves, sleeped = 180) {
     startTimer(start);
     console.log(window.moves)
     for (let i = 0; i < moves.length; i++) {
+        if (killed) break;
         const m = moves[i], n = moves[i + 1];
         if (isOpposite(m, n)) {
             await Promise.all([
@@ -607,6 +612,42 @@ async function spikeCube(moves, sleeped = 180) {
     await sleepT(200)
     await updateBatteries();
     scSecure = false;
+}
+
+// KILL SWITCH
+
+async function kill() {
+    killed = true;
+    scSecure = true;   // block runMovement/spikeMove/spikeCube from sending anything new
+    solveSecure = true;
+    store.length = 0;  // wipe any queued keyboard moves
+
+    if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+    }
+
+    const stopCmd = (p) => `motor.stop(port.${p});`;
+    const allPorts = ['A', 'B', 'C', 'D', 'E', 'F'];
+
+    await Promise.all([
+        ...(leftWriter ? allPorts.map(p => sendLine(leftWriter, stopCmd(p))) : []),
+        ...(rightWriter ? allPorts.map(p => sendLine(rightWriter, stopCmd(p))) : [])
+    ]);
+
+    await Promise.all([
+        sendLine(leftWriter, `light_matrix.write("O",100)`),
+        sendLine(rightWriter, `light_matrix.write("K",100)`)
+    ]);
+
+    log("KILLED - all motors stopped");
+
+    // release the lock shortly after, so the app isn't stuck dead forever
+    setTimeout(() => {
+        killed = false;
+        scSecure = false;
+        solveSecure = false;
+    }, 1000);
 }
 
 // KEYBOARD MOVES
@@ -847,7 +888,8 @@ document.addEventListener('DOMContentLoaded', () => {
         "w": startCube,
         "s": spin,
         "f": fullscreen,
-        "backspace": scramble
+        "backspace": scramble,
+        "delete": kill
     }
     document.body.addEventListener('keydown', (e) => {
         const ctrlKeys = ['c', 'v', 'z', 'f', 'w', 't', 's', 'r', 'x', 'a', 'l'];
@@ -909,6 +951,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 case "move3":
                   console.log("Move 3");
                   sexyMoves3();
+                  break;
+                case "kill":
+                  console.log("Kill");
+                  kill();
                   break;
                 default:
                     try {
