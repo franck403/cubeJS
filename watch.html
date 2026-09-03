@@ -90,15 +90,17 @@
     transform-style:preserve-3d;
   }
   .slide{
-    grid-area:1/1;
+    flex-direction: column;
     opacity:0; visibility:hidden;
     transform:rotateY(-90deg) translateZ(60px);
     transform-origin:center center;
     backface-visibility:hidden;
     transition:opacity .35s ease, transform .7s cubic-bezier(.22,.9,.32,1.1), visibility 0s linear .7s;
     pointer-events:none;
+    display:none;
   }
   .slide.is-active{
+    display:flex; align-items: center; justify-content: center;
     opacity:1; visibility:visible;
     transform:rotateY(0deg) translateZ(0);
     transition:opacity .35s ease .1s, transform .7s cubic-bezier(.22,.9,.32,1.1);
