@@ -83,11 +83,28 @@
     position:relative;
     perspective:1800px;
     padding-top:4px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+  .carousel-track-wrap{
+    width:100%;
+    position:relative;
+    /* height locked by JS (px) to the tallest slide so switching never shifts page content */
+    transition:height .35s ease;
+    overflow:hidden;
   }
   .carousel-track{
     position:relative;
-    display:grid; /* stack all slides in same cell so height = tallest */
     transform-style:preserve-3d;
+    /* height is set in JS from the tallest slide so switching slides never
+       resizes/shifts the page; all slides are stacked via grid so every
+       slide occupies the exact same cell regardless of its own content height */
+    display:grid;
+  }
+  .carousel-track > .slide{
+    grid-area:1 / 1; /* every slide occupies the same single grid cell -> stacked, no reflow */
+    width:100%;
   }
   .slide{
     flex-direction: column;
@@ -97,10 +114,10 @@
     backface-visibility:hidden;
     transition:opacity .35s ease, transform .7s cubic-bezier(.22,.9,.32,1.1), visibility 0s linear .7s;
     pointer-events:none;
-    display:none;
+    display:flex; /* always flex (never `none`) so its natural height is measurable for the tallest-slide calc */
+    align-items:center; justify-content:center;
   }
   .slide.is-active{
-    display:flex; align-items: center; justify-content: center;
     opacity:1; visibility:visible;
     transform:rotateY(0deg) translateZ(0);
     transition:opacity .35s ease .1s, transform .7s cubic-bezier(.22,.9,.32,1.1);
@@ -134,26 +151,41 @@
   .panel-stats .num{font-family:'Fraunces',serif; font-size:30px; font-weight:600;}
   .panel-stats .desc{font-size:13.5px; color:var(--muted); max-width:24ch; text-align:right;}
 
+  /* -------- nav: fixed layout, never resizes/shifts when slides are added/removed -------- */
   .carousel-nav{
-    display:flex; align-items:center; justify-content:space-between;
+    display:flex;
+    align-items:center;
+    justify-content:center; /* always centered, regardless of slide count */
+    gap:24px;
     margin-top:44px; padding-top:28px; border-top:1px solid var(--line);
+    min-height:40px; /* locks vertical size */
   }
-  .carousel-dots{display:flex; gap:10px;}
+  .carousel-dots{
+    display:flex; align-items:center; gap:10px;
+    min-width:220px; /* reserves space so removing a dot doesn't shift the arrows/layout */
+    justify-content:center;
+    flex:0 0 auto;
+  }
   .carousel-dots button{
     width:28px; height:4px; border-radius:2px; border:none; padding:0;
     background:var(--line); cursor:pointer;
     transition:background .25s ease;
+    flex:0 0 auto;
   }
   .carousel-dots button.is-active{background:var(--green);}
   .carousel-dots button:hover{background:#4a4a4a;}
   .carousel-dots button.is-active:hover{background:var(--green);}
-  .carousel-arrows{display:flex; gap:10px;}
+  .carousel-arrows{
+    display:flex; gap:10px;
+    flex:0 0 auto; /* fixed size, never grows/shrinks with dots count */
+  }
   .arrow-btn{
     width:40px; height:40px; border-radius:50%;
     border:1px solid var(--line); background:transparent; color:var(--ink);
     display:flex; align-items:center; justify-content:center;
     cursor:pointer; font-size:16px;
     transition:border-color .2s, background .2s, transform .2s;
+    flex:0 0 auto;
   }
   .arrow-btn:hover{border-color:var(--green); background:var(--surface); transform:translateY(-1px);}
 
@@ -219,7 +251,8 @@
   @media (max-width:560px){
     .wrap{padding:0 16px;}
     .hero-carousel{padding:16px 0;}
-    .carousel-nav{flex-wrap:wrap; gap:16px;}
+    .carousel-nav{flex-wrap:nowrap; gap:16px;}
+    .carousel-dots{min-width:140px;}
     .skills-grid{grid-template-columns:1fr;}
   }
 
@@ -231,6 +264,7 @@
 <section class="hero-carousel" id="site-carousel">
   <div class="wrap">
     <div class="carousel" role="region" aria-label="Robot Gan Spike — commande et informations" aria-live="polite">
+      <div class="carousel-track-wrap" id="carouselTrackWrap">
       <div class="carousel-track" id="carouselTrack">
 
         <article class="slide is-active" id="connexionSlide">
@@ -311,6 +345,7 @@
         </article>
 
       </div>
+      </div>
 
       <div class="carousel-nav">
         <div class="carousel-dots" id="carouselDots"></div>
@@ -326,17 +361,20 @@
 <script>
 (function(){
   const track = document.getElementById('carouselTrack');
+  const trackWrap = document.getElementById('carouselTrackWrap');
   const dotsWrap = document.getElementById('carouselDots');
   const prevBtn = document.getElementById('prevBtn');
   const nextBtn = document.getElementById('nextBtn');
-  if(!track || !dotsWrap) return;
+  if(!track || !dotsWrap || !trackWrap) return;
   const slides = Array.from(track.querySelectorAll('.slide'));
   if(slides.length === 0) return;
 
   let current = slides.findIndex(s => s.classList.contains('is-active'));
   if(current < 0) current = 0;
   let timer = null;
+  let transitioning = false; // lock: prevents overlapping/queued goTo() calls from desyncing state
   const INTERVAL = 9000;
+  const TRANSITION_MS = 750; // matches the slide transition duration
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   slides.forEach((_, i) => {
@@ -349,6 +387,19 @@
   });
   const dots = Array.from(dotsWrap.children);
 
+  // Measure the tallest slide and lock the wrapper's height to it, so
+  // switching slides (or removing one) never changes page/nav position.
+  function recalcHeight(){
+    let max = 0;
+    slides.forEach(s => {
+      // temporarily force-measure even inactive slides (they're display:flex + opacity:0,
+      // already laid out via the grid stacking, so offsetHeight is accurate as-is)
+      const h = s.offsetHeight;
+      if(h > max) max = h;
+    });
+    if(max > 0) trackWrap.style.height = max + 'px';
+  }
+
   function render(prevIndex, direction){
     slides.forEach((s, i) => {
       s.classList.toggle('is-active', i === current);
@@ -357,7 +408,7 @@
       // give the outgoing slide a directional exit class briefly for the 3D flip
       const outgoing = slides[prevIndex];
       outgoing.classList.add(direction === 'next' ? 'is-exit-next' : 'is-exit-prev');
-      window.setTimeout(() => outgoing.classList.remove('is-exit-next', 'is-exit-prev'), 750);
+      window.setTimeout(() => outgoing.classList.remove('is-exit-next', 'is-exit-prev'), TRANSITION_MS);
     }
     dots.forEach((d, i) => d.classList.toggle('is-active', i === current));
   }
@@ -380,17 +431,22 @@
     } else {
       dots.forEach((d, i) => d.classList.toggle('is-active', i === current));
     }
+    recalcHeight();
   }
   // exposed so other scripts (e.g. the BLE connect handler) can drop a slide
   window.__carouselRemoveSlide = removeSlide;
 
   function goTo(i, userTriggered){
+    if(transitioning) return; // ignore clicks/ticks that land mid-transition -> prevents desync
     const prevIndex = current;
     const total = slides.length;
     const nextIndex = (i + total) % total;
+    if(nextIndex === prevIndex) return;
     const direction = ((nextIndex - prevIndex + total) % total) <= total / 2 ? 'next' : 'prev';
     current = nextIndex;
+    transitioning = true;
     render(prevIndex, direction);
+    window.setTimeout(() => { transitioning = false; }, TRANSITION_MS);
     if(userTriggered) restart();
   }
 
@@ -430,6 +486,12 @@
   });
 
   render(null, 'next');
+  recalcHeight();
+  window.addEventListener('resize', recalcHeight);
+  // fonts loading late can change slide heights after first paint
+  if(document.fonts && document.fonts.ready){
+    document.fonts.ready.then(recalcHeight);
+  }
   start();
 })();
 </script>
