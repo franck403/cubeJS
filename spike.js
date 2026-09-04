@@ -251,12 +251,20 @@ async function reconnectSpike(side) {
             encoderStream.readable.pipeTo(p.writable);
             const writer = encoderStream.writable.getWriter();
 
+            // Interrupt whatever's running on the hub first, same as openSpike,
+            // so the REPL is in a clean state before we ask it to identify itself.
+            // Without this, getHubIdCmd can land on a busy/garbled REPL and never
+            // echo back a clean "Id..." line, causing identifyHub to time out and
+            // the hub to fall through to fallback (order-based) side assignment.
+            await writer.write(new Uint8Array([3]));
+            await sleepT(100);
+
             const hubId = await identifyHub(writer, reader);
             const rememberedSide = getRememberedSide(hubId);
 
             if (rememberedSide === 'left' || rememberedSide === 'right') {
-                assignSpikeSide(rememberedSide, p, writer, reader);
-                console.log(`${rememberedSide} reconnected (identified as ${hubId})`);
+                await assignSpikeSide(rememberedSide, p, writer, reader);
+                log(`${rememberedSide} reconnected (identified as ${hubId})`);
             } else {
                 // Unknown hub (first time seen this session, or id lookup failed):
                 // hold onto it and assign to whichever side is still missing.
@@ -272,19 +280,24 @@ async function reconnectSpike(side) {
     for (const entry of unassigned) {
         const openSide = !SpikeState.left ? 'left' : (!SpikeState.right ? 'right' : null);
         if (!openSide) break;
-        assignSpikeSide(openSide, entry.port, entry.writer, entry.reader);
+        await assignSpikeSide(openSide, entry.port, entry.writer, entry.reader);
         if (entry.hubId) rememberSpikeSide(entry.hubId, openSide);
-        console.log(`${openSide} reconnected (new/unidentified hub, assigned by fallback)`);
+        log(`${openSide} reconnected (new/unidentified hub, assigned by fallback)`);
     }
 
     if (!SpikeState.left || !SpikeState.right) {
         const missing = !SpikeState.left && !SpikeState.right ? 'left/right' : (!SpikeState.left ? 'left' : 'right');
-        console.info(`No ${missing} port found, retrying in 5s`);
+        log(`No ${missing} port found, retrying in 5s`);
         setTimeout(() => reconnectSpike(side), 5000);
     }
 }
 
-function assignSpikeSide(side, port, writer, reader) {
+// FIX: this used to only wire up state + call the undefined `autoReconnectLoop`,
+// which threw immediately and skipped sending `startup` and starting the RX
+// reader (batteryRead). That's why reconnect gave you: no motor movement
+// (no `motor` import / high-res mode on the hub), no RX/TX log (batteryRead,
+// which contains the RX error logging, was never started), and no sound.
+async function assignSpikeSide(side, port, writer, reader) {
     if (side === 'left') {
         leftPort = port;
         leftWriter = writer;
@@ -296,7 +309,17 @@ function assignSpikeSide(side, port, writer, reader) {
         rightReader = reader;
         SpikeState.right = true;
     }
-    autoReconnectLoop(side, port, reader);
+
+    // Run the same setup openSpike() does, so reconnect behaves identically
+    // to a fresh connect.
+    await sendLine(writer, startup);
+
+    // Start listening for RX on this port (battery reports, hub id replies, etc.)
+    batteryRead(side, reader);
+
+    if (!silence) {
+        await sendLine(writer, connectSound);
+    }
 }
 
 async function spike(cubeed) {
@@ -374,6 +397,7 @@ async function batteryRead(which, reader) {
                 const { value, done } = await reader.read();
                 if (done) break;
                 if (value) {
+                    log(`RX [${which}]:`, value);
                     value.split('\n').forEach(element => {
                         if (element.startsWith('Ba')) {
                             const batteryValue = parseFloat(element.replace('Ba', '')) / 1000;
