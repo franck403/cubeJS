@@ -40,7 +40,6 @@ worker.onmessage = function (e) {
       }
       await spikeCube(moves)
       console.info("End Solve")
-      await solve2ndCube(moves);
     }
     fnc()
   }
