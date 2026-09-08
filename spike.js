@@ -504,7 +504,7 @@ function pickQuarterTurnDeg(face, dirKey) {
 
 /**
  * Waits until the hub reports the given port's absolute position is within
- * POS_TOLERANCE_DEG of targetPos, or POS_TIMEOUT_MS elapses.
+ * the active profile's tolerance of targetPos, or its timeout elapses.
  *
  * This is THE fix for the drift/45-instead-of-90 problem: previously we
  * just slept a fixed amount of JS time and assumed the move had finished.
@@ -514,9 +514,11 @@ function pickQuarterTurnDeg(face, dirKey) {
  * 90deg, and why error accumulates over a sequence (never "resets").
  *
  * Requires the hub to actually send back its position. We ask for it with
- * a "Po<port><value>" print after every move (see buildMoveCommand below).
+ * a "Po<port><value>" print after every move.
  */
-function waitForPosition(which, port, targetPos, timeoutMs = POS_TIMEOUT_MS) {
+function waitForPosition(which, port, targetPos, timeoutMs) {
+    const profile = getSpeedProfile();
+    const effectiveTimeout = timeoutMs ?? profile.posTimeoutMs;
     return new Promise((resolve) => {
         let settled = false;
         const cleanup = () => {
@@ -527,7 +529,7 @@ function waitForPosition(which, port, targetPos, timeoutMs = POS_TIMEOUT_MS) {
 
         const onReading = (actualPos) => {
             if (settled) return;
-            if (Math.abs(actualPos - targetPos) <= POS_TOLERANCE_DEG) {
+            if (Math.abs(actualPos - targetPos) <= profile.posToleranceDeg) {
                 settled = true;
                 cleanup();
                 resolve({ ok: true, actualPos });
@@ -541,14 +543,14 @@ function waitForPosition(which, port, targetPos, timeoutMs = POS_TIMEOUT_MS) {
         const writer = which === 'left' ? leftWriter : rightWriter;
         const pollTimer = setInterval(() => {
             sendLine(writer, `print("Po${port}" + str(motor.absolute_position(port.${port})))`);
-        }, POS_POLL_INTERVAL_MS);
+        }, profile.posPollIntervalMs);
 
         const timeoutTimer = setTimeout(() => {
             if (settled) return;
             settled = true;
             cleanup();
             resolve({ ok: false, actualPos: null });
-        }, timeoutMs);
+        }, effectiveTimeout);
 
         // fire the first poll immediately instead of waiting one interval
         sendLine(writer, `print("Po${port}" + str(motor.absolute_position(port.${port})))`);
@@ -557,6 +559,8 @@ function waitForPosition(which, port, targetPos, timeoutMs = POS_TIMEOUT_MS) {
 
 async function runMovement(move, sleep = 220, noCube = false) {
     if (!move || typeof move !== 'string') return console.log(`Invalid move ${move}`);
+
+    const profile = getSpeedProfile();
 
     const face = move.charAt(0);
     const sym = move.charAt(1) || '';
@@ -596,7 +600,7 @@ async function runMovement(move, sleep = 220, noCube = false) {
     const targetPos = (currentPos ?? 0) - deg0;
 
     const cmd =
-        `motor.run_to_absolute_position(port.${port}, ${targetPos}, ${MOVE_VELOCITY}, acceleration=${MOVE_ACCEL}, deceleration=${MOVE_DECEL});\n`;
+        `motor.run_to_absolute_position(port.${port}, ${targetPos}, ${profile.moveVelocity}, acceleration=${profile.moveAccel}, deceleration=${profile.moveDecel});\n`;
 
     await sendLine(writer, cmd);
     await sendLine(leftWriter, `light_matrix.write("${face}",100)`);
@@ -607,17 +611,17 @@ async function runMovement(move, sleep = 220, noCube = false) {
     // truncated turns, no more compounding drift across a sequence.
     const result = await waitForPosition(which, port, targetPos);
     if (!result.ok) {
-        log(`WARN: ${move} on port ${port} (${which}) did not confirm position within ${POS_TIMEOUT_MS}ms - possible stall/skip`);
+        log(`WARN: ${move} on port ${port} (${which}) did not confirm position within ${profile.posTimeoutMs}ms - possible stall/skip`);
         // Best-effort nudge: re-issue the same target once. If it still
         // fails we move on rather than hang the whole sequence forever.
         await sendLine(writer, cmd);
-        await waitForPosition(which, port, targetPos, 800);
+        await waitForPosition(which, port, targetPos, Math.min(800, profile.posTimeoutMs + 300));
     }
 
     // Still respect a minimum visual/audible pacing between moves so the
     // light matrix + sound don't overlap awkwardly, but this is now a
     // floor, not the thing we rely on for correctness.
-    await sleepT(Math.min(wait, 120));
+    await sleepT(Math.min(wait, profile.pacingFloorMs));
 }
 
 /**
@@ -691,24 +695,23 @@ async function resetMotors() {
     log("Resetting motors to home position...");
 
     // Reset all motors on the left side
-    
     bettew = 4000
     if (SpikeState.left) {
-        await sendLine(leftWriter, "motor.run_to_absolute_position(port.A, 0, 50, direction=motor.SHORTEST_PATH, acceleration=1000, deceleration=1000);");
+        await sendLine(leftWriter, "motor.run_to_absolute_position(port.A, 0, 50, direction=motor.SHORTEST_PATH, stop=motor.STOP_HOLD, acceleration=1000, deceleration=1000);");
         await sleepT(bettew)
-        await sendLine(leftWriter, "motor.run_to_absolute_position(port.C, 0, 50, direction=motor.SHORTEST_PATH, acceleration=1000, deceleration=1000);");
+        await sendLine(leftWriter, "motor.run_to_absolute_position(port.C, 0, 50, direction=motor.SHORTEST_PATH, stop=motor.STOP_HOLD, acceleration=1000, deceleration=1000);");
         await sleepT(bettew)
-        await sendLine(leftWriter, "motor.run_to_absolute_position(port.E, 0, 50, direction=motor.SHORTEST_PATH, acceleration=1000, deceleration=1000);");
+        await sendLine(leftWriter, "motor.run_to_absolute_position(port.E, 0, 50, direction=motor.SHORTEST_PATH, stop=motor.STOP_HOLD, acceleration=1000, deceleration=1000);");
         await sleepT(bettew)
     }
 
     // Reset all motors on the right side
     if (SpikeState.right) {
-        await sendLine(rightWriter, "motor.run_to_absolute_position(port.D, 0, 50, direction=motor.SHORTEST_PATH, acceleration=1000, deceleration=1000);");
+        await sendLine(rightWriter, "motor.run_to_absolute_position(port.D, 0, 50, direction=motor.SHORTEST_PATH, stop=motor.STOP_HOLD, acceleration=1000, deceleration=1000);");
         await sleepT(bettew)
-        await sendLine(rightWriter, "motor.run_to_absolute_position(port.F, 0, 50, direction=motor.SHORTEST_PATH, acceleration=1000, deceleration=1000);");
+        await sendLine(rightWriter, "motor.run_to_absolute_position(port.F, 0, 50, direction=motor.SHORTEST_PATH, stop=motor.STOP_HOLD, acceleration=1000, deceleration=1000);");
         await sleepT(bettew)
-        await sendLine(rightWriter, "motor.run_to_absolute_position(port.B, 0, 50, direction=motor.SHORTEST_PATH, acceleration=1000, deceleration=1000);");
+        await sendLine(rightWriter, "motor.run_to_absolute_position(port.B, 0, 50, direction=motor.SHORTEST_PATH, stop=motor.STOP_HOLD, acceleration=1000, deceleration=1000);");
         await sleepT(bettew)
     }
 
@@ -1053,6 +1056,7 @@ document.addEventListener('DOMContentLoaded', () => {
         "s": spin,
         "f": fullscreen,
         "backspace": scramble,
+        "v": () => toggleSpeed(),
         "delete": kill
     }
     document.body.addEventListener('keydown', (e) => {
