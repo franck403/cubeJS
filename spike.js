@@ -691,6 +691,7 @@ async function resetMotors() {
     log("Resetting motors to home position...");
 
     // Reset all motors on the left side
+    
     bettew = 4000
     if (SpikeState.left) {
         await sendLine(leftWriter, "motor.run_to_absolute_position(port.A, 0, 50, direction=motor.SHORTEST_PATH, acceleration=1000, deceleration=1000);");
