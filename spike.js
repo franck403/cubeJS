@@ -15,7 +15,8 @@ let bcState = false;
 
 let scLenght = 20;
 
-let deg = 95;  // Moves x 1
+let deg = 92;  // Moves x 1
+let deg1 = 90; // Same face, same direction, seen again later in the sequence
 let dog = 180; // Moves x 2
 
 let lb = localStorage.lb || 0;
@@ -25,7 +26,7 @@ var silence = true;
 
 let timerInterval = null;
 
-window.sleeped = 170;
+window.sleeped = 160;
 
 let nxt;
 let wrong;
@@ -38,7 +39,7 @@ let largeFaces = ['D', 'B'];
 
 let cor = 5;
 let acc = 100000000;
-let dec = 100;
+let dec = 1000;
 
 // KILL SWITCH
 
@@ -67,25 +68,23 @@ async function sleepT(ms) {
 
 // DEFAULT
 
+// All 18 standard quarter/half turns, one entry per face+modifier.
+const ALL_MOVES = ['U', "U'", 'U2', 'D', "D'", 'D2', 'L', "L'", 'L2', 'R', "R'", 'R2', 'F', "F'", 'F2', 'B', "B'", 'B2'];
+
 /**
  * Generate a random scramble table
- * @param {number} count - number of moves
+ * @param {number} length - number of moves
  * @returns {string[]} - array of move notations
  */
 function generateScramble(length = 20) {
     const result = [];
-    let last
+    let lastFace = null;
     for (let i = 0; i < length; i++) {
         let m;
         do m = ALL_MOVES[Math.random() * ALL_MOVES.length | 0];
-        while (i && m[0] === result[i - 1][0]);
-        if (!last) {
-            result.push(m);
-            last = m;
-        } else if (!last.startsWith(m.charAt(0))) {
-            result.push(m);
-            last = m;
-        }
+        while (m.charAt(0) === lastFace);
+        result.push(m);
+        lastFace = m.charAt(0);
     }
     return result;
 }
@@ -100,84 +99,6 @@ function log(...args) {
 }
 
 // CONNECTIONS
-
-// ---- Spike identity persistence (left/right regardless of plug order) ----
-// We ask each hub for a stable identity string (its own on-board unique id file,
-// created the first time we ever see it) and remember which side that identity
-// belongs to in localStorage. On reconnect we identify every available port
-// before assigning left/right, instead of trusting getPorts() order.
-
-const SPIKE_ID_STORAGE_KEY = 'spikeIds'; // { [hubId]: 'left' | 'right' }
-
-function loadSpikeIdMap() {
-    try {
-        return JSON.parse(localStorage.getItem(SPIKE_ID_STORAGE_KEY) || '{}');
-    } catch {
-        return {};
-    }
-}
-
-function saveSpikeIdMap(map) {
-    localStorage.setItem(SPIKE_ID_STORAGE_KEY, JSON.stringify(map));
-}
-
-function rememberSpikeSide(hubId, side) {
-    if (!hubId) return;
-    const map = loadSpikeIdMap();
-    map[hubId] = side;
-    saveSpikeIdMap(map);
-}
-
-function getRememberedSide(hubId) {
-    if (!hubId) return null;
-    const map = loadSpikeIdMap();
-    return map[hubId] || null;
-}
-
-// Command sent to the hub: makes sure a persistent id file exists on the hub's
-// own storage, then prints it back to us so we can read it over serial.
-const getHubIdCmd =
-`try:\n    with open('gilaxy_id.txt') as f:\n        _gid = f.read().strip()\nexcept:\n    import urandom\n    _gid = ''.join(['{:02x}'.format(urandom.getrandbits(8)) for _ in range(4)])\n    with open('gilaxy_id.txt', 'w') as f:\n        f.write(_gid)\nprint('Id' + _gid)`;
-
-/**
- * Sends the id-fetch command to a hub and resolves with the hub's persistent id.
- * Reads from the given reader until a line starting with "Id" is seen, or times out.
- */
-async function identifyHub(writer, reader, timeoutMs = 3000) {
-    return new Promise(async (resolve) => {
-        let settled = false;
-        const finish = (val) => {
-            if (settled) return;
-            settled = true;
-            resolve(val);
-        };
-
-        const timer = setTimeout(() => finish(null), timeoutMs);
-
-        (async () => {
-            try {
-                await sendLine(writer, getHubIdCmd);
-                while (!settled) {
-                    const { value, done } = await reader.read();
-                    if (done) break;
-                    if (value) {
-                        const lines = value.split('\n');
-                        for (const line of lines) {
-                            if (line.startsWith('Id')) {
-                                clearTimeout(timer);
-                                finish(line.replace('Id', '').trim());
-                                return;
-                            }
-                        }
-                    }
-                }
-            } catch (err) {
-                clearTimeout(timer);
-                finish(null);
-            }
-        })();
-    });
-}
 
 async function openSpike(which) {
     let port, writer, reader, abortCtrl;
@@ -208,37 +129,47 @@ async function openSpike(which) {
             SpikeState.right = true;
         }
 
-        await sendLine(writer, startup);
+        log(`${which} Spike port opened`);
 
-        // Learn/confirm this hub's identity and remember which side it is.
-        const hubId = await identifyHub(writer, reader);
-        if (hubId) rememberSpikeSide(hubId, which);
+        // Everything below (startup script, RX listener, connect sound) is
+        // setup work that does NOT need to block the caller. The caller's
+        // only job here is to get requestPort() shown and the port opened,
+        // so the SECOND popup (for the other hub) can show up right away
+        // instead of waiting on startup/sendLine round-trips. This is what
+        // was causing the second popup to appear inconsistently/late.
+        (async () => {
+            try {
+                await sendLine(writer, startup);
 
-        // start listening for RX
-        batteryRead(which, reader);
+                // start listening for RX
+                batteryRead(which, reader);
 
-        if (!silence) {
-            await sendLine(writer, connectSound);
-        }
+                if (!silence) {
+                    await sendLine(writer, connectSound);
+                }
 
-        log(`${which} Spike connected`);
+                log(`${which} Spike connected`);
+            } catch (err) {
+                log(`Error setting up ${which} Spike:`, err?.message || err);
+            }
+        })();
     } catch (err) {
         log(`Error opening ${which} Spike:`, err?.message || err);
     }
 }
 
 /**
- * Reconnects to all previously authorized Spike ports and figures out which
- * one is "left" and which is "right" by asking each hub for its remembered
- * identity, instead of relying on plug order.
+ * Reconnects to all previously authorized Spike ports. No identity check —
+ * ports are assigned left/right in whatever order navigator.serial.getPorts()
+ * returns them (i.e. plug order / grant order).
  */
 async function reconnectSpike(side) {
     const ports = await navigator.serial.getPorts();
-    const unassigned = [];
+    const candidates = ports.filter(p => p !== leftPort && p !== rightPort);
 
-    for (const p of ports) {
-        // Skip ports we've already wired up in this pass.
-        if (p === leftPort || p === rightPort) continue;
+    for (const p of candidates) {
+        const openSide = !SpikeState.left ? 'left' : (!SpikeState.right ? 'right' : null);
+        if (!openSide) break;
 
         try {
             await p.open({ baudRate: 115200 });
@@ -251,38 +182,14 @@ async function reconnectSpike(side) {
             encoderStream.readable.pipeTo(p.writable);
             const writer = encoderStream.writable.getWriter();
 
-            // Interrupt whatever's running on the hub first, same as openSpike,
-            // so the REPL is in a clean state before we ask it to identify itself.
-            // Without this, getHubIdCmd can land on a busy/garbled REPL and never
-            // echo back a clean "Id..." line, causing identifyHub to time out and
-            // the hub to fall through to fallback (order-based) side assignment.
             await writer.write(new Uint8Array([3]));
             await sleepT(100);
 
-            const hubId = await identifyHub(writer, reader);
-            const rememberedSide = getRememberedSide(hubId);
-
-            if (rememberedSide === 'left' || rememberedSide === 'right') {
-                await assignSpikeSide(rememberedSide, p, writer, reader);
-                log(`${rememberedSide} reconnected (identified as ${hubId})`);
-            } else {
-                // Unknown hub (first time seen this session, or id lookup failed):
-                // hold onto it and assign to whichever side is still missing.
-                unassigned.push({ port: p, writer, reader, hubId });
-            }
+            await assignSpikeSide(openSide, p, writer, reader);
+            log(`${openSide} reconnected`);
         } catch {
             try { await p.close(); } catch { }
         }
-    }
-
-    // Fill any remaining empty side with unassigned hubs, remembering the
-    // choice for next time.
-    for (const entry of unassigned) {
-        const openSide = !SpikeState.left ? 'left' : (!SpikeState.right ? 'right' : null);
-        if (!openSide) break;
-        await assignSpikeSide(openSide, entry.port, entry.writer, entry.reader);
-        if (entry.hubId) rememberSpikeSide(entry.hubId, openSide);
-        log(`${openSide} reconnected (new/unidentified hub, assigned by fallback)`);
     }
 
     if (!SpikeState.left || !SpikeState.right) {
@@ -314,7 +221,7 @@ async function assignSpikeSide(side, port, writer, reader) {
     // to a fresh connect.
     await sendLine(writer, startup);
 
-    // Start listening for RX on this port (battery reports, hub id replies, etc.)
+    // Start listening for RX on this port (battery reports, etc.)
     batteryRead(side, reader);
 
     if (!silence) {
@@ -485,6 +392,35 @@ async function updateBatteries() {
 
 // MOVE
 
+// Tracks, per face (U/D/L/R/F/B), the last non-double direction we ran and
+// whether we've already used the "first" (deg) angle for that direction.
+// Reset at the start of every spikeCube() run.
+let faceMoveHistory = {};
+
+function resetFaceMoveHistory() {
+    faceMoveHistory = {};
+}
+
+/**
+ * Picks the rotation angle (in degrees, unsigned) for a quarter turn (no '2')
+ * of the given face+direction. First time this face is turned in this
+ * direction during the current sequence: deg (95). If that same face is
+ * turned again later in the SAME direction (separated by other moves):
+ * deg1 (90). If it comes back in the OTHER direction, it resets and counts
+ * as a fresh "first time" (95) for that new direction.
+ */
+function pickQuarterTurnDeg(face, dirKey) {
+    const prev = faceMoveHistory[face];
+    let angle;
+    if (prev && prev.dir === dirKey) {
+        angle = deg1;
+    } else {
+        angle = deg;
+    }
+    faceMoveHistory[face] = { dir: dirKey };
+    return angle;
+}
+
 async function runMovement(move, sleep = 220, noCube = false) {
     if (!move || typeof move !== 'string') return console.log(`Invalid move ${move}`);
 
@@ -496,15 +432,24 @@ async function runMovement(move, sleep = 220, noCube = false) {
 
     const port = left ? leftPorts[idx] : rightPorts[idx];
 
-    const c = largeFaces.includes(face) ? cor : 0; 
-    const deg0 = (sym === '2' ? dog : sym === "'" ? -deg : deg) + c;
+    const c = largeFaces.includes(face) ? cor : 0;
+
+    let deg0;
+    if (sym === '2') {
+        deg0 = dog + c;
+    } else {
+        // dirKey distinguishes clockwise ("") from counter-clockwise ("'")
+        const dirKey = sym === "'" ? "'" : "";
+        const quarterDeg = pickQuarterTurnDeg(face, dirKey);
+        deg0 = (sym === "'" ? -quarterDeg : quarterDeg) + c;
+    }
 
     const wait =
         (largeFaces.includes(face) ? sleep + 40 : sleep) *
         (move.endsWith('2') ? 2 : 1);
 
-    const cmd =
-        `motor.run_to_absolute_position(port.${port}, motor.absolute_position(port.${port}) - ${deg0}, 1110, stop=motor.STOP_HOLD, acceleration=${acc}, deceleration=${dec});\n`;
+    const cmd = /* stop=motor.STOP_HOLD caused a error to look in to it */
+        `motor.run_to_absolute_position(port.${port}, motor.absolute_position(port.${port}) - ${deg0}, 1110, acceleration=${acc}, deceleration=${dec});\n`;
 
     const writer = left ? leftWriter : rightWriter;
 
@@ -599,12 +544,13 @@ async function spikeMove(move) {
     scSecure = false
 }
 
-async function spikeCube(moves, sleeped = 180) {
+async function spikeCube(moves, sleeped = 150) {
 
     moves = simplifyMoves(moves);
     console.info(moves)
     if (scSecure) return console.warn("NO SPAM !!!");
     scSecure = true;
+    resetFaceMoveHistory();
     const noCube = ganCubePresent();
     if (noCube) return console.warn("Cube Not Connected")
     const sleep = sleeped || window.sleeped;
@@ -798,14 +744,14 @@ async function scramble() {
         if (!silence) {
             await sendLine(leftWriter, scrambleSound);
         }
-        await spikeCube(moves, 300)
+        await spikeCube(moves, 200)
         console.info("End Scramble")
     }
 }
 
 async function startCube() {
     console.info("Start Cube")
-    await spikeCube(['U', "U'"], 300)
+    await spikeCube(['U', "U'"], 290)
 }
 
 async function spin() {
@@ -856,26 +802,26 @@ document.addEventListener("fullscreenchange", (e) => {
 
 async function sexyMoves1() {
     console.log("Start Sexy Move 1")
-    await spikeCube(sexyMove1, 200)
+    await spikeCube(sexyMove1, 190)
     console.log("End Sexy Move 1")
 }
 
 async function sexyMoves2() {
     console.log("Start Sexy Move 2")
-    await spikeCube(sexyMove2, 200)
+    await spikeCube(sexyMove2, 190)
     console.log("End Sexy Move 2")
 }
 
 async function sexyMoves3() {
     console.log("Start Sexy Move 3")
-    await spikeCube(sexyMove3, 200)
+    await spikeCube(sexyMove3, 190)
     console.log("End Sexy Move 3")
 }
 
 
 async function cubecubes() {
     console.log("Start cubecube Move 3")
-    await spikeCube(cubecube, 200)
+    await spikeCube(cubecube, 190)
     console.log("End cubecube Move 3")
 }
 // KEYBOARD MAPPIMG
