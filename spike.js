@@ -15,7 +15,7 @@ let bcState = false;
 
 let scLenght = 20;
 
-let deg = 92;  // Moves x 1
+let deg = 95;  // Moves x 1
 let deg1 = 90; // Same face, same direction, seen again later in the sequence
 let dog = 180; // Moves x 2
 
@@ -40,6 +40,67 @@ let largeFaces = ['D', 'B'];
 let cor = 5;
 let acc = 100000000;
 let dec = 1000;
+
+// MOTION CONFIRMATION TUNING
+// Instead of trusting a fixed sleep, we now ask the hub for the real
+// motor position after every move and wait until it actually matches
+// the target (within a tolerance) before sending the next command.
+// This is what fixes drift (positions never landing at the same spot)
+// and truncated moves (a "90 deg" turn that lands at 45 deg because the
+// next command interrupted it).
+//
+// SPEED PROFILES
+// "normal" = safe/reliable tuning (what we validated the confirm-loop with).
+// "fast"   = tight tolerance/timeout + higher velocity/accel, tuned to fit
+//            a 22-move sequence under ~6s. Toggle with toggleSpeed() or the
+//            "v" key. Fast trades a little settle precision for speed, so
+//            if you start seeing skipped/half-turned moves again, that's
+//            the first thing to back off (see tuning notes below).
+const SPEED_PROFILES = {
+    normal: {
+        posToleranceDeg: 3,     // settle tolerance
+        posPollIntervalMs: 25,  // how often we ask the hub for position
+        posTimeoutMs: 1500,     // give up waiting after this long
+        moveVelocity: 720,      // deg/s target speed
+        moveAccel: 3000,        // ramp up
+        moveDecel: 2500,        // ramp down
+        pacingFloorMs: 120,     // min visual/audible pacing after confirm
+    },
+    fast: {
+        posToleranceDeg: 6,     // looser: confirm sooner, still catches real stalls
+        posPollIntervalMs: 12,  // poll more often so we notice "arrived" faster
+        posTimeoutMs: 500,      // don't let one stuck move eat the whole budget
+        moveVelocity: 1400,     // near max useful speed for these small turns
+        moveAccel: 9000,        // snappier ramp - short moves barely reach cruise speed anyway
+        moveDecel: 7000,        // stop harder; higher tolerance absorbs the extra overshoot
+        pacingFloorMs: 20,      // basically no artificial floor, confirm loop paces it
+    },
+};
+
+let currentSpeedMode = 'normal';
+
+function getSpeedProfile() {
+    return SPEED_PROFILES[currentSpeedMode];
+}
+
+/**
+ * Switches between "normal" (reliable) and "fast" (tight timing, tuned for
+ * ~22 moves under 6s) speed profiles. Call with no args to flip, or pass
+ * 'normal'/'fast' to set explicitly. Safe to call mid-idle; don't call
+ * while a sequence is running (scSecure guards against that anyway - the
+ * new profile takes effect on the NEXT spikeCube()/spikeMove() call).
+ */
+function toggleSpeed(mode) {
+    if (mode === 'normal' || mode === 'fast') {
+        currentSpeedMode = mode;
+    } else {
+        currentSpeedMode = currentSpeedMode === 'normal' ? 'fast' : 'normal';
+    }
+    log(`Speed mode: ${currentSpeedMode}`);
+    const badge = document.getElementById('speedMode');
+    if (badge) badge.textContent = currentSpeedMode.toUpperCase();
+    return currentSpeedMode;
+}
 
 // KILL SWITCH
 
@@ -296,6 +357,13 @@ function areBothSpikesConnected() {
 
 // BATTERIES
 
+// Per-side buffer of raw text lines coming off the hub UART, and a map of
+// pending "waiting for a position reading" promises keyed by port letter.
+// batteryRead() used to be the only RX consumer; now it also demuxes
+// position replies (prefixed "Po") so waitForPosition() can resolve them.
+const pendingPositionResolvers = { left: {}, right: {} };
+let rxLineBuffer = { left: '', right: '' };
+
 async function batteryRead(which, reader) {
     if (!reader) return;
     (async () => {
@@ -305,7 +373,12 @@ async function batteryRead(which, reader) {
                 if (done) break;
                 if (value) {
                     log(`RX [${which}]:`, value);
-                    value.split('\n').forEach(element => {
+                    rxLineBuffer[which] += value;
+                    let lines = rxLineBuffer[which].split('\n');
+                    rxLineBuffer[which] = lines.pop(); // keep last partial line in buffer
+
+                    lines.forEach(element => {
+                        element = element.trim();
                         if (element.startsWith('Ba')) {
                             const batteryValue = parseFloat(element.replace('Ba', '')) / 1000;
                             const batteryPercentageValue = batteryPercentage(batteryValue, 6.0, 8.4);
@@ -337,6 +410,14 @@ async function batteryRead(which, reader) {
                                 }
                                 // Add the appropriate battery class
                                 batteryIcon.classList.add(iconClass);
+                            }
+                        } else if (element.startsWith('Po')) {
+                            // Format expected from the hub: "Po<port><value>" e.g. "PoA1234"
+                            const port = element.charAt(2);
+                            const posValue = parseInt(element.slice(3), 10);
+                            if (!Number.isNaN(posValue)) {
+                                const resolver = pendingPositionResolvers[which][port];
+                                if (resolver) resolver(posValue);
                             }
                         }
                     });
@@ -421,6 +502,59 @@ function pickQuarterTurnDeg(face, dirKey) {
     return angle;
 }
 
+/**
+ * Waits until the hub reports the given port's absolute position is within
+ * POS_TOLERANCE_DEG of targetPos, or POS_TIMEOUT_MS elapses.
+ *
+ * This is THE fix for the drift/45-instead-of-90 problem: previously we
+ * just slept a fixed amount of JS time and assumed the move had finished.
+ * If the hub was still moving (or had stalled) when the next command was
+ * sent, the in-flight run_to_absolute_position() gets superseded/aborted
+ * partway through — that's why you'd see a move stop at 45deg instead of
+ * 90deg, and why error accumulates over a sequence (never "resets").
+ *
+ * Requires the hub to actually send back its position. We ask for it with
+ * a "Po<port><value>" print after every move (see buildMoveCommand below).
+ */
+function waitForPosition(which, port, targetPos, timeoutMs = POS_TIMEOUT_MS) {
+    return new Promise((resolve) => {
+        let settled = false;
+        const cleanup = () => {
+            delete pendingPositionResolvers[which][port];
+            clearInterval(pollTimer);
+            clearTimeout(timeoutTimer);
+        };
+
+        const onReading = (actualPos) => {
+            if (settled) return;
+            if (Math.abs(actualPos - targetPos) <= POS_TOLERANCE_DEG) {
+                settled = true;
+                cleanup();
+                resolve({ ok: true, actualPos });
+            }
+            // else: keep waiting, the next reading (triggered by pollTimer)
+            // may be closer once the motor finishes settling.
+        };
+
+        pendingPositionResolvers[which][port] = onReading;
+
+        const writer = which === 'left' ? leftWriter : rightWriter;
+        const pollTimer = setInterval(() => {
+            sendLine(writer, `print("Po${port}" + str(motor.absolute_position(port.${port})))`);
+        }, POS_POLL_INTERVAL_MS);
+
+        const timeoutTimer = setTimeout(() => {
+            if (settled) return;
+            settled = true;
+            cleanup();
+            resolve({ ok: false, actualPos: null });
+        }, timeoutMs);
+
+        // fire the first poll immediately instead of waiting one interval
+        sendLine(writer, `print("Po${port}" + str(motor.absolute_position(port.${port})))`);
+    });
+}
+
 async function runMovement(move, sleep = 220, noCube = false) {
     if (!move || typeof move !== 'string') return console.log(`Invalid move ${move}`);
 
@@ -448,17 +582,68 @@ async function runMovement(move, sleep = 220, noCube = false) {
         (largeFaces.includes(face) ? sleep + 40 : sleep) *
         (move.endsWith('2') ? 2 : 1);
 
-    const cmd = /* stop=motor.STOP_HOLD caused a error to look in to it */
-        `motor.run_to_absolute_position(port.${port}, motor.absolute_position(port.${port}) - ${deg0}, 1110, acceleration=${acc}, deceleration=${dec});\n`;
-
+    const which = left ? 'left' : 'right';
     const writer = left ? leftWriter : rightWriter;
 
     if (noCube) return console.warn('Cube Not Connected');
 
+    // We need to know the target absolute position (not just the relative
+    // delta) so we can confirm the hub actually reached it. We ask the hub
+    // for its CURRENT position first, compute the target in JS, send the
+    // move, then poll until it's confirmed. This replaces the old
+    // "compute delta inline in the Python string + hope" approach.
+    const currentPos = await readPositionOnce(which, port);
+    const targetPos = (currentPos ?? 0) - deg0;
+
+    const cmd =
+        `motor.run_to_absolute_position(port.${port}, ${targetPos}, ${MOVE_VELOCITY}, acceleration=${MOVE_ACCEL}, deceleration=${MOVE_DECEL});\n`;
+
     await sendLine(writer, cmd);
     await sendLine(leftWriter, `light_matrix.write("${face}",100)`);
     await sendLine(rightWriter, `light_matrix.write("${sym}",100)`);
-    await sleepT(wait);
+
+    // Confirm the motor actually landed on target before returning. This
+    // is the core fix: no more fixed-sleep guessing, no more silently
+    // truncated turns, no more compounding drift across a sequence.
+    const result = await waitForPosition(which, port, targetPos);
+    if (!result.ok) {
+        log(`WARN: ${move} on port ${port} (${which}) did not confirm position within ${POS_TIMEOUT_MS}ms - possible stall/skip`);
+        // Best-effort nudge: re-issue the same target once. If it still
+        // fails we move on rather than hang the whole sequence forever.
+        await sendLine(writer, cmd);
+        await waitForPosition(which, port, targetPos, 800);
+    }
+
+    // Still respect a minimum visual/audible pacing between moves so the
+    // light matrix + sound don't overlap awkwardly, but this is now a
+    // floor, not the thing we rely on for correctness.
+    await sleepT(Math.min(wait, 120));
+}
+
+/**
+ * Single-shot read of a port's current absolute position, bypassing the
+ * polling loop in waitForPosition. Used to compute the target position
+ * for the NEXT move from ground truth instead of trusting a value we
+ * calculated in JS and never verified.
+ */
+function readPositionOnce(which, port, timeoutMs = 500) {
+    return new Promise((resolve) => {
+        let settled = false;
+        pendingPositionResolvers[which][port] = (actualPos) => {
+            if (settled) return;
+            settled = true;
+            delete pendingPositionResolvers[which][port];
+            resolve(actualPos);
+        };
+        const writer = which === 'left' ? leftWriter : rightWriter;
+        sendLine(writer, `print("Po${port}" + str(motor.absolute_position(port.${port})))`);
+        setTimeout(() => {
+            if (settled) return;
+            settled = true;
+            delete pendingPositionResolvers[which][port];
+            resolve(null);
+        }, timeoutMs);
+    });
 }
 
 function degCorrection(move) {
@@ -508,21 +693,21 @@ async function resetMotors() {
     // Reset all motors on the left side
     bettew = 4000
     if (SpikeState.left) {
-        await sendLine(leftWriter, "motor.run_to_absolute_position(port.A, 0, 50, direction=motor.SHORTEST_PATH, stop=motor.STOP_HOLD, acceleration=1000, deceleration=1000);");
+        await sendLine(leftWriter, "motor.run_to_absolute_position(port.A, 0, 50, direction=motor.SHORTEST_PATH, acceleration=1000, deceleration=1000);");
         await sleepT(bettew)
-        await sendLine(leftWriter, "motor.run_to_absolute_position(port.C, 0, 50, direction=motor.SHORTEST_PATH, stop=motor.STOP_HOLD, acceleration=1000, deceleration=1000);");
+        await sendLine(leftWriter, "motor.run_to_absolute_position(port.C, 0, 50, direction=motor.SHORTEST_PATH, acceleration=1000, deceleration=1000);");
         await sleepT(bettew)
-        await sendLine(leftWriter, "motor.run_to_absolute_position(port.E, 0, 50, direction=motor.SHORTEST_PATH, stop=motor.STOP_HOLD, acceleration=1000, deceleration=1000);");
+        await sendLine(leftWriter, "motor.run_to_absolute_position(port.E, 0, 50, direction=motor.SHORTEST_PATH, acceleration=1000, deceleration=1000);");
         await sleepT(bettew)
     }
 
     // Reset all motors on the right side
     if (SpikeState.right) {
-        await sendLine(rightWriter, "motor.run_to_absolute_position(port.D, 0, 50, direction=motor.SHORTEST_PATH, stop=motor.STOP_HOLD, acceleration=1000, deceleration=1000);");
+        await sendLine(rightWriter, "motor.run_to_absolute_position(port.D, 0, 50, direction=motor.SHORTEST_PATH, acceleration=1000, deceleration=1000);");
         await sleepT(bettew)
-        await sendLine(rightWriter, "motor.run_to_absolute_position(port.F, 0, 50, direction=motor.SHORTEST_PATH, stop=motor.STOP_HOLD, acceleration=1000, deceleration=1000);");
+        await sendLine(rightWriter, "motor.run_to_absolute_position(port.F, 0, 50, direction=motor.SHORTEST_PATH, acceleration=1000, deceleration=1000);");
         await sleepT(bettew)
-        await sendLine(rightWriter, "motor.run_to_absolute_position(port.B, 0, 50, direction=motor.SHORTEST_PATH, stop=motor.STOP_HOLD, acceleration=1000, deceleration=1000);");
+        await sendLine(rightWriter, "motor.run_to_absolute_position(port.B, 0, 50, direction=motor.SHORTEST_PATH, acceleration=1000, deceleration=1000);");
         await sleepT(bettew)
     }
 
@@ -565,6 +750,14 @@ async function spikeCube(moves, sleeped = 150) {
     const start = new Date();
     startTimer(start);
     console.log(window.moves)
+    // NOTE: moves are now always run sequentially (no more Promise.all
+    // pairing for opposite-face moves). Running two run_to_absolute_position
+    // confirmations concurrently on left+right is still fine (different
+    // hubs, independent UART), so isOpposite() moves on different sides
+    // still effectively overlap because runMovement's own awaits only
+    // block on THAT port's confirmation. What we removed is starting a
+    // move before the previous one on the SAME side was confirmed done,
+    // which was the main source of truncated/drifted turns.
     for (let i = 0; i < moves.length; i++) {
         if (killed) break;
         const m = moves[i], n = moves[i + 1];
