@@ -41,6 +41,29 @@ let cor = 5;
 let acc = 100000000;
 let dec = 1000;
 
+// FIX (left-side drift correction): the original file only ever
+// corrected D/B (both on the right hub) via `largeFaces`+`cor`. If the
+// left hub (U/L/F) drifts too, there was no equivalent path. We add a
+// small, symmetric correction table so ANY face can define its own
+// extra degrees, not just D/B. largeFaces/cor stay as the legacy
+// right-side default; faceCorrectionDeg lets us override/extend per
+// face (including left-side faces) without touching runMovement's core
+// logic every time tuning changes.
+let faceCorrectionDeg = {
+    D: cor,
+    B: cor,
+    // Left-side faces: start at 0 (no observed drift reported yet).
+    // Bump these independently if U/L/F starts drifting - this is the
+    // hook that didn't exist before.
+    U: 0,
+    L: 0,
+    F: 0,
+};
+
+function getFaceCorrection(face) {
+    return faceCorrectionDeg[face] ?? 0;
+}
+
 // MOTION CONFIRMATION TUNING
 // Instead of trusting a fixed sleep, we now ask the hub for the real
 // motor position after every move and wait until it actually matches
@@ -364,6 +387,21 @@ function areBothSpikesConnected() {
 const pendingPositionResolvers = { left: {}, right: {} };
 let rxLineBuffer = { left: '', right: '' };
 
+// FIX (RX line parsing / echo-split bug): the REPL echoes the raw input
+// line back over UART before running it, and that echo can itself
+// contain the substring we print (e.g. the command line has
+// `print("Po...")` literally in it as TEXT before the hub has even
+// executed it). The old code matched ANY line starting with "Po"/"Ba",
+// including an echoed *source line* that just happens to start with
+// those two chars after whitespace-trim, and it also had no guard
+// against garbage/partial lines splitting a value across two chunks.
+// Fix: only accept a Po/Ba line if the remainder after the 2-char
+// prefix (and for Po, the 1-char port letter) is ALL DIGITS — an
+// echoed source line will contain `(`, `"`, `+`, letters, etc. and gets
+// rejected instead of silently parsing as NaN/garbage and falling
+// through to the "position unknown" branch.
+const DIGITS_ONLY = /^-?\d+$/;
+
 async function batteryRead(which, reader) {
     if (!reader) return;
     (async () => {
@@ -380,7 +418,9 @@ async function batteryRead(which, reader) {
                     lines.forEach(element => {
                         element = element.trim();
                         if (element.startsWith('Ba')) {
-                            const batteryValue = parseFloat(element.replace('Ba', '')) / 1000;
+                            const raw = element.replace('Ba', '');
+                            if (!DIGITS_ONLY.test(raw)) return; // echoed source line, not real output
+                            const batteryValue = parseFloat(raw) / 1000;
                             const batteryPercentageValue = batteryPercentage(batteryValue, 6.0, 8.4);
                             // Update the battery icon for the correct side
                             const batteryIcon = document.getElementById(`${which}`);
@@ -414,11 +454,11 @@ async function batteryRead(which, reader) {
                         } else if (element.startsWith('Po')) {
                             // Format expected from the hub: "Po<port><value>" e.g. "PoA1234"
                             const port = element.charAt(2);
-                            const posValue = parseInt(element.slice(3), 10);
-                            if (!Number.isNaN(posValue)) {
-                                const resolver = pendingPositionResolvers[which][port];
-                                if (resolver) resolver(posValue);
-                            }
+                            const rawVal = element.slice(3);
+                            if (!DIGITS_ONLY.test(rawVal)) return; // echoed source line, not real output
+                            const posValue = parseInt(rawVal, 10);
+                            const resolver = pendingPositionResolvers[which][port];
+                            if (resolver) resolver(posValue);
                         }
                     });
                 }
@@ -570,7 +610,15 @@ async function runMovement(move, sleep = 220, noCube = false) {
 
     const port = left ? leftPorts[idx] : rightPorts[idx];
 
-    const c = largeFaces.includes(face) ? cor : 0;
+    // FIX (left-side correction / dead degCorrection): replaced the
+    // largeFaces-only `c` lookup with getFaceCorrection(face), which
+    // covers every face (D/B keep their old `cor` value by default,
+    // U/L/F now have a real, tunable hook instead of nothing). This also
+    // makes degCorrection()'s per-direction bias useful: we fold its
+    // lb/ld-driven bias into the same correction value instead of that
+    // function being dead code nothing ever called.
+    degCorrection(move);
+    const c = getFaceCorrection(face);
 
     let deg0;
     if (sym === '2') {
@@ -596,8 +644,26 @@ async function runMovement(move, sleep = 220, noCube = false) {
     // for its CURRENT position first, compute the target in JS, send the
     // move, then poll until it's confirmed. This replaces the old
     // "compute delta inline in the Python string + hope" approach.
-    const currentPos = await readPositionOnce(which, port);
-    const targetPos = (currentPos ?? 0) - deg0;
+    //
+    // FIX (silent null fallback): readPositionOnce can legitimately come
+    // back null (timeout / lost reply). The old code did
+    // `(currentPos ?? 0) - deg0`, i.e. silently assumed the motor was at
+    // absolute 0 — on any move past the first one, that's flatly wrong
+    // and sends the motor to a bogus target with zero warning. We now
+    // retry once, and if it's STILL unknown we abort this move instead
+    // of guessing, logging loudly so it's visible instead of silently
+    // corrupting alignment for the rest of the sequence.
+    let currentPos = await readPositionOnce(which, port);
+    if (currentPos === null) {
+        log(`WARN: ${move} on port ${port} (${which}) - position read failed, retrying once`);
+        currentPos = await readPositionOnce(which, port);
+    }
+    if (currentPos === null) {
+        log(`ERROR: ${move} on port ${port} (${which}) - position unknown, ABORTING move (no blind guess)`);
+        return;
+    }
+
+    const targetPos = currentPos - deg0;
 
     const cmd =
         `motor.run_to_absolute_position(port.${port}, ${targetPos}, ${profile.moveVelocity}, acceleration=${profile.moveAccel}, deceleration=${profile.moveDecel});\n`;
@@ -629,6 +695,9 @@ async function runMovement(move, sleep = 220, noCube = false) {
  * polling loop in waitForPosition. Used to compute the target position
  * for the NEXT move from ground truth instead of trusting a value we
  * calculated in JS and never verified.
+ *
+ * Returns null on timeout/lost reply — callers MUST handle null
+ * explicitly (see runMovement) rather than defaulting to 0.
  */
 function readPositionOnce(which, port, timeoutMs = 500) {
     return new Promise((resolve) => {
@@ -650,37 +719,46 @@ function readPositionOnce(which, port, timeoutMs = 500) {
     });
 }
 
+// FIX (dead code): degCorrection() previously computed b/b1/b2/d/d1/d2 as
+// implicit globals and NOTHING ever read them - runMovement used only
+// `cor` via largeFaces. We keep the same lb/ld-driven "alternate
+// direction" bias logic (localStorage-persisted, same semantics as
+// before) but now actually feed its result into faceCorrectionDeg so
+// runMovement's getFaceCorrection(face) picks it up on the very next
+// call. cb/cd (the "alternate" correction magnitude) weren't defined
+// anywhere in the original file either - defaulting both to `cor` here
+// since that's the only correction constant this project defines; tune
+// separately if B and D need different bias values.
+const cb = cor;
+const cd = cor;
+
 function degCorrection(move) {
     if (move.startsWith("B")) {
         if (move.endsWith("2") || move.endsWith("'")) {
-            b = lb === 1 ? cb : 0;
-            b1 = b;
-            b2 = b;
+            const b = lb === 1 ? cb : 0;
             lb = 2;
-            localStorage.lb = lb
+            localStorage.lb = lb;
+            faceCorrectionDeg.B = cor + b;
             console.debug(`B - 1 - ${b}`);
         } else {
-            b = lb === 2 ? cb : 0;
-            b1 = b;
-            b2 = b;
+            const b = lb === 2 ? cb : 0;
             lb = 1;
-            localStorage.lb = lb
+            localStorage.lb = lb;
+            faceCorrectionDeg.B = cor + b;
             console.debug(`B - 2 - ${b}`);
         }
     } else if (move.startsWith("D")) {
         if (move.endsWith("2") || move.endsWith("'")) {
-            d = ld === 1 ? cd : 0;
-            d1 = d;
-            d2 = d;
+            const d = ld === 1 ? cd : 0;
             ld = 2;
-            localStorage.ld = ld
+            localStorage.ld = ld;
+            faceCorrectionDeg.D = cor + d;
             console.debug(`D - 1 - ${d}`);
         } else {
-            d = ld === 2 ? cd : 0;
-            d1 = d;
-            d2 = d;
+            const d = ld === 2 ? cd : 0;
             ld = 1;
-            localStorage.ld = ld
+            localStorage.ld = ld;
+            faceCorrectionDeg.D = cor + d;
             console.debug(`D - 2 - ${d}`);
         }
     }
