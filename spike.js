@@ -15,7 +15,7 @@ let bcState         = false;
 
 let scLenght = 20;
 
-let deg = 95;  // Moves x 1
+let deg = 94;  // Moves x 1
 let dog = 180; // Moves x 2
 
 let u  = 0, f  = 0, l  = 0, r  = 0, b  = 0, d  = 0;
@@ -40,6 +40,7 @@ let wrong;
 const sexyMove1 = ["R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'"];
 const sexyMove2 = ["L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2"];
 const sexyMove3 = ["R2", "L2", "U2", "R2", "L2", "U2", "R2", "L2", "U2", "R2", "L2", "U2"];
+const cubecube =  ["F", "L", "F", "U'", "R", "U", "F2", "L2", "U'", "L'", "B", "D'", "B'", "L2", "U"]
 
 const startup = "cor=1.5\n\nimport motor\n\nfrom hub import port, light_matrix, sound\n\nimport time\n\nlayer = motor.run_for_degrees\n\nlight_matrix.clear();\nmotor.motor_set_high_resolution_mode(port.A, True);\nmotor.motor_set_high_resolution_mode(port.B, True);\nmotor.motor_set_high_resolution_mode(port.C, True);\nmotor.motor_set_high_resolution_mode(port.D, True);\nmotor.motor_set_high_resolution_mode(port.E, True);\nmotor.motor_set_high_resolution_mode(port.F, True)";
 const connectSound = "sound.beep(392,120);time.sleep_ms(120);sound.beep(494,120);time.sleep_ms(120);sound.beep(587,150);time.sleep_ms(150);sound.beep(784,200)";
@@ -532,20 +533,22 @@ function startTimer(startTime) {
     timerInterval = setInterval(() => {
         let elapsed = ((new Date() - startTime) / 1000).toFixed(3);
         document.getElementById('timer').innerHTML = '<i class="fa-solid fa-clock"></i> : ' + elapsed + 'S';
+        if (elapsed > 20) {
+            stopTimer(startTime,false)
+        }
     }, 1);
 }
 
-function stopTimer(startTime) {
+function stopTimer(startTime,post=true) {
     if (timerInterval) {
         clearInterval(timerInterval);
         try {
             let elapsed = ((new Date() - startTime) / 1000).toFixed(3);
-            bc.postMessage(Number(elapsed));
-        } catch {
-
-        }
+            if (post) {
+                bc.postMessage(Number(elapsed));
+            }
+        } catch {}
         timerInterval = null;
-
     }
 }
 
@@ -704,6 +707,12 @@ async function sexyMoves3() {
     console.log("Start Sexy Move 3")
     await spikeCube(sexyMove3, 200)
     console.log("End Sexy Move 3")
+}
+
+async function cubecubes() {
+    console.log("Start CUBECUBE")
+    await spikeCube(cubecube, 200)
+    console.log("End CUBECUBE")
 }
 
 let still = [];
