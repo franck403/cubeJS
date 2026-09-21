@@ -1,140 +1,47 @@
-let leftPort, rightPort = null;
+let leftPort,   rightPort   = null;
 let leftWriter, rightWriter = null;
 let leftReader, rightReader = null;
-let leftAbort, rightAbort = null;
+let leftAbort,  rightAbort  = null;
 
 var store = [];
 
 let SpikeState = { left: false, right: false };
 
-let scSecure = false;
-let solveSecure = false;
+let scSecure        = false;
+let solveSecure     = false;
 let fullscreenstate = false;
-let spinState = false;
-let bcState = false;
+let spinState       = false;
+let bcState         = false;
 
 let scLenght = 20;
 
 let deg = 95;  // Moves x 1
-let deg1 = 90; // Same face, same direction, seen again later in the sequence
 let dog = 180; // Moves x 2
+
+let u  = 0, f  = 0, l  = 0, r  = 0, b  = 0, d  = 0;
+let u1 = 0, f1 = 0, l1 = 0, r1 = 0, b1 = 0, d1 = 0;
+let u2 = 0, f2 = 0, l2 = 0, r2 = 0, b2 = 0, d2 = 0;
+
+let cb = 3; // back deg corr
+let cd = 3; // down deg corr
 
 let lb = localStorage.lb || 0;
 let ld = localStorage.ld || 0;
 
-var silence = true;
+var silence = false;
 
 let timerInterval = null;
 
-window.sleeped = 160;
+window.sleeped = 170;
 
 let nxt;
 let wrong;
 
-let leftFaces = ['U', 'L', 'F'];
-let leftPorts = ['A', 'C', 'E'];
-let rightFaces = ['R', 'B', 'D'];
-let rightPorts = ['D', 'F', 'B'];
-let largeFaces = ['D', 'B'];
-
-let cor = 5;
-let acc = 100000000;
-let dec = 1000;
-
-// FIX (left-side drift correction): the original file only ever
-// corrected D/B (both on the right hub) via `largeFaces`+`cor`. If the
-// left hub (U/L/F) drifts too, there was no equivalent path. We add a
-// small, symmetric correction table so ANY face can define its own
-// extra degrees, not just D/B. largeFaces/cor stay as the legacy
-// right-side default; faceCorrectionDeg lets us override/extend per
-// face (including left-side faces) without touching runMovement's core
-// logic every time tuning changes.
-let faceCorrectionDeg = {
-    D: cor,
-    B: cor,
-    // Left-side faces: start at 0 (no observed drift reported yet).
-    // Bump these independently if U/L/F starts drifting - this is the
-    // hook that didn't exist before.
-    U: 0,
-    L: 0,
-    F: 0,
-};
-
-function getFaceCorrection(face) {
-    return faceCorrectionDeg[face] ?? 0;
-}
-
-// MOTION CONFIRMATION TUNING
-// Instead of trusting a fixed sleep, we now ask the hub for the real
-// motor position after every move and wait until it actually matches
-// the target (within a tolerance) before sending the next command.
-// This is what fixes drift (positions never landing at the same spot)
-// and truncated moves (a "90 deg" turn that lands at 45 deg because the
-// next command interrupted it).
-//
-// SPEED PROFILES
-// "normal" = safe/reliable tuning (what we validated the confirm-loop with).
-// "fast"   = tight tolerance/timeout + higher velocity/accel, tuned to fit
-//            a 22-move sequence under ~6s. Toggle with toggleSpeed() or the
-//            "v" key. Fast trades a little settle precision for speed, so
-//            if you start seeing skipped/half-turned moves again, that's
-//            the first thing to back off (see tuning notes below).
-const SPEED_PROFILES = {
-    normal: {
-        posToleranceDeg: 3,     // settle tolerance
-        posPollIntervalMs: 25,  // how often we ask the hub for position
-        posTimeoutMs: 1500,     // give up waiting after this long
-        moveVelocity: 720,      // deg/s target speed
-        moveAccel: 3000,        // ramp up
-        moveDecel: 2500,        // ramp down
-        pacingFloorMs: 120,     // min visual/audible pacing after confirm
-    },
-    fast: {
-        posToleranceDeg: 6,     // looser: confirm sooner, still catches real stalls
-        posPollIntervalMs: 12,  // poll more often so we notice "arrived" faster
-        posTimeoutMs: 500,      // don't let one stuck move eat the whole budget
-        moveVelocity: 1400,     // near max useful speed for these small turns
-        moveAccel: 9000,        // snappier ramp - short moves barely reach cruise speed anyway
-        moveDecel: 7000,        // stop harder; higher tolerance absorbs the extra overshoot
-        pacingFloorMs: 20,      // basically no artificial floor, confirm loop paces it
-    },
-};
-
-let currentSpeedMode = 'normal';
-
-function getSpeedProfile() {
-    return SPEED_PROFILES[currentSpeedMode];
-}
-
-/**
- * Switches between "normal" (reliable) and "fast" (tight timing, tuned for
- * ~22 moves under 6s) speed profiles. Call with no args to flip, or pass
- * 'normal'/'fast' to set explicitly. Safe to call mid-idle; don't call
- * while a sequence is running (scSecure guards against that anyway - the
- * new profile takes effect on the NEXT spikeCube()/spikeMove() call).
- */
-function toggleSpeed(mode) {
-    if (mode === 'normal' || mode === 'fast') {
-        currentSpeedMode = mode;
-    } else {
-        currentSpeedMode = currentSpeedMode === 'normal' ? 'fast' : 'normal';
-    }
-    log(`Speed mode: ${currentSpeedMode}`);
-    const badge = document.getElementById('speedMode');
-    if (badge) badge.textContent = currentSpeedMode.toUpperCase();
-    return currentSpeedMode;
-}
-
-// KILL SWITCH
-
-let killed = false;
-
 const sexyMove1 = ["R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'"];
 const sexyMove2 = ["L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2"];
 const sexyMove3 = ["R2", "L2", "U2", "R2", "L2", "U2", "R2", "L2", "U2", "R2", "L2", "U2"];
-const cubecube = ["F", "L", "F", "U'", "R", "U", "F2", "L2,", "U'", "L'", "B", "D'", "B'" ,"L2","U"]
 
-const startup = "import motor\n\nfrom hub import port, light_matrix, sound\n\nimport time\n\nlayer = motor.run_for_degrees\n\nlight_matrix.clear();\nmotor.motor_set_high_resolution_mode(port.A, True);\nmotor.motor_set_high_resolution_mode(port.B, True);\nmotor.motor_set_high_resolution_mode(port.C, True);\nmotor.motor_set_high_resolution_mode(port.D, True);\nmotor.motor_set_high_resolution_mode(port.E, True);\nmotor.motor_set_high_resolution_mode(port.F, True)\n\ncor=1.5";
+const startup = "cor=1.5\n\nimport motor\n\nfrom hub import port, light_matrix, sound\n\nimport time\n\nlayer = motor.run_for_degrees\n\nlight_matrix.clear();\nmotor.motor_set_high_resolution_mode(port.A, True);\nmotor.motor_set_high_resolution_mode(port.B, True);\nmotor.motor_set_high_resolution_mode(port.C, True);\nmotor.motor_set_high_resolution_mode(port.D, True);\nmotor.motor_set_high_resolution_mode(port.E, True);\nmotor.motor_set_high_resolution_mode(port.F, True)";
 const connectSound = "sound.beep(392,120);time.sleep_ms(120);sound.beep(494,120);time.sleep_ms(120);sound.beep(587,150);time.sleep_ms(150);sound.beep(784,200)";
 const scrambleSound = "sound.beep(784,100);time.sleep_ms(100);sound.beep(659,100);time.sleep_ms(100);sound.beep(587,100);time.sleep_ms(100);sound.beep(494,150);time.sleep_ms(150);sound.beep(392,200)";
 const solveSound = "sound.beep(392,100);time.sleep_ms(100);sound.beep(494,100);time.sleep_ms(100);sound.beep(587,100);time.sleep_ms(100);sound.beep(659,150);time.sleep_ms(150);sound.beep(784,200);time.sleep_ms(200);sound.beep(988,300)";
@@ -142,33 +49,79 @@ const music = "sound.beep(196, 800) ; time.sleep_ms(850)  # G3\nsound.beep(262, 
 const getBattery = `import hub\n\nprint("Ba" + str(hub.battery_voltage()))`
 const clearDisplay = `light_matrix.clear();\n`
 
+let CLP_LEFT;
+let CLP_RIGHT;
+
 // =========================================================================================================
 
 // COMMANDS
+
+function regen() {
+    CLP_LEFT = {
+        // Face U
+        "U": `motor.run_to_absolute_position(port.A,  motor.absolute_position(port.A)- ${deg + u}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n`,
+        "U'": `motor.run_to_absolute_position(port.A, motor.absolute_position(port.A)+ ${deg + u1}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n`,
+        "U2": `motor.run_to_absolute_position(port.A, motor.absolute_position(port.A)+ ${dog + u2}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n`,
+
+        // Face L
+        "L": `motor.run_to_absolute_position(port.C,  motor.absolute_position(port.C) - ${deg + l}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n`,
+        "L'": `motor.run_to_absolute_position(port.C, motor.absolute_position(port.C) + ${deg + l1}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n`,
+        "L2": `motor.run_to_absolute_position(port.C, motor.absolute_position(port.C) + ${dog + l2}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n`,
+
+        // Face F
+        "F": `motor.run_to_absolute_position(port.E,  motor.absolute_position(port.E)- ${deg + f}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n`,
+        "F'": `motor.run_to_absolute_position(port.E, motor.absolute_position(port.E)+ ${deg + f1}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n`,
+        "F2": `motor.run_to_absolute_position(port.E, motor.absolute_position(port.E)+ ${dog + f2}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n`,
+    };
+
+    CLP_RIGHT = {
+        // Face R
+        "R": `motor.run_to_absolute_position(port.D,  motor.absolute_position(port.D)- ${deg + r}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n`,
+        "R'": `motor.run_to_absolute_position(port.D, motor.absolute_position(port.D)+ ${deg + r1}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n`,
+        "R2": `motor.run_to_absolute_position(port.D, motor.absolute_position(port.D)+ ${dog + r2}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n`,
+
+        // Face B
+        "B": `motor.run_to_absolute_position(port.F,  motor.absolute_position(port.F) - ${deg + b}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n`,
+        "B'": `motor.run_to_absolute_position(port.F, motor.absolute_position(port.F) + ${deg + b1}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n`,
+        "B2": `motor.run_to_absolute_position(port.F, motor.absolute_position(port.F) + ${dog + b2}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n`,
+
+        // Face D
+        "D": `motor.run_to_absolute_position(port.B,  motor.absolute_position(port.B)- ${deg + d}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n`,
+        "D'": `motor.run_to_absolute_position(port.B, motor.absolute_position(port.B)+ ${deg + d1}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n`,
+        "D2": `motor.run_to_absolute_position(port.B, motor.absolute_position(port.B)+ ${dog + d2}, 1110, stop=motor.SMART_BRAKE, acceleration=100000000, deceleration=100000000);\n`,
+    };
+}
+
+regen();
 
 async function sleepT(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-// DEFAULT
 
-// All 18 standard quarter/half turns, one entry per face+modifier.
-const ALL_MOVES = ['U', "U'", 'U2', 'D', "D'", 'D2', 'L', "L'", 'L2', 'R', "R'", 'R2', 'F', "F'", 'F2', 'B', "B'", 'B2'];
+const ALL_MOVES = Object.keys({ ...CLP_LEFT, ...CLP_RIGHT });
+
+// DEFAULT
 
 /**
  * Generate a random scramble table
- * @param {number} length - number of moves
+ * @param {number} count - number of moves
  * @returns {string[]} - array of move notations
  */
 function generateScramble(length = 20) {
     const result = [];
-    let lastFace = null;
+    let last
     for (let i = 0; i < length; i++) {
         let m;
         do m = ALL_MOVES[Math.random() * ALL_MOVES.length | 0];
-        while (m.charAt(0) === lastFace);
-        result.push(m);
-        lastFace = m.charAt(0);
+        while (i && m[0] === result[i - 1][0]);
+        if (!last) {
+            result.push(m);
+            last = m;
+        } else if (!last.startsWith(m.charAt(0))) {
+            result.push(m);
+            last = m;
+        }
     }
     return result;
 }
@@ -213,104 +166,46 @@ async function openSpike(which) {
             SpikeState.right = true;
         }
 
-        log(`${which} Spike port opened`);
+        // start listening for RX
+        batteryRead(which, reader);
 
-        // Everything below (startup script, RX listener, connect sound) is
-        // setup work that does NOT need to block the caller. The caller's
-        // only job here is to get requestPort() shown and the port opened,
-        // so the SECOND popup (for the other hub) can show up right away
-        // instead of waiting on startup/sendLine round-trips. This is what
-        // was causing the second popup to appear inconsistently/late.
-        (async () => {
-            try {
-                await sendLine(writer, startup);
+        await sendLine(writer, startup);
+        if (!silence) {
+            await sendLine(writer, connectSound);
+        }
 
-                // start listening for RX
-                batteryRead(which, reader);
-
-                if (!silence) {
-                    await sendLine(writer, connectSound);
-                }
-
-                log(`${which} Spike connected`);
-            } catch (err) {
-                log(`Error setting up ${which} Spike:`, err?.message || err);
-            }
-        })();
+        log(`${which} Spike connected`);
     } catch (err) {
         log(`Error opening ${which} Spike:`, err?.message || err);
     }
 }
 
-/**
- * Reconnects to all previously authorized Spike ports. No identity check —
- * ports are assigned left/right in whatever order navigator.serial.getPorts()
- * returns them (i.e. plug order / grant order).
- */
 async function reconnectSpike(side) {
+    const filters = []; // optional: restrict by vendorId/productId
     const ports = await navigator.serial.getPorts();
-    const candidates = ports.filter(p => p !== leftPort && p !== rightPort);
-
-    for (const p of candidates) {
-        const openSide = !SpikeState.left ? 'left' : (!SpikeState.right ? 'right' : null);
-        if (!openSide) break;
-
+    for (const p of ports) {
         try {
             await p.open({ baudRate: 115200 });
+            const encoder = new TextEncoderStream();
+            encoder.readable.pipeTo(p.writable);
+            const writer = encoder.writable.getWriter();
 
-            const decoderStream = new TextDecoderStream();
-            p.readable.pipeTo(decoderStream.writable);
-            const reader = decoderStream.readable.getReader();
+            if (side === 'left') leftWriter = writer;
+            if (side === 'right') rightWriter = writer;
 
-            const encoderStream = new TextEncoderStream();
-            encoderStream.readable.pipeTo(p.writable);
-            const writer = encoderStream.writable.getWriter();
-
-            await writer.write(new Uint8Array([3]));
-            await sleepT(100);
-
-            await assignSpikeSide(openSide, p, writer, reader);
-            log(`${openSide} reconnected`);
+            SpikeState[side] = p;
+            console.log(`${side} reconnected`);
+            const textDecoder = new TextDecoderStream();
+            p.readable.pipeTo(textDecoder.writable);
+            const reader = textDecoder.readable.getReader();
+            autoReconnectLoop(side, p, reader);
+            return;
         } catch {
             try { await p.close(); } catch { }
         }
     }
-
-    if (!SpikeState.left || !SpikeState.right) {
-        const missing = !SpikeState.left && !SpikeState.right ? 'left/right' : (!SpikeState.left ? 'left' : 'right');
-        log(`No ${missing} port found, retrying in 5s`);
-        setTimeout(() => reconnectSpike(side), 5000);
-    }
-}
-
-// FIX: this used to only wire up state + call the undefined `autoReconnectLoop`,
-// which threw immediately and skipped sending `startup` and starting the RX
-// reader (batteryRead). That's why reconnect gave you: no motor movement
-// (no `motor` import / high-res mode on the hub), no RX/TX log (batteryRead,
-// which contains the RX error logging, was never started), and no sound.
-async function assignSpikeSide(side, port, writer, reader) {
-    if (side === 'left') {
-        leftPort = port;
-        leftWriter = writer;
-        leftReader = reader;
-        SpikeState.left = true;
-    } else {
-        rightPort = port;
-        rightWriter = writer;
-        rightReader = reader;
-        SpikeState.right = true;
-    }
-
-    // Run the same setup openSpike() does, so reconnect behaves identically
-    // to a fresh connect.
-    await sendLine(writer, startup);
-
-    // Start listening for RX on this port (battery reports, etc.)
-    batteryRead(side, reader);
-
-    if (!silence) {
-        await sendLine(writer, connectSound);
-    }
+    console.info(`No ${side} port found, retrying in 5s`);
+    setTimeout(() => reconnectSpike(side), 5000);
 }
 
 async function spike(cubeed) {
@@ -380,28 +275,6 @@ function areBothSpikesConnected() {
 
 // BATTERIES
 
-// Per-side buffer of raw text lines coming off the hub UART, and a map of
-// pending "waiting for a position reading" promises keyed by port letter.
-// batteryRead() used to be the only RX consumer; now it also demuxes
-// position replies (prefixed "Po") so waitForPosition() can resolve them.
-const pendingPositionResolvers = { left: {}, right: {} };
-let rxLineBuffer = { left: '', right: '' };
-
-// FIX (RX line parsing / echo-split bug): the REPL echoes the raw input
-// line back over UART before running it, and that echo can itself
-// contain the substring we print (e.g. the command line has
-// `print("Po...")` literally in it as TEXT before the hub has even
-// executed it). The old code matched ANY line starting with "Po"/"Ba",
-// including an echoed *source line* that just happens to start with
-// those two chars after whitespace-trim, and it also had no guard
-// against garbage/partial lines splitting a value across two chunks.
-// Fix: only accept a Po/Ba line if the remainder after the 2-char
-// prefix (and for Po, the 1-char port letter) is ALL DIGITS — an
-// echoed source line will contain `(`, `"`, `+`, letters, etc. and gets
-// rejected instead of silently parsing as NaN/garbage and falling
-// through to the "position unknown" branch.
-const DIGITS_ONLY = /^-?\d+$/;
-
 async function batteryRead(which, reader) {
     if (!reader) return;
     (async () => {
@@ -410,17 +283,9 @@ async function batteryRead(which, reader) {
                 const { value, done } = await reader.read();
                 if (done) break;
                 if (value) {
-                    log(`RX [${which}]:`, value);
-                    rxLineBuffer[which] += value;
-                    let lines = rxLineBuffer[which].split('\n');
-                    rxLineBuffer[which] = lines.pop(); // keep last partial line in buffer
-
-                    lines.forEach(element => {
-                        element = element.trim();
+                    value.split('\n').forEach(element => {
                         if (element.startsWith('Ba')) {
-                            const raw = element.replace('Ba', '');
-                            if (!DIGITS_ONLY.test(raw)) return; // echoed source line, not real output
-                            const batteryValue = parseFloat(raw) / 1000;
+                            const batteryValue = parseFloat(element.replace('Ba', '')) / 1000;
                             const batteryPercentageValue = batteryPercentage(batteryValue, 6.0, 8.4);
                             // Update the battery icon for the correct side
                             const batteryIcon = document.getElementById(`${which}`);
@@ -451,14 +316,6 @@ async function batteryRead(which, reader) {
                                 // Add the appropriate battery class
                                 batteryIcon.classList.add(iconClass);
                             }
-                        } else if (element.startsWith('Po')) {
-                            // Format expected from the hub: "Po<port><value>" e.g. "PoA1234"
-                            const port = element.charAt(2);
-                            const rawVal = element.slice(3);
-                            if (!DIGITS_ONLY.test(rawVal)) return; // echoed source line, not real output
-                            const posValue = parseInt(rawVal, 10);
-                            const resolver = pendingPositionResolvers[which][port];
-                            if (resolver) resolver(posValue);
                         }
                     });
                 }
@@ -513,255 +370,57 @@ async function updateBatteries() {
 
 // MOVE
 
-// Tracks, per face (U/D/L/R/F/B), the last non-double direction we ran and
-// whether we've already used the "first" (deg) angle for that direction.
-// Reset at the start of every spikeCube() run.
-let faceMoveHistory = {};
-
-function resetFaceMoveHistory() {
-    faceMoveHistory = {};
-}
-
-/**
- * Picks the rotation angle (in degrees, unsigned) for a quarter turn (no '2')
- * of the given face+direction. First time this face is turned in this
- * direction during the current sequence: deg (95). If that same face is
- * turned again later in the SAME direction (separated by other moves):
- * deg1 (90). If it comes back in the OTHER direction, it resets and counts
- * as a fresh "first time" (95) for that new direction.
- */
-function pickQuarterTurnDeg(face, dirKey) {
-    const prev = faceMoveHistory[face];
-    let angle;
-    if (prev && prev.dir === dirKey) {
-        angle = deg1;
-    } else {
-        angle = deg;
-    }
-    faceMoveHistory[face] = { dir: dirKey };
-    return angle;
-}
-
-/**
- * Waits until the hub reports the given port's absolute position is within
- * the active profile's tolerance of targetPos, or its timeout elapses.
- *
- * This is THE fix for the drift/45-instead-of-90 problem: previously we
- * just slept a fixed amount of JS time and assumed the move had finished.
- * If the hub was still moving (or had stalled) when the next command was
- * sent, the in-flight run_to_absolute_position() gets superseded/aborted
- * partway through — that's why you'd see a move stop at 45deg instead of
- * 90deg, and why error accumulates over a sequence (never "resets").
- *
- * Requires the hub to actually send back its position. We ask for it with
- * a "Po<port><value>" print after every move.
- */
-function waitForPosition(which, port, targetPos, timeoutMs) {
-    const profile = getSpeedProfile();
-    const effectiveTimeout = timeoutMs ?? profile.posTimeoutMs;
-    return new Promise((resolve) => {
-        let settled = false;
-        const cleanup = () => {
-            delete pendingPositionResolvers[which][port];
-            clearInterval(pollTimer);
-            clearTimeout(timeoutTimer);
-        };
-
-        const onReading = (actualPos) => {
-            if (settled) return;
-            if (Math.abs(actualPos - targetPos) <= profile.posToleranceDeg) {
-                settled = true;
-                cleanup();
-                resolve({ ok: true, actualPos });
-            }
-            // else: keep waiting, the next reading (triggered by pollTimer)
-            // may be closer once the motor finishes settling.
-        };
-
-        pendingPositionResolvers[which][port] = onReading;
-
-        const writer = which === 'left' ? leftWriter : rightWriter;
-        const pollTimer = setInterval(() => {
-            sendLine(writer, `print("Po${port}" + str(motor.absolute_position(port.${port})))`);
-        }, profile.posPollIntervalMs);
-
-        const timeoutTimer = setTimeout(() => {
-            if (settled) return;
-            settled = true;
-            cleanup();
-            resolve({ ok: false, actualPos: null });
-        }, effectiveTimeout);
-
-        // fire the first poll immediately instead of waiting one interval
-        sendLine(writer, `print("Po${port}" + str(motor.absolute_position(port.${port})))`);
-    });
-}
-
 async function runMovement(move, sleep = 220, noCube = false) {
-    if (!move || typeof move !== 'string') return console.log(`Invalid move ${move}`);
-
-    const profile = getSpeedProfile();
-
-    const face = move.charAt(0);
-    const sym = move.charAt(1) || '';
-
-    const left = leftFaces.includes(face);
-    const idx = left ? leftFaces.indexOf(face) : rightFaces.indexOf(face);
-
-    const port = left ? leftPorts[idx] : rightPorts[idx];
-
-    // FIX (left-side correction / dead degCorrection): replaced the
-    // largeFaces-only `c` lookup with getFaceCorrection(face), which
-    // covers every face (D/B keep their old `cor` value by default,
-    // U/L/F now have a real, tunable hook instead of nothing). This also
-    // makes degCorrection()'s per-direction bias useful: we fold its
-    // lb/ld-driven bias into the same correction value instead of that
-    // function being dead code nothing ever called.
+    if (!move || typeof move !== "string") return log(`Invalid move ${move}`);
     degCorrection(move);
-    const c = getFaceCorrection(face);
-
-    let deg0;
-    if (sym === '2') {
-        deg0 = dog + c;
-    } else {
-        // dirKey distinguishes clockwise ("") from counter-clockwise ("'")
-        const dirKey = sym === "'" ? "'" : "";
-        const quarterDeg = pickQuarterTurnDeg(face, dirKey);
-        deg0 = (sym === "'" ? -quarterDeg : quarterDeg) + c;
-    }
-
-    const wait =
-        (largeFaces.includes(face) ? sleep + 40 : sleep) *
-        (move.endsWith('2') ? 2 : 1);
-
-    const which = left ? 'left' : 'right';
-    const writer = left ? leftWriter : rightWriter;
-
-    if (noCube) return console.warn('Cube Not Connected');
-
-    // We need to know the target absolute position (not just the relative
-    // delta) so we can confirm the hub actually reached it. We ask the hub
-    // for its CURRENT position first, compute the target in JS, send the
-    // move, then poll until it's confirmed. This replaces the old
-    // "compute delta inline in the Python string + hope" approach.
-    //
-    // FIX (silent null fallback): readPositionOnce can legitimately come
-    // back null (timeout / lost reply). The old code did
-    // `(currentPos ?? 0) - deg0`, i.e. silently assumed the motor was at
-    // absolute 0 — on any move past the first one, that's flatly wrong
-    // and sends the motor to a bogus target with zero warning. We now
-    // retry once, and if it's STILL unknown we abort this move instead
-    // of guessing, logging loudly so it's visible instead of silently
-    // corrupting alignment for the rest of the sequence.
-    let currentPos = await readPositionOnce(which, port);
-    if (currentPos === null) {
-        log(`WARN: ${move} on port ${port} (${which}) - position read failed, retrying once`);
-        currentPos = await readPositionOnce(which, port);
-    }
-    if (currentPos === null) {
-        log(`ERROR: ${move} on port ${port} (${which}) - position unknown, ABORTING move (no blind guess)`);
-        return;
-    }
-
-    const targetPos = currentPos - deg0;
-
-    const cmd =
-        `motor.run_to_absolute_position(port.${port}, ${targetPos}, ${profile.moveVelocity}, acceleration=${profile.moveAccel}, deceleration=${profile.moveDecel});\n`;
-
+    const cmd = CLP_LEFT[move] || CLP_RIGHT[move];
+    const writer = CLP_LEFT[move] ? leftWriter : rightWriter;
+    const wait = (move.startsWith("B") || move.startsWith("D") ? sleep + 40 : sleep) * (move.endsWith("2") ? 2 : 1);
+    if (!cmd || !writer) await sleepT(1);
+    if (noCube) return console.warn("Cube Not Connected");
     await sendLine(writer, cmd);
-    await sendLine(leftWriter, `light_matrix.write("${face}",100)`);
+    const mov = move.charAt(0);
+    const sym = move.charAt(1);
+    await sendLine(leftWriter,  `light_matrix.write("${mov}",100)`);
     await sendLine(rightWriter, `light_matrix.write("${sym}",100)`);
-
-    // Confirm the motor actually landed on target before returning. This
-    // is the core fix: no more fixed-sleep guessing, no more silently
-    // truncated turns, no more compounding drift across a sequence.
-    const result = await waitForPosition(which, port, targetPos);
-    if (!result.ok) {
-        log(`WARN: ${move} on port ${port} (${which}) did not confirm position within ${profile.posTimeoutMs}ms - possible stall/skip`);
-        // Best-effort nudge: re-issue the same target once. If it still
-        // fails we move on rather than hang the whole sequence forever.
-        await sendLine(writer, cmd);
-        await waitForPosition(which, port, targetPos, Math.min(800, profile.posTimeoutMs + 300));
-    }
-
-    // Still respect a minimum visual/audible pacing between moves so the
-    // light matrix + sound don't overlap awkwardly, but this is now a
-    // floor, not the thing we rely on for correctness.
-    await sleepT(Math.min(wait, profile.pacingFloorMs));
+    await sleepT(wait);
 }
-
-/**
- * Single-shot read of a port's current absolute position, bypassing the
- * polling loop in waitForPosition. Used to compute the target position
- * for the NEXT move from ground truth instead of trusting a value we
- * calculated in JS and never verified.
- *
- * Returns null on timeout/lost reply — callers MUST handle null
- * explicitly (see runMovement) rather than defaulting to 0.
- */
-function readPositionOnce(which, port, timeoutMs = 500) {
-    return new Promise((resolve) => {
-        let settled = false;
-        pendingPositionResolvers[which][port] = (actualPos) => {
-            if (settled) return;
-            settled = true;
-            delete pendingPositionResolvers[which][port];
-            resolve(actualPos);
-        };
-        const writer = which === 'left' ? leftWriter : rightWriter;
-        sendLine(writer, `print("Po${port}" + str(motor.absolute_position(port.${port})))`);
-        setTimeout(() => {
-            if (settled) return;
-            settled = true;
-            delete pendingPositionResolvers[which][port];
-            resolve(null);
-        }, timeoutMs);
-    });
-}
-
-// FIX (dead code): degCorrection() previously computed b/b1/b2/d/d1/d2 as
-// implicit globals and NOTHING ever read them - runMovement used only
-// `cor` via largeFaces. We keep the same lb/ld-driven "alternate
-// direction" bias logic (localStorage-persisted, same semantics as
-// before) but now actually feed its result into faceCorrectionDeg so
-// runMovement's getFaceCorrection(face) picks it up on the very next
-// call. cb/cd (the "alternate" correction magnitude) weren't defined
-// anywhere in the original file either - defaulting both to `cor` here
-// since that's the only correction constant this project defines; tune
-// separately if B and D need different bias values.
-const cb = cor;
-const cd = cor;
 
 function degCorrection(move) {
     if (move.startsWith("B")) {
         if (move.endsWith("2") || move.endsWith("'")) {
-            const b = lb === 1 ? cb : 0;
+            b = lb === 1 ? cb : 0;
+            b1 = b;
+            b2 = b;
             lb = 2;
-            localStorage.lb = lb;
-            faceCorrectionDeg.B = cor + b;
+            localStorage.lb = lb
             console.debug(`B - 1 - ${b}`);
         } else {
-            const b = lb === 2 ? cb : 0;
+            b = lb === 2 ? cb : 0;
+            b1 = b;
+            b2 = b;
             lb = 1;
-            localStorage.lb = lb;
-            faceCorrectionDeg.B = cor + b;
+            localStorage.lb = lb
             console.debug(`B - 2 - ${b}`);
         }
     } else if (move.startsWith("D")) {
         if (move.endsWith("2") || move.endsWith("'")) {
-            const d = ld === 1 ? cd : 0;
+            d = ld === 1 ? cd : 0;
+            d1 = d;
+            d2 = d;
             ld = 2;
-            localStorage.ld = ld;
-            faceCorrectionDeg.D = cor + d;
+            localStorage.ld = ld
             console.debug(`D - 1 - ${d}`);
         } else {
-            const d = ld === 2 ? cd : 0;
+            d = ld === 2 ? cd : 0;
+            d1 = d;
+            d2 = d;
             ld = 1;
-            localStorage.ld = ld;
-            faceCorrectionDeg.D = cor + d;
+            localStorage.ld = ld
             console.debug(`D - 2 - ${d}`);
         }
     }
+    regen();
 }
 
 async function resetMotors() {
@@ -775,21 +434,21 @@ async function resetMotors() {
     // Reset all motors on the left side
     bettew = 4000
     if (SpikeState.left) {
-        await sendLine(leftWriter, "motor.run_to_absolute_position(port.A, 0, 50, direction=motor.SHORTEST_PATH, stop=motor.STOP_HOLD, acceleration=1000, deceleration=1000);");
+        await sendLine(leftWriter, "motor.run_to_absolute_position(port.A, 0, 50, direction=motor.SHORTEST_PATH, stop=motor.BRAKE, acceleration=1000, deceleration=1000);");
         await sleepT(bettew)
-        await sendLine(leftWriter, "motor.run_to_absolute_position(port.C, 0, 50, direction=motor.SHORTEST_PATH, stop=motor.STOP_HOLD, acceleration=1000, deceleration=1000);");
+        await sendLine(leftWriter, "motor.run_to_absolute_position(port.C, 0, 50, direction=motor.SHORTEST_PATH, stop=motor.BRAKE, acceleration=1000, deceleration=1000);");
         await sleepT(bettew)
-        await sendLine(leftWriter, "motor.run_to_absolute_position(port.E, 0, 50, direction=motor.SHORTEST_PATH, stop=motor.STOP_HOLD, acceleration=1000, deceleration=1000);");
+        await sendLine(leftWriter, "motor.run_to_absolute_position(port.E, 0, 50, direction=motor.SHORTEST_PATH, stop=motor.BRAKE, acceleration=1000, deceleration=1000);");
         await sleepT(bettew)
     }
 
     // Reset all motors on the right side
     if (SpikeState.right) {
-        await sendLine(rightWriter, "motor.run_to_absolute_position(port.D, 0, 50, direction=motor.SHORTEST_PATH, stop=motor.STOP_HOLD, acceleration=1000, deceleration=1000);");
+        await sendLine(rightWriter, "motor.run_to_absolute_position(port.D, 0, 50, direction=motor.SHORTEST_PATH, stop=motor.BRAKE, acceleration=1000, deceleration=1000);");
         await sleepT(bettew)
-        await sendLine(rightWriter, "motor.run_to_absolute_position(port.F, 0, 50, direction=motor.SHORTEST_PATH, stop=motor.STOP_HOLD, acceleration=1000, deceleration=1000);");
+        await sendLine(rightWriter, "motor.run_to_absolute_position(port.F, 0, 50, direction=motor.SHORTEST_PATH, stop=motor.BRAKE, acceleration=1000, deceleration=1000);");
         await sleepT(bettew)
-        await sendLine(rightWriter, "motor.run_to_absolute_position(port.B, 0, 50, direction=motor.SHORTEST_PATH, stop=motor.STOP_HOLD, acceleration=1000, deceleration=1000);");
+        await sendLine(rightWriter, "motor.run_to_absolute_position(port.B, 0, 50, direction=motor.SHORTEST_PATH, stop=motor.BRAKE, acceleration=1000, deceleration=1000);");
         await sleepT(bettew)
     }
 
@@ -811,13 +470,12 @@ async function spikeMove(move) {
     scSecure = false
 }
 
-async function spikeCube(moves, sleeped = 150) {
-
+async function spikeCube(moves, sleeped = 180) {
+    regen()
     moves = simplifyMoves(moves);
     console.info(moves)
     if (scSecure) return console.warn("NO SPAM !!!");
     scSecure = true;
-    resetFaceMoveHistory();
     const noCube = ganCubePresent();
     if (noCube) return console.warn("Cube Not Connected")
     const sleep = sleeped || window.sleeped;
@@ -831,17 +489,8 @@ async function spikeCube(moves, sleeped = 150) {
     await sleepT(2000)
     const start = new Date();
     startTimer(start);
-    console.log(window.moves)
-    // NOTE: moves are now always run sequentially (no more Promise.all
-    // pairing for opposite-face moves). Running two run_to_absolute_position
-    // confirmations concurrently on left+right is still fine (different
-    // hubs, independent UART), so isOpposite() moves on different sides
-    // still effectively overlap because runMovement's own awaits only
-    // block on THAT port's confirmation. What we removed is starting a
-    // move before the previous one on the SAME side was confirmed done,
-    // which was the main source of truncated/drifted turns.
+
     for (let i = 0; i < moves.length; i++) {
-        if (killed) break;
         const m = moves[i], n = moves[i + 1];
         if (isOpposite(m, n)) {
             await Promise.all([
@@ -859,42 +508,6 @@ async function spikeCube(moves, sleeped = 150) {
     scSecure = false;
 }
 
-// KILL SWITCH
-
-async function kill() {
-    killed = true;
-    scSecure = true;   // block runMovement/spikeMove/spikeCube from sending anything new
-    solveSecure = true;
-    store.length = 0;  // wipe any queued keyboard moves
-
-    if (timerInterval) {
-        clearInterval(timerInterval);
-        timerInterval = null;
-    }
-
-    const stopCmd = (p) => `motor.stop(port.${p});`;
-    const allPorts = ['A', 'B', 'C', 'D', 'E', 'F'];
-
-    await Promise.all([
-        ...(leftWriter ? allPorts.map(p => sendLine(leftWriter, stopCmd(p))) : []),
-        ...(rightWriter ? allPorts.map(p => sendLine(rightWriter, stopCmd(p))) : [])
-    ]);
-
-    await Promise.all([
-        sendLine(leftWriter, `light_matrix.write("O",100)`),
-        sendLine(rightWriter, `light_matrix.write("K",100)`)
-    ]);
-
-    log("KILLED - all motors stopped");
-
-    // release the lock shortly after, so the app isn't stuck dead forever
-    setTimeout(() => {
-        killed = false;
-        scSecure = false;
-        solveSecure = false;
-    }, 1000);
-}
-
 // KEYBOARD MOVES
 
 var Soupdate = () => {
@@ -907,7 +520,7 @@ var Soupdate = () => {
 }
 
 async function playMove(move) {
-
+    regen()
     store.push(move)
 }
 
@@ -976,16 +589,16 @@ function simplifyMoves(moves) {
 }
 
 function rvsMove(move) {
-    if (!move) return;
-    const lastChar = move[move.length - 1];
-    const face = move[0];
-    if (lastChar === "'") {
-        return face; // R' → R
-    } else if (lastChar === "2") {
-        return move; // R2 → R2
-    } else {
-        return face + "'"; // R → R'
-    }
+  if (!move) return;
+  const lastChar = move[move.length - 1];
+  const face = move[0];
+  if (lastChar === "'") {
+    return face; // R' → R
+  } else if (lastChar === "2") {
+    return move; // R2 → R2
+  } else {
+    return face + "'"; // R → R'
+  }
 }
 
 
@@ -1019,14 +632,14 @@ async function scramble() {
         if (!silence) {
             await sendLine(leftWriter, scrambleSound);
         }
-        await spikeCube(moves, 200)
+        await spikeCube(moves, 300)
         console.info("End Scramble")
     }
 }
 
 async function startCube() {
     console.info("Start Cube")
-    await spikeCube(['U', "U'"], 290)
+    await spikeCube(['U', "U'"], 300)
 }
 
 async function spin() {
@@ -1077,28 +690,72 @@ document.addEventListener("fullscreenchange", (e) => {
 
 async function sexyMoves1() {
     console.log("Start Sexy Move 1")
-    await spikeCube(sexyMove1, 190)
+    await spikeCube(sexyMove1, 200)
     console.log("End Sexy Move 1")
 }
 
 async function sexyMoves2() {
     console.log("Start Sexy Move 2")
-    await spikeCube(sexyMove2, 190)
+    await spikeCube(sexyMove2, 200)
     console.log("End Sexy Move 2")
 }
 
 async function sexyMoves3() {
     console.log("Start Sexy Move 3")
-    await spikeCube(sexyMove3, 190)
+    await spikeCube(sexyMove3, 200)
     console.log("End Sexy Move 3")
 }
 
+let still = [];
+async function solve2ndCube(mvs) {
+    if (!bc) return console.warn("No bc connection found");
+    if (!mvs || mvs.length === 0) return console.warn("No moves for 2nd cube");
+    window.dontMove = true;
+    nxt.classList.add("active")
+    console.info("Starting 2nd cube solve");
+    console.info("Moves: " + mvs.join(","));
+    still = [...mvs];
+    nxt.innerHTML = still[0];
+    await new Promise((resolve) => {
+        bc.onmessage = (e) => {
+            const data = e.data;
+            if (typeof data !== "string" || !data.startsWith("Move: ")) return;
 
-async function cubecubes() {
-    console.log("Start cubecube Move 3")
-    await spikeCube(cubecube, 190)
-    console.log("End cubecube Move 3")
+            const move = data.replace("Move: ", "").trim();
+            const expected = still[0];
+            console.log(expected)
+            const next = still[1]
+
+            if (move === expected) {
+                still.shift();
+                if (still.length !== 0) {
+                    console.info(`Next: ${next}`);
+                    nxt.innerHTML = next;
+                    if (wrong) {
+                        nxt.classList.remove("wrong")
+                        wrong = false;
+                    }
+                }
+            } else {
+                const rvs = rvsMove(move)
+                console.warn(`No: ${move}, do: ${rvs}, expected: ${expected}`)
+                still.push(rvs)
+                nxt.innerHTML = rvs;
+                nxt.classList.add("wrong")
+                wrong = true;
+            }
+
+            if (still.length === 0) {
+                resolve();
+            }
+        };
+    });
+
+    window.dontMove = false;
+    nxt.clasList.remove("active")
+    console.info("2nd cube solved");
 }
+
 // KEYBOARD MAPPIMG
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -1133,9 +790,7 @@ document.addEventListener('DOMContentLoaded', () => {
         "w": startCube,
         "s": spin,
         "f": fullscreen,
-        "backspace": scramble,
-        "v": () => toggleSpeed(),
-        "delete": kill
+        "backspace": scramble
     }
     document.body.addEventListener('keydown', (e) => {
         const ctrlKeys = ['c', 'v', 'z', 'f', 'w', 't', 's', 'r', 'x', 'a', 'l'];
@@ -1154,7 +809,6 @@ document.addEventListener('DOMContentLoaded', () => {
             playMove(fn2)
         };
         bc.postMessage('key' + e.key)
-        
     });
     document.body.addEventListener('keyup', (e) => {
         bc.postMessage('ked' + e.key)
@@ -1164,7 +818,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     bc.onmessage = (e) => {
         var data = e.data
-        console.log(data)
         if (data == true) {
             document.getElementById('timerBlock').style.display = 'none'
             bcState = true;
@@ -1174,47 +827,13 @@ document.addEventListener('DOMContentLoaded', () => {
             let move = data.replace("Move: ", "");
             console.log(`%cSec:  ${move}`, 'color:#eb34d8;');
             playMove(move);
-        } else if (typeof data !== "string" || data.startsWith("Watch: ")) {
-            command = data.replace('Watch: ','')
-            console.log(command)
-            switch (command) {
-                case "solve":
-                  console.log("Solving");
-                  solve();
-                  break;
-                case "scramble":
-                  console.log("Scrambling");
-                  scramble();
-                  break;
-                case "move1":
-                  console.log("Move 1");
-                  sexyMoves1();
-                  break;
-                case "move2":
-                  console.log("Move 2");
-                  sexyMoves2();
-                  break;
-                case "move3":
-                  console.log("Move 3");
-                  sexyMoves3();
-                  break;
-                case "kill":
-                  console.log("Kill");
-                  kill();
-                  break;
-                default:
-                    try {
-                        globalThis[command]();
-                    } catch {
-                        console.log("Invalid move");
-                    }
-              }
-        } else {
+        } 
+        else {
             console.debug("Unknown message from Slide tab: ", data)
         }
     }
 });
 
 // BROADCAST
-localStorage.bc = 'app_channel'
+
 const bc = new BroadcastChannel(localStorage.bc);
