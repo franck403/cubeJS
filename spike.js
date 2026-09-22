@@ -542,9 +542,11 @@ async function spikeCube(moves, sleeped) {
     const noCube = ganCubePresent();
     if (noCube) return console.warn("Cube Not Connected")
     const sleep = sleeped || window.sleeped;
-    console.log(sleeped)
+    console.log(sleep)
 
-    await wiggle();
+    //await wiggle();
+
+    //await sleepT(2000)
 
     const lenStr = String(moves.length).padStart(2, "0");
     await Promise.all([
