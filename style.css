@@ -372,7 +372,7 @@ body.fast .bat {
     color: #ffd0d0;
 }
 
-body.fast .stats,
+body.fast .stats, 
 body.fast .timer {
     color: #ffdada;
     text-shadow: 0 0 8px rgba(255, 0, 0, 0.7);
