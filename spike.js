@@ -510,6 +510,29 @@ async function spikeMove(move) {
     scSecure = false
 }
 
+async function wigle() {
+    await Promise.all([
+        sendLine(leftWriter, `for p in [port.A, port.B, port.C, port.D, port.E, port.F]:
+        try:
+            motor.run_for_degrees(p, 3, 500)
+            motor.run_for_degrees(p, -3, 500)
+            pos = motor.relative_position(p)
+            target = round(pos / 90) * 90
+            motor.run_to_relative_position(p, target, 500)
+        except:
+            pass`),
+        sendLine(rightWriter, `for p in [port.A, port.B, port.C, port.D, port.E, port.F]:
+        try:
+            motor.run_for_degrees(p, 3, 500)
+            motor.run_for_degrees(p, -3, 500)
+            pos = motor.relative_position(p)
+            target = round(pos / 90) * 90
+            motor.run_to_relative_position(p, target, 500)
+        except:
+            pass`)
+    ]);
+}
+
 async function spikeCube(moves, sleeped) {
     regen()
     moves = simplifyMoves(moves);
@@ -520,6 +543,8 @@ async function spikeCube(moves, sleeped) {
     if (noCube) return console.warn("Cube Not Connected")
     const sleep = sleeped || window.sleeped;
     console.log(sleeped)
+
+    await wiggle();
 
     const lenStr = String(moves.length).padStart(2, "0");
     await Promise.all([
