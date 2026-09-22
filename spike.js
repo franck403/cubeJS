@@ -15,7 +15,7 @@ let bcState         = false;
 
 let scLenght = 20;
 
-let deg = 94;  // Moves x 1
+let deg = 95;  // Moves x 1
 let dog = 180; // Moves x 2
 
 let u  = 0, f  = 0, l  = 0, r  = 0, b  = 0, d  = 0;
