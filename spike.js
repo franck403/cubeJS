@@ -578,7 +578,7 @@ function startTimer(startTime) {
         }        
     }, 1);
 }
-
+ 
 function stopTimer(startTime, post = true) {
     if (timerInterval) {
         clearInterval(timerInterval);
