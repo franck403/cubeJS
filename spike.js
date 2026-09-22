@@ -574,7 +574,8 @@ function startTimer(startTime) {
         document.getElementById('timer').innerHTML = '<i class="fa-solid fa-clock"></i> : ' + elapsed + 'S';
         if (elapsed > 20) {
             stopTimer(startTime, false)
-        }
+            scSecure = false; // spam fix
+        }        
     }, 1);
 }
 
