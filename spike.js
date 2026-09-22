@@ -1,24 +1,24 @@
-let leftPort,   rightPort   = null;
+let leftPort, rightPort = null;
 let leftWriter, rightWriter = null;
 let leftReader, rightReader = null;
-let leftAbort,  rightAbort  = null;
+let leftAbort, rightAbort = null;
 
 var store = [];
 
 let SpikeState = { left: false, right: false };
 
-let scSecure        = false;
-let solveSecure     = false;
+let scSecure = false;
+let solveSecure = false;
 let fullscreenstate = false;
-let spinState       = false;
-let bcState         = false;
+let spinState = false;
+let bcState = false;
 
 let scLenght = 20;
 
 let deg = 95;  // Moves x 1
 let dog = 180; // Moves x 2
 
-let u  = 0, f  = 0, l  = 0, r  = 0, b  = 0, d  = 0;
+let u = 0, f = 0, l = 0, r = 0, b = 0, d = 0;
 let u1 = 0, f1 = 0, l1 = 0, r1 = 0, b1 = 0, d1 = 0;
 let u2 = 0, f2 = 0, l2 = 0, r2 = 0, b2 = 0, d2 = 0;
 
@@ -32,7 +32,7 @@ var silence = true;
 
 let timerInterval = null;
 
-window.sleeped = 170;
+window.sleeped = 200;
 
 let nxt;
 let wrong;
@@ -40,7 +40,7 @@ let wrong;
 const sexyMove1 = ["R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'", "R", "U", "R'", "U'"];
 const sexyMove2 = ["L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2"];
 const sexyMove3 = ["R2", "L2", "U2", "R2", "L2", "U2", "R2", "L2", "U2", "R2", "L2", "U2"];
-const cubecube =  ["F", "L", "F", "U'", "R", "U", "F2", "L2", "U'", "L'", "B", "D'", "B'", "L2", "U"]
+const cubecube = ["F", "L", "F", "U'", "R", "U", "F2", "L2", "U'", "L'", "B", "D'", "B'", "L2", "U"]
 
 const startup = "cor=1.5\n\nimport motor\n\nfrom hub import port, light_matrix, sound\n\nimport time\n\nlayer = motor.run_for_degrees\n\nlight_matrix.clear();\nmotor.motor_set_high_resolution_mode(port.A, True);\nmotor.motor_set_high_resolution_mode(port.B, True);\nmotor.motor_set_high_resolution_mode(port.C, True);\nmotor.motor_set_high_resolution_mode(port.D, True);\nmotor.motor_set_high_resolution_mode(port.E, True);\nmotor.motor_set_high_resolution_mode(port.F, True)";
 const connectSound = "sound.beep(392,120);time.sleep_ms(120);sound.beep(494,120);time.sleep_ms(120);sound.beep(587,150);time.sleep_ms(150);sound.beep(784,200)";
@@ -185,13 +185,13 @@ async function SerialL(readable) {
     while (true) {
         const { value, done } = await reader.read();
         if (done) {
-          // Allow the serial port to be closed later.
-          reader.releaseLock();
-          break;
+            // Allow the serial port to be closed later.
+            reader.releaseLock();
+            break;
         }
         // value is a Uint8Array.
         console.log(value);
-      }
+    }
 }
 
 async function reconnectSpike(side) {
@@ -383,9 +383,30 @@ async function updateBatteries() {
 }
 
 // MOVE
+// MOVE STORE
+let lastMove = {
+    u : '', 
+    l : '', 
+    f : '', 
+    r : '', 
+    b : '',
+    d : '',
+}
+
+function sameSideFixer(move) {
+    lm = lastMove[move.slice(0,1)]
+    lastMove[move.slice(0,1)] = move
+    if (lm == move) {
+        return 90
+    } else {
+        return 95
+    }
+    return deg
+}
 
 async function runMovement(move, sleep = 220, noCube = false) {
     if (!move || typeof move !== "string") return log(`Invalid move ${move}`);
+    deg = sameSideFixer(move)
     degCorrection(move);
     const cmd = CLP_LEFT[move] || CLP_RIGHT[move];
     const writer = CLP_LEFT[move] ? leftWriter : rightWriter;
@@ -395,7 +416,7 @@ async function runMovement(move, sleep = 220, noCube = false) {
     await sendLine(writer, cmd);
     const mov = move.charAt(0);
     const sym = move.charAt(1);
-    await sendLine(leftWriter,  `light_matrix.write("${mov}",100)`);
+    await sendLine(leftWriter, `light_matrix.write("${mov}",100)`);
     await sendLine(rightWriter, `light_matrix.write("${sym}",100)`);
     await sleepT(wait);
 }
@@ -547,12 +568,12 @@ function startTimer(startTime) {
         let elapsed = ((new Date() - startTime) / 1000).toFixed(3);
         document.getElementById('timer').innerHTML = '<i class="fa-solid fa-clock"></i> : ' + elapsed + 'S';
         if (elapsed > 20) {
-            stopTimer(startTime,false)
+            stopTimer(startTime, false)
         }
     }, 1);
 }
 
-function stopTimer(startTime,post=true) {
+function stopTimer(startTime, post = true) {
     if (timerInterval) {
         clearInterval(timerInterval);
         try {
@@ -560,7 +581,7 @@ function stopTimer(startTime,post=true) {
             if (post) {
                 bc.postMessage(Number(elapsed));
             }
-        } catch {}
+        } catch { }
         timerInterval = null;
     }
 }
@@ -605,16 +626,16 @@ function simplifyMoves(moves) {
 }
 
 function rvsMove(move) {
-  if (!move) return;
-  const lastChar = move[move.length - 1];
-  const face = move[0];
-  if (lastChar === "'") {
-    return face; // R' → R
-  } else if (lastChar === "2") {
-    return move; // R2 → R2
-  } else {
-    return face + "'"; // R → R'
-  }
+    if (!move) return;
+    const lastChar = move[move.length - 1];
+    const face = move[0];
+    if (lastChar === "'") {
+        return face; // R' → R
+    } else if (lastChar === "2") {
+        return move; // R2 → R2
+    } else {
+        return face + "'"; // R → R'
+    }
 }
 
 
@@ -849,7 +870,7 @@ document.addEventListener('DOMContentLoaded', () => {
             let move = data.replace("Move: ", "");
             console.log(`%cSec:  ${move}`, 'color:#eb34d8;');
             playMove(move);
-        } 
+        }
         else {
             console.debug("Unknown message from Slide tab: ", data)
         }
