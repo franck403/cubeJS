@@ -510,7 +510,7 @@ async function spikeMove(move) {
     scSecure = false
 }
 
-async function spikeCube(moves, sleeped = 180) {
+async function spikeCube(moves, sleeped) {
     regen()
     moves = simplifyMoves(moves);
     console.info(moves)
@@ -519,6 +519,7 @@ async function spikeCube(moves, sleeped = 180) {
     const noCube = ganCubePresent();
     if (noCube) return console.warn("Cube Not Connected")
     const sleep = sleeped || window.sleeped;
+    console.log(sleeped)
 
     const lenStr = String(moves.length).padStart(2, "0");
     await Promise.all([
