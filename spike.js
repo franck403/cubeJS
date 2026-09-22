@@ -510,7 +510,7 @@ async function spikeMove(move) {
     scSecure = false
 }
 
-async function wigle() {
+async function wiggle() {
     await Promise.all([
         sendLine(leftWriter, `for p in [port.A, port.B, port.C, port.D, port.E, port.F]:
         try:
