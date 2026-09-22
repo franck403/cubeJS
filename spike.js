@@ -681,7 +681,7 @@ async function scramble() {
 
 async function startCube() {
     console.info("Start Cube")
-    await spikeCube(['U2', "U2"], intSolve)
+    await spikeCube(['U2', "U2"], window.sleeped)
 }
 
 async function idiot() {
