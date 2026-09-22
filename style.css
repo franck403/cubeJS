@@ -20,6 +20,7 @@ body {
     justify-content: center;
     flex-direction: column;
     overflow: hidden;
+    transition: background 0.4s ease;
 }
 
 /* Cursor cube */
@@ -31,6 +32,7 @@ body {
     z-index: 10000000000000000000000000;
     pointer-events: none;
     transform: translate(-50%, -50%) rotateX(var(--rot-x)) rotateY(var(--rot-y));
+    filter: drop-shadow(0 0 6px rgba(255, 213, 0, 0.85)) drop-shadow(0 0 14px rgba(255, 213, 0, 0.5));
 }
 
 /* Cube faces */
@@ -73,6 +75,7 @@ body {
     width: var(--cube-size);
     height: var(--cube-size);
     animation: cubeDropSpin var(--drop-duration) linear forwards;
+    filter: drop-shadow(0 0 6px rgba(255, 213, 0, 0.85)) drop-shadow(0 0 14px rgba(255, 213, 0, 0.5));
 }
 
 .dropCube div:nth-of-type(1) { transform: rotateY(0deg) translateZ(var(--half-cube)); }
@@ -271,6 +274,7 @@ body {
     height: 50px;
     padding: 16px;
     border-radius: 60px;
+    transition: background 0.3s ease, box-shadow 0.3s ease;
 }
 
 .dark { background: #000000; }
@@ -296,4 +300,89 @@ body {
 
 .move.wrong {
     background:rgba(250, 50, 40, 0.4);
+}
+
+/* ============================================= */
+/* FAST MODE — body.fast : UI rouge + vagues moorpght */
+/* ============================================= */
+
+@keyframes moorpghtWaves {
+    0% {
+        background-position: 0% 50%, 0% 50%, 0% 50%;
+    }
+    100% {
+        background-position: 200% 50%, -200% 50%, 200% 50%;
+    }
+}
+
+@keyframes fastPulse {
+    0%, 100% { filter: brightness(1) saturate(1); }
+    50% { filter: brightness(1.15) saturate(1.3); }
+}
+
+body.fast {
+    background:
+        repeating-linear-gradient(115deg,
+            rgba(255, 60, 60, 0.35) 0%,
+            rgba(180, 0, 0, 0.25) 8%,
+            rgba(255, 90, 90, 0.35) 16%,
+            rgba(120, 0, 0, 0.2) 24%),
+        repeating-linear-gradient(65deg,
+            rgba(255, 30, 30, 0.25) 0%,
+            rgba(90, 0, 0, 0.15) 10%,
+            rgba(255, 120, 120, 0.25) 20%),
+        linear-gradient(180deg, #2a0000 0%, #4d0000 50%, #2a0000 100%);
+    background-size: 300% 300%, 300% 300%, 100% 100%;
+    animation: moorpghtWaves 6s linear infinite, fastPulse 2s ease-in-out infinite;
+}
+
+body.fast .controls {
+    background: #6b0000;
+    box-shadow: 0 0 25px 4px rgba(255, 0, 0, 0.55);
+}
+
+body.fast .MoveLib {
+    background: #ff2e2e;
+}
+
+body.fast .MoveLib button {
+    background: #ff9a9a !important;
+    color: #3a0000;
+}
+
+body.fast .btn,
+body.fast .controls button,
+body.fast .topBar button {
+    background: #ff0000 !important;
+    box-shadow: 0 0 14px 2px rgba(255, 0, 0, 0.75);
+    animation: fastPulse 1.2s ease-in-out infinite;
+}
+
+body.fast .btn:hover,
+body.fast .controls button:hover,
+body.fast .topBar button:hover {
+    background: #ff3d3d !important;
+    box-shadow: 0 0 22px 6px rgba(255, 0, 0, 0.9);
+}
+
+body.fast .dark { background: #4d0000; }
+body.fast .topBar { background: #7a0000; }
+body.fast .bat {
+    background: #b30030;
+    color: #ffd0d0;
+}
+
+body.fast .stats,
+body.fast .timer {
+    color: #ffdada;
+    text-shadow: 0 0 8px rgba(255, 0, 0, 0.7);
+}
+
+#full i.fa-bolt {
+    transition: color 0.2s ease, text-shadow 0.2s ease;
+}
+
+body.fast #full i.fa-bolt {
+    color: #fff200;
+    text-shadow: 0 0 10px rgba(255, 230, 0, 0.9);
 }

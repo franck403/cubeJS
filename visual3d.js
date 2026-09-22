@@ -283,7 +283,7 @@ function init3DCube(containerId = "cube3d") {
     }
 
     scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x000000);
+    scene.background = null; // transparent — lets the page's CSS background (incl. .fast mode) show through
 
     camera = new THREE.PerspectiveCamera(
         45,

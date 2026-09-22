@@ -18,6 +18,11 @@ let scLenght = 20;
 let deg = 95;  // Moves x 1
 let dog = 180; // Moves x 2
 
+let intSolve = 300;
+let intScramble = 300;
+
+let intSolveFast = 170;
+
 let u = 0, f = 0, l = 0, r = 0, b = 0, d = 0;
 let u1 = 0, f1 = 0, l1 = 0, r1 = 0, b1 = 0, d1 = 0;
 let u2 = 0, f2 = 0, l2 = 0, r2 = 0, b2 = 0, d2 = 0;
@@ -669,14 +674,24 @@ async function scramble() {
         if (!silence) {
             await sendLine(leftWriter, scrambleSound);
         }
-        await spikeCube(moves, 300)
+        await spikeCube(moves, intScramble)
         console.info("End Scramble")
     }
 }
 
 async function startCube() {
     console.info("Start Cube")
-    await spikeCube(['U', "U'"], 300)
+    await spikeCube(['U2', "U2"], intSolve)
+}
+
+async function idiot() {
+    if (window.sleeped != intSolveFast) {
+        window.sleeped = intSolveFast
+        document.body.classList.add('fast')
+    } else {
+        window.sleeped = intSolve
+        document.body.classList.remove('fast')
+    }
 }
 
 async function spin() {
