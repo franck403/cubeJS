@@ -568,9 +568,8 @@ async function spikeCube(moves, sleeped) {
             i++;
         } else await runMovement(m, sleep, noCube);
     }
-    if (areBothSpikesConnected() || debug) {
-        stopTimer(start);
-    }
+    stopTimer(start);
+
     await sleepT(200)
     await updateBatteries();
     scSecure = false;
@@ -609,13 +608,13 @@ function startTimer(startTime) {
  
 function stopTimer(startTime, post = true) {
     if (timerInterval) {
-        clearInterval(timerInterval);
         try {
             let elapsed = ((new Date() - startTime) / 1000).toFixed(3);
             if (post) {
                 bc.postMessage(Number(elapsed));
             }
         } catch { }
+        clearInterval(timerInterval);
         timerInterval = null;
     }
 }
