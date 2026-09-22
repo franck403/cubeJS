@@ -147,7 +147,7 @@ async function openSpike(which) {
     let port, writer, reader, abortCtrl;
     try {
         port = await navigator.serial.requestPort({ filters: [{ usbVendorId: 0x0694 }] });
-        await port.open({ baudRate: 115200 });
+        await port.open({ baudRate: 115200, bufferSize: 8192});
 
         reader = port.readable.pipeThrough(new TextDecoderStream()).getReader();
         if (port.writable) {
@@ -598,7 +598,7 @@ function startTimer(startTime) {
     timerInterval = setInterval(() => {
         let elapsed = ((new Date() - startTime) / 1000).toFixed(3);
         document.getElementById('timer').innerHTML = '<i class="fa-solid fa-clock"></i> : ' + elapsed + 'S';
-        if (elapsed > 20) {
+        if (elapsed >= 20) {
             stopTimer(startTime, false)
             scSecure = false; // spam fix
         }         
