@@ -37,7 +37,7 @@ var silence = true;
 
 let timerInterval = null;
 
-window.sleeped = 200;
+window.sleeped = 300;
 
 let nxt;
 let wrong;
