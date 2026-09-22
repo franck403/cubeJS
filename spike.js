@@ -575,7 +575,7 @@ function startTimer(startTime) {
         if (elapsed > 20) {
             stopTimer(startTime, false)
             scSecure = false; // spam fix
-        }        
+        }         
     }, 1);
 }
  
