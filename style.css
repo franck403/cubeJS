@@ -23,7 +23,7 @@ body {
     transition: background 0.4s ease;
 }
 
-/* Cursor cube
+/* Cursor cube */
 .mouse {
     width: var(--cube-size);
     height: var(--cube-size);
@@ -34,28 +34,28 @@ body {
     transform: translate(-50%, -50%) rotateX(var(--rot-x)) rotateY(var(--rot-y));
 }
 
-/* Cube faces 
+/* Cube faces */
 .mouse > div {
     position: absolute;
     width: var(--cube-size);
     height: var(--cube-size);
     box-shadow: 0 0 6px rgba(255, 213, 0, 0.85), 0 0 14px rgba(255, 213, 0, 0.5);
 }
-/* Cube faces
+/* Cube faces */
 .dropCube > div {
     position: absolute;
     width: var(--cube-size);
     height: var(--cube-size);
     box-shadow: 0 0 6px rgba(255, 213, 0, 0.85), 0 0 14px rgba(255, 213, 0, 0.5);
 }
-/* Face placement 
+/* Face placement */
 .mouse div:nth-of-type(1) { transform: rotateY(0deg) translateZ(var(--half-cube)); }
 .mouse div:nth-of-type(2) { transform: rotateY(180deg) translateZ(var(--half-cube)); }
 .mouse div:nth-of-type(3) { transform: rotateY(90deg) translateZ(var(--half-cube)); }
 .mouse div:nth-of-type(4) { transform: rotateY(-90deg) translateZ(var(--half-cube)); }
 .mouse div:nth-of-type(5) { transform: rotateX(90deg) translateZ(var(--half-cube)); }
 .mouse div:nth-of-type(6) { transform: rotateX(-90deg) translateZ(var(--half-cube)); }
-*/
+
 
 /* Drop animation with spin */
 @keyframes cubeDropSpin {

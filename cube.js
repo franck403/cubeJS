@@ -44,36 +44,3 @@ worker.onmessage = function (e) {
     fnc()
   }
 };
-
-const cursorCube = document.getElementById('cursorCube');
-const load = document.getElementById('mouseLoad');
-
-// Cursor follow + rotation
-if (!window.debug) {
-  document.addEventListener('mousemove', (e) => {
-    const xRatio = e.clientX / window.innerWidth;
-    const yRatio = e.clientY / window.innerHeight;
-    const rotX = (yRatio - 0.5) * 360;
-    const rotY = (xRatio - 0.5) * 360;
-
-    document.documentElement.style.setProperty('--rot-x', `${rotX}deg`);
-    document.documentElement.style.setProperty('--rot-y', `${rotY}deg`);
-    document.body.style.cursor = "none";
-
-    cursorCube.style.left = e.clientX + 'px';
-    cursorCube.style.top = e.clientY + 'px';
-  });
-} else {
-  cursorCube.style.display = "none";
-}
-
-// Drop cube every 3s
-setInterval(() => {
-    const clone = cursorCube.cloneNode(true);
-    clone.classList.add('dropCube');
-    const rect = cursorCube.getBoundingClientRect();
-    clone.style.left = rect.left + rect.width / 2 + 'px';
-    clone.style.top = rect.top + rect.height / 2 + 'px';
-    //load.appendChild(clone);
-    setTimeout(() => clone.remove(), 2500);
-}, 100);
