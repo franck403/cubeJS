@@ -718,8 +718,10 @@ function rvsMove(move) {
 async function fullConnect() {
     scSecure = false
     if (!ganCubePresent()) {
-        await spike(true)
+        showFullscreenMessage('click')
         connect()
+        showFullscreenMessage('click')
+        await spike(true)
     } else {
         await spike(false)
     }
