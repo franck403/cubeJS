@@ -13,6 +13,7 @@ let fullscreenstate = false;
 let spinState = false;
 let bcState = false;
 
+
 let scLenght = 20;
 
 let deg = 100;  // Moves x 1
