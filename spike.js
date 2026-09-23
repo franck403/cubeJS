@@ -62,8 +62,8 @@ let CLP_RIGHT;
 
 // COMMANDS
 
-let decel = 10000
-let acel = 10000
+let decel = 1000
+let acel = 1000
 
 function regen() {
     CLP_LEFT = {
@@ -760,9 +760,13 @@ async function startCube() {
 async function idiot() {
     if (window.sleeped != intSolveFast) {
         window.sleeped = intSolveFast
+        decel = 10000
+        acel = 5000
         document.body.classList.add('fast')
     } else {
         window.sleeped = intSolve
+        decel = 1000
+        acel = 1000
         document.body.classList.remove('fast')
     }
 }
