@@ -429,7 +429,7 @@ async function updateBatteries() {
     await Promise.all([sendLine(leftWriter, clearDisplay), sendLine(rightWriter, clearDisplay)]);
     ganB();
 }
-
+ 
 // MOVE
 // MOVE STORE
 let lastMove = {
@@ -555,22 +555,8 @@ async function spikeMove(move) {
 }
 
 async function wiggle() {
-    await Promise.all([
-        sendLine(leftWriter, `for p in [port.A, port.B, port.C, port.D, port.E, port.F]:
-try:\n\tmotor.run_for_degrees(p, 3, 500)\n\tmotor.run_for_degrees(p, -3, 500)\n\tpos = motor.relative_position(p)
-            target = round(pos / 90) * 90\nmotor.run_to_relative_position(p, target, 500)
-        except:
-            pass`),
-        sendLine(rightWriter, `for p in [port.A, port.B, port.C, port.D, port.E, port.F]:
-        try:
-            motor.run_for_degrees(p, 3, 500)
-            motor.run_for_degrees(p, -3, 500)
-            pos = motor.relative_position(p)
-            target = round(pos / 90) * 90
-            motor.run_to_relative_position(p, target, 500)
-        except:
-            pass`)
-    ]);
+    const cmd = "for p in [port.A, port.B, port.C, port.D, port.E, port.F]:\n    try:\n        motor.run_for_degrees(p, 3, 500)\n        motor.run_for_degrees(p, -3, 500)\n        pos = motor.relative_position(p)\n        target = round(pos / 90) * 90\n        motor.run_to_relative_position(p, target, 500)\n    except:\n        pass";
+    await Promise.all([sendLine(leftWriter, cmd), sendLine(rightWriter, cmd)]);
 }
 
 async function spikeCube(moves, sleeped) {
