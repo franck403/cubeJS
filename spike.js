@@ -591,6 +591,10 @@ async function spikeCube(moves, sleeped) {
     stopTimer(start);
 
     await sleepT(200)
+
+    await wiggle();
+
+    await sleepT(2000)
     await updateBatteries();
     scSecure = false;
 }
