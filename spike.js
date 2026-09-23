@@ -142,45 +142,55 @@ function log(...args) {
 }
 
 function showFullscreenMessage(text, callback) {
-    const overlay = document.createElement('div');
-    
-    Object.assign(overlay.style, {
-        position: 'fixed',
-        top: '0',
-        left: '0',
-        width: '100vw',
-        height: '100vh',
-        backgroundColor: '#000000',
-        color: '#ffffff',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        fontSize: '2rem',
-        textAlign: 'center',
-        padding: '20px',
-        boxSizing: 'border-box',
-        cursor: 'pointer',
-        zIndex: '999999',
-        userSelect: 'none'
+    return new Promise((resolve) => {
+        const overlay = document.createElement('div');
+        
+        Object.assign(overlay.style, {
+            position: 'fixed',
+            top: '0',
+            left: '0',
+            width: '100vw',
+            height: '100vh',
+            backgroundColor: '#000000',
+            color: '#ffffff',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            fontSize: '2rem',
+            textAlign: 'center',
+            padding: '20px',
+            boxSizing: 'border-box',
+            cursor: 'pointer',
+            zIndex: '999999',
+            userSelect: 'none'
+        });
+
+        overlay.textContent = text;
+
+        overlay.addEventListener('click', async function onClick() {
+            overlay.remove();
+            if (typeof callback === 'function') {
+                await callback();
+            }
+            resolve();
+        });
+
+        document.body.appendChild(overlay);
     });
-
-    overlay.textContent = text;
-
-    overlay.addEventListener('click', function onClick() {
-        overlay.remove();
-        if (typeof callback === 'function') {
-            callback();
-        }
-    });
-
-    document.body.appendChild(overlay);
 }
+
 
 // CONNECTIONS
 async function openSpike(which) {
     let port, writer, reader, abortCtrl;
     try {
-        port = await navigator.serial.requestPort({ filters: [{ usbVendorId: 0x0694 }] });
+        let port = null;
+        try {
+            port = await navigator.serial.requestPort({ filters: [{ usbVendorId: 0x0694 }] });
+        } catch {
+            await showFullscreenMessage('CLICK')
+            port = await navigator.serial.requestPort({ filters: [{ usbVendorId: 0x0694 }] });
+        }
         await port.open({ baudRate: 115200});
 
         reader = port.readable.pipeThrough(new TextDecoderStream()).getReader();
