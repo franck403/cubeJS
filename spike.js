@@ -570,9 +570,9 @@ async function spikeCube(moves, sleeped) {
     const sleep = sleeped || window.sleeped;
     console.log(sleep)
 
-    //await wiggle();
+    await wiggle();
 
-    //await sleepT(2000)
+    await sleepT(2000)
 
     const lenStr = String(moves.length).padStart(2, "0");
     await Promise.all([
