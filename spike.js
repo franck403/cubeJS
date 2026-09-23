@@ -147,7 +147,7 @@ async function openSpike(which) {
     let port, writer, reader, abortCtrl;
     try {
         port = await navigator.serial.requestPort({ filters: [{ usbVendorId: 0x0694 }] });
-        await port.open({ baudRate: 115200, bufferSize: 8192});
+        await port.open({ baudRate: 115200});
 
         reader = port.readable.pipeThrough(new TextDecoderStream()).getReader();
         if (port.writable) {
