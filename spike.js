@@ -237,12 +237,6 @@ async function openSpike(which) {
 async function SerialL(readable) {
     while (true) {
         const { value, done } = await reader.read();
-        if (done) {
-            // Allow the serial port to be closed later.
-            reader.releaseLock();
-            break;
-        }
-        // value is a Uint8Array.
         console.log(value);
     }
 }
