@@ -549,7 +549,7 @@ async function spikeMove(move) {
 }
 
 async function wiggle() {
-    const cmd = "for p in [port.A, port.B, port.C, port.D, port.E, port.F]:\n    try:\n        motor.run_for_degrees(p, 3, 500)\n        motor.run_for_degrees(p, -3, 500)\n        pos = motor.relative_position(p)\n        target = round(pos / 90) * 90\n        motor.run_to_relative_position(p, target, 500)\n    except:\n        pass";
+    const cmd = `exec("import runloop\\nasync def _w():\\n    for p in [port.A, port.B, port.C, port.D, port.E, port.F]:\\n        try:\\n            await motor.run_for_degrees(p, 3, 500)\\n            await motor.run_for_degrees(p, -3, 500)\\n            pos = motor.relative_position(p)\\n            target = round(pos / 90) * 90\\n            await motor.run_to_relative_position(p, target, 500)\\n        except Exception as e:\\n            print(p, e)\\nrunloop.run(_w())")`;
     await Promise.all([sendLine(leftWriter, cmd), sendLine(rightWriter, cmd)]);
 }
 
