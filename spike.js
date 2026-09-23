@@ -69,36 +69,36 @@ let acel = 1000
 function regen() {
     CLP_LEFT = {
         // Face U
-        "U": `motor.run_to_absolute_position(port.A,  motor.absolute_position(port.A)- ${deg + u}, 1000, stop=motor.SMART_HOLD, acceleration=${acel}, deceleration=${decel});\n`,
-        "U'": `motor.run_to_absolute_position(port.A, motor.absolute_position(port.A)+ ${deg + u1}, 1000, stop=motor.SMART_HOLD, acceleration=${acel}, deceleration=${decel});\n`,
-        "U2": `motor.run_to_absolute_position(port.A, motor.absolute_position(port.A)+ ${dog + u2}, 1000, stop=motor.SMART_HOLD, acceleration=${acel}, deceleration=${decel});\n`,
+        "U": `motor.run_to_absolute_position(port.A,  motor.absolute_position(port.A)- ${deg + u}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel});\n`,
+        "U'": `motor.run_to_absolute_position(port.A, motor.absolute_position(port.A)+ ${deg + u1}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel});\n`,
+        "U2": `motor.run_to_absolute_position(port.A, motor.absolute_position(port.A)+ ${dog + u2}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel});\n`,
 
         // Face L
-        "L": `motor.run_to_absolute_position(port.C,  motor.absolute_position(port.C) - ${deg + l}, 1000, stop=motor.SMART_HOLD, acceleration=${acel}, deceleration=${decel});\n`,
-        "L'": `motor.run_to_absolute_position(port.C, motor.absolute_position(port.C) + ${deg + l1}, 1000, stop=motor.SMART_HOLD, acceleration=${acel}, deceleration=${decel});\n`,
-        "L2": `motor.run_to_absolute_position(port.C, motor.absolute_position(port.C) + ${dog + l2}, 1000, stop=motor.SMART_HOLD, acceleration=${acel}, deceleration=${decel});\n`,
+        "L": `motor.run_to_absolute_position(port.C,  motor.absolute_position(port.C) - ${deg + l}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel});\n`,
+        "L'": `motor.run_to_absolute_position(port.C, motor.absolute_position(port.C) + ${deg + l1}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel});\n`,
+        "L2": `motor.run_to_absolute_position(port.C, motor.absolute_position(port.C) + ${dog + l2}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel});\n`,
 
         // Face F
-        "F": `motor.run_to_absolute_position(port.E,  motor.absolute_position(port.E)- ${deg + f}, 1000, stop=motor.SMART_HOLD, acceleration=${acel}, deceleration=${decel});\n`,
-        "F'": `motor.run_to_absolute_position(port.E, motor.absolute_position(port.E)+ ${deg + f1}, 1000, stop=motor.SMART_HOLD, acceleration=${acel}, deceleration=${decel});\n`,
-        "F2": `motor.run_to_absolute_position(port.E, motor.absolute_position(port.E)+ ${dog + f2}, 1000, stop=motor.SMART_HOLD, acceleration=${acel}, deceleration=${decel});\n`,
+        "F": `motor.run_to_absolute_position(port.E,  motor.absolute_position(port.E)- ${deg + f}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel});\n`,
+        "F'": `motor.run_to_absolute_position(port.E, motor.absolute_position(port.E)+ ${deg + f1}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel});\n`,
+        "F2": `motor.run_to_absolute_position(port.E, motor.absolute_position(port.E)+ ${dog + f2}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel});\n`,
     };
 
     CLP_RIGHT = {
         // Face R
-        "R": `motor.run_to_absolute_position(port.B,  motor.absolute_position(port.B) - ${deg + r}, 1000, stop=motor.SMART_HOLD, acceleration=${acel}, deceleration=${decel});\n`,
-        "R'": `motor.run_to_absolute_position(port.B, motor.absolute_position(port.B)+ ${deg + r1}, 1000, stop=motor.SMART_HOLD, acceleration=${acel}, deceleration=${decel});\n`,
-        "R2": `motor.run_to_absolute_position(port.B, motor.absolute_position(port.B)+ ${dog + r2}, 1000, stop=motor.SMART_HOLD, acceleration=${acel}, deceleration=${decel});\n`,
+        "R": `motor.run_to_absolute_position(port.B,  motor.absolute_position(port.B) - ${deg + r}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel});\n`,
+        "R'": `motor.run_to_absolute_position(port.B, motor.absolute_position(port.B)+ ${deg + r1}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel});\n`,
+        "R2": `motor.run_to_absolute_position(port.B, motor.absolute_position(port.B)+ ${dog + r2}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel});\n`,
 
         // Face B
-        "B": `motor.run_to_absolute_position(port.F,  motor.absolute_position(port.F) - ${deg + b}, 1000, stop=motor.SMART_HOLD, acceleration=${acel}, deceleration=${decel});\n`,
-        "B'": `motor.run_to_absolute_position(port.F, motor.absolute_position(port.F) + ${deg + b1}, 1000, stop=motor.SMART_HOLD, acceleration=${acel}, deceleration=${decel});\n`,
-        "B2": `motor.run_to_absolute_position(port.F, motor.absolute_position(port.F) + ${dog + b2}, 1000, stop=motor.SMART_HOLD, acceleration=${acel}, deceleration=${decel});\n`,
+        "B": `motor.run_to_absolute_position(port.F,  motor.absolute_position(port.F) - ${deg + b}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel});\n`,
+        "B'": `motor.run_to_absolute_position(port.F, motor.absolute_position(port.F) + ${deg + b1}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel});\n`,
+        "B2": `motor.run_to_absolute_position(port.F, motor.absolute_position(port.F) + ${dog + b2}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel});\n`,
 
         // Face D
-        "D": `motor.run_to_absolute_position(port.D,  motor.absolute_position(port.D)- ${deg + d}, 1000, stop=motor.SMART_HOLD, acceleration=${acel}, deceleration=${decel});\n`,
-        "D'": `motor.run_to_absolute_position(port.D, motor.absolute_position(port.D)+ ${deg + d1}, 1000, stop=motor.SMART_HOLD, acceleration=${acel}, deceleration=${decel});\n`,
-        "D2": `motor.run_to_absolute_position(port.D, motor.absolute_position(port.D)+ ${dog + d2}, 1000, stop=motor.SMART_HOLD, acceleration=${acel}, deceleration=${decel});\n`,
+        "D": `motor.run_to_absolute_position(port.D,  motor.absolute_position(port.D)- ${deg + d}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel});\n`,
+        "D'": `motor.run_to_absolute_position(port.D, motor.absolute_position(port.D)+ ${deg + d1}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel});\n`,
+        "D2": `motor.run_to_absolute_position(port.D, motor.absolute_position(port.D)+ ${dog + d2}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel});\n`,
     };
 }
 
