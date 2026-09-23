@@ -15,7 +15,7 @@ let bcState = false;
 
 let scLenght = 20;
 
-let deg = 95;  // Moves x 1
+let deg = 100;  // Moves x 1
 let dog = 180; // Moves x 2
 
 let intSolve = 300;
@@ -555,12 +555,8 @@ async function spikeMove(move) {
 async function wiggle() {
     await Promise.all([
         sendLine(leftWriter, `for p in [port.A, port.B, port.C, port.D, port.E, port.F]:
-        try:
-            motor.run_for_degrees(p, 3, 500)
-            motor.run_for_degrees(p, -3, 500)
-            pos = motor.relative_position(p)
-            target = round(pos / 90) * 90
-            motor.run_to_relative_position(p, target, 500)
+try:\n\tmotor.run_for_degrees(p, 3, 500)\n\tmotor.run_for_degrees(p, -3, 500)\n\tpos = motor.relative_position(p)
+            target = round(pos / 90) * 90\nmotor.run_to_relative_position(p, target, 500)
         except:
             pass`),
         sendLine(rightWriter, `for p in [port.A, port.B, port.C, port.D, port.E, port.F]:
