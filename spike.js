@@ -141,8 +141,42 @@ function log(...args) {
     }
 }
 
-// CONNECTIONS
+function showFullscreenMessage(text, callback) {
+    const overlay = document.createElement('div');
+    
+    Object.assign(overlay.style, {
+        position: 'fixed',
+        top: '0',
+        left: '0',
+        width: '100vw',
+        height: '100vh',
+        backgroundColor: '#000000',
+        color: '#ffffff',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        fontSize: '2rem',
+        textAlign: 'center',
+        padding: '20px',
+        boxSizing: 'border-box',
+        cursor: 'pointer',
+        zIndex: '999999',
+        userSelect: 'none'
+    });
 
+    overlay.textContent = text;
+
+    overlay.addEventListener('click', function onClick() {
+        overlay.remove();
+        if (typeof callback === 'function') {
+            callback();
+        }
+    });
+
+    document.body.appendChild(overlay);
+}
+
+// CONNECTIONS
 async function openSpike(which) {
     let port, writer, reader, abortCtrl;
     try {
@@ -228,13 +262,10 @@ async function reconnectSpike(side) {
 }
 
 async function spike(cubeed) {
-    if (cubeed) {
+    if (SpikeState.left != true) {
         await openSpike('left')
-        await openSpike('right')
-    } else {
-        await reconnectSpike('left')
-        await reconnectSpike('right')
     }
+    await openSpike('right')
 }
 
 async function sendLine(writer, text) {
