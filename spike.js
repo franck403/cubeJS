@@ -381,6 +381,8 @@ async function batteryRead(which, reader) {
                             }
                         }
                     });
+                } else {
+                    console.log(value)
                 }
             }
         } catch (err) {
