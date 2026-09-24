@@ -66,6 +66,8 @@ let CLP_RIGHT;
 let decel = 1000
 let acel = 1000
 
+//p = port.A\\n await motor.run_to_relative_position(p, round(motor.relative_position(p) / 90) * 90, 500)
+/*
 function regen() {
     CLP_LEFT = {
         // Face U
@@ -99,6 +101,36 @@ function regen() {
         "D": `motor.run_to_absolute_position(port.D,  motor.absolute_position(port.D)- ${deg + d}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel});\n`,
         "D'": `motor.run_to_absolute_position(port.D, motor.absolute_position(port.D)+ ${deg + d1}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel});\n`,
         "D2": `motor.run_to_absolute_position(port.D, motor.absolute_position(port.D)+ ${dog + d2}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel});\n`,
+    };
+}*/
+
+function regen() {
+    CLP_LEFT = {
+        "U": `async def move_u():\n    await motor.run_for_degrees(port.A, -(${deg + u}), 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel})\n    await motor.run_to_relative_position(port.A, round(motor.relative_position(port.A) / 90) * 90, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel})\n`,
+        "U'": `async def move_u_prime():\n    await motor.run_for_degrees(port.A, ${deg + u1}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel})\n    await motor.run_to_relative_position(port.A, round(motor.relative_position(port.A) / 90) * 90, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel})\n`,
+        "U2": `async def move_u2():\n    await motor.run_for_degrees(port.A, ${dog + u2}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel})\n    await motor.run_to_relative_position(port.A, round(motor.relative_position(port.A) / 90) * 90, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel})\n`,
+
+        "L": `async def move_l():\n    await motor.run_for_degrees(port.C, -(${deg + l}), 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel})\n    await motor.run_to_relative_position(port.C, round(motor.relative_position(port.C) / 90) * 90, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel})\n`,
+        "L'": `async def move_l_prime():\n    await motor.run_for_degrees(port.C, ${deg + l1}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel})\n    await motor.run_to_relative_position(port.C, round(motor.relative_position(port.C) / 90) * 90, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel})\n`,
+        "L2": `async def move_l2():\n    await motor.run_for_degrees(port.C, ${dog + l2}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel})\n    await motor.run_to_relative_position(port.C, round(motor.relative_position(port.C) / 90) * 90, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel})\n`,
+
+        "F": `async def move_f():\n    await motor.run_for_degrees(port.E, -(${deg + f}), 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel})\n    await motor.run_to_relative_position(port.E, round(motor.relative_position(port.E) / 90) * 90, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel})\n`,
+        "F'": `async def move_f_prime():\n    await motor.run_for_degrees(port.E, ${deg + f1}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel})\n    await motor.run_to_relative_position(port.E, round(motor.relative_position(port.E) / 90) * 90, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel})\n`,
+        "F2": `async def move_f2():\n    await motor.run_for_degrees(port.E, ${dog + f2}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel})\n    await motor.run_to_relative_position(port.E, round(motor.relative_position(port.E) / 90) * 90, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel})\n`,
+    };
+
+    CLP_RIGHT = {
+        "R": `async def move_r():\n    await motor.run_for_degrees(port.B, -(${deg + r}), 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel})\n    await motor.run_to_relative_position(port.B, round(motor.relative_position(port.B) / 90) * 90, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel})\n`,
+        "R'": `async def move_r_prime():\n    await motor.run_for_degrees(port.B, ${deg + r1}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel})\n    await motor.run_to_relative_position(port.B, round(motor.relative_position(port.B) / 90) * 90, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel})\n`,
+        "R2": `async def move_r2():\n    await motor.run_for_degrees(port.B, ${dog + r2}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel})\n    await motor.run_to_relative_position(port.B, round(motor.relative_position(port.B) / 90) * 90, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel})\n`,
+
+        "B": `async def move_b():\n    await motor.run_for_degrees(port.F, -(${deg + b}), 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel})\n    await motor.run_to_relative_position(port.F, round(motor.relative_position(port.F) / 90) * 90, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel})\n`,
+        "B'": `async def move_b_prime():\n    await motor.run_for_degrees(port.F, ${deg + b1}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel})\n    await motor.run_to_relative_position(port.F, round(motor.relative_position(port.F) / 90) * 90, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel})\n`,
+        "B2": `async def move_b2():\n    await motor.run_for_degrees(port.F, ${dog + b2}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel})\n    await motor.run_to_relative_position(port.F, round(motor.relative_position(port.F) / 90) * 90, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel})\n`,
+
+        "D": `async def move_d():\n    await motor.run_for_degrees(port.D, -(${deg + d}), 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel})\n    await motor.run_to_relative_position(port.D, round(motor.relative_position(port.D) / 90) * 90, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel})\n`,
+        "D'": `async def move_d_prime():\n    await motor.run_for_degrees(port.D, ${deg + d1}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel})\n    await motor.run_to_relative_position(port.D, round(motor.relative_position(port.D) / 90) * 90, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel})\n`,
+        "D2": `async def move_d2():\n    await motor.run_for_degrees(port.D, ${dog + d2}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel})\n    await motor.run_to_relative_position(port.D, round(motor.relative_position(port.D) / 90) * 90, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel})\n`,
     };
 }
 
@@ -524,6 +556,7 @@ async function wiggle() {
     const cmd = `exec("import runloop\\nasync def _w():\\n    for p in [port.A, port.B, port.C, port.D, port.E, port.F]:\\n        try:\\n            await motor.run_for_degrees(p, 3, 500)\\n            await motor.run_for_degrees(p, -3, 500)\\n            pos = motor.relative_position(p)\\n            target = round(pos / 90) * 90\\n            await motor.run_to_relative_position(p, target, 500)\\n        except Exception as e:\\n            print(p, e)\\nrunloop.run(_w())")`;
     await Promise.all([sendLine(leftWriter, cmd), sendLine(rightWriter, cmd)]);
 }
+
 
 async function spikeCube(moves, sleeped) {
     regen()
