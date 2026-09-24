@@ -456,6 +456,7 @@ function sameSideFixer(move) {
 
 async function runMovement(move, sleep = 220, noCube = false) {
     if (!move || typeof move !== "string") return log(`Invalid move ${move}`);
+    let olddeg = deg
     deg = sameSideFixer(move)
     degCorrection(move);
     const cmd = CLP_LEFT[move] || CLP_RIGHT[move];
@@ -465,7 +466,6 @@ async function runMovement(move, sleep = 220, noCube = false) {
     if (noCube) return console.warn("Cube Not Connected");
     await sendLine(writer, cmd);
     sleepT(180)
-    /*motor.run_to_absolute_position(port.A*/
     let side = cmd.slice(36,37)
     await sendLine(writer, `motor.run_to_absolute_position(port.${side},  round((round(motor.absolute_position(port.A)) / 90) * 90), 1000, stop=motor.SMART_BRAKE, acceleration=10000, deceleration=9000);\n`)
     const mov = move.charAt(0);
@@ -473,7 +473,7 @@ async function runMovement(move, sleep = 220, noCube = false) {
     await sendLine(leftWriter, `light_matrix.write("${mov}",100);\n`);
     await sendLine(rightWriter, `light_matrix.write("${sym}",100);\n`);
     await sleepT(wait - 180);
-    deg = 95
+    deg = olddeg;
 }
 
 function degCorrection(move) {
