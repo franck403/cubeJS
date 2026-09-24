@@ -19,12 +19,12 @@ let scLenght = 20;
 let deg = 95;  // Moves x 1
 let dog = 180; // Moves x 2
 
-let intSolve = 300;
-let intScramble = 300;
+let intSolve = 500;
+let intScramble = 500;
 
 let intSolveFast = 170;
 
-let u = 4, f = 4, l = 4, r = 4, b = 5, d = 8;
+let u = 5, f = 5, l = 5, r = 5, b = 5, d = 8;
 let u1 = 5, f1 = 5, l1 = 5, r1 = 5, b1 = 6, d1 = 11;
 let u2 = 0, f2 = 0, l2 = 0, r2 = 0, b2 = 10, d2 = 8;
 
@@ -103,7 +103,6 @@ function regen() {
         "D'": `motor.run_to_absolute_position(port.D, round((round(motor.absolute_position(port.D)) / 90) * 90) + ${deg + d1}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel});\n`,
         "D2": `motor.run_to_absolute_position(port.D, round((round(motor.absolute_position(port.D)) / 90) * 90) + ${dog + d2}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel});\n`,
     };
-    return regen()
 }
 
 /*
@@ -461,15 +460,19 @@ async function runMovement(move, sleep = 220, noCube = false) {
     degCorrection(move);
     const cmd = CLP_LEFT[move] || CLP_RIGHT[move];
     const writer = CLP_LEFT[move] ? leftWriter : rightWriter;
-    const wait = (move.startsWith("B") || move.startsWith("D") ? sleep /* FAT MOTOR +40 before*/ : sleep) * (move.endsWith("2") ? 2 : 1);
+    const wait = (move.startsWith("B") || move.startsWith("D") ? sleep + 5 : sleep) * (move.endsWith("2") ? 2 : 1);
     if (!cmd || !writer) await sleepT(1);
     if (noCube) return console.warn("Cube Not Connected");
     await sendLine(writer, cmd);
+    sleepT(180)
+    /*motor.run_to_absolute_position(port.A*/
+    let side = cmd.slice(36,37)
+    await sendLine(writer, `motor.run_to_absolute_position(port.${side},  round((round(motor.absolute_position(port.A)) / 90) * 90), 1000, stop=motor.SMART_BRAKE, acceleration=10000, deceleration=9000);\n`)
     const mov = move.charAt(0);
     const sym = move.charAt(1);
-    await sendLine(leftWriter, `light_matrix.write("${mov}",100)`);
-    await sendLine(rightWriter, `light_matrix.write("${sym}",100)`);
-    await sleepT(wait);
+    await sendLine(leftWriter, `light_matrix.write("${mov}",100);\n`);
+    await sendLine(rightWriter, `light_matrix.write("${sym}",100);\n`);
+    await sleepT(wait - 180);
     deg = 95
 }
 
