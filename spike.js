@@ -67,13 +67,14 @@ let acel = 5000
 let decel = acel/2
 
 //p = port.A\\n await motor.run_to_relative_position(p, round(motor.relative_position(p) / 90) * 90, 500)
-
+// ((round(motor.absolute_position(port.A)) / 90) * 90)
+// motor.absolute_position(port.A)
 function regen() {
     CLP_LEFT = {
         // Face U
-        "U": `motor.run_to_absolute_position(port.A,  motor.absolute_position(port.A)- ${deg + u}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel});\n`,
-        "U'": `motor.run_to_absolute_position(port.A, motor.absolute_position(port.A)+ ${deg + u1}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel});\n`,
-        "U2": `motor.run_to_absolute_position(port.A, motor.absolute_position(port.A)+ ${dog + u2}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel});\n`,
+        "U": `motor.run_to_absolute_position(port.A,  ((round(motor.absolute_position(port.A)) / 90) * 90) - ${deg + u}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel});\n`,
+        "U'": `motor.run_to_absolute_position(port.A, ((round(motor.absolute_position(port.A)) / 90) * 90) + ${deg + u1}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel});\n`,
+        "U2": `motor.run_to_absolute_position(port.A, ((round(motor.absolute_position(port.A)) / 90) * 90) + ${dog + u2}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel});\n`,
 
         // Face L
         "L": `motor.run_to_absolute_position(port.C,  motor.absolute_position(port.C) - ${deg + l}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel});\n`,
