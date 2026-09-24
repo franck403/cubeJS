@@ -77,33 +77,35 @@ function regen() {
         "U2": `motor.run_to_absolute_position(port.A, ((round(motor.absolute_position(port.A)) / 90) * 90) + ${dog + u2}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel});\n`,
 
         // Face L
-        "L": `motor.run_to_absolute_position(port.C,  motor.absolute_position(port.C) - ${deg + l}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel});\n`,
-        "L'": `motor.run_to_absolute_position(port.C, motor.absolute_position(port.C) + ${deg + l1}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel});\n`,
-        "L2": `motor.run_to_absolute_position(port.C, motor.absolute_position(port.C) + ${dog + l2}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel});\n`,
+        "L": `motor.run_to_absolute_position(port.C,  ((round(motor.absolute_position(port.C)) / 90) * 90) - ${deg + l}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel});\n`,
+        "L'": `motor.run_to_absolute_position(port.C, ((round(motor.absolute_position(port.C)) / 90) * 90) + ${deg + l1}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel});\n`,
+        "L2": `motor.run_to_absolute_position(port.C, ((round(motor.absolute_position(port.C)) / 90) * 90) + ${dog + l2}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel});\n`,
 
         // Face F
-        "F": `motor.run_to_absolute_position(port.E,  motor.absolute_position(port.E)- ${deg + f}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel});\n`,
-        "F'": `motor.run_to_absolute_position(port.E, motor.absolute_position(port.E)+ ${deg + f1}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel});\n`,
-        "F2": `motor.run_to_absolute_position(port.E, motor.absolute_position(port.E)+ ${dog + f2}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel});\n`,
+        "F": `motor.run_to_absolute_position(port.E,  ((round(motor.absolute_position(port.E)) / 90) * 90) - ${deg + f}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel});\n`,
+        "F'": `motor.run_to_absolute_position(port.E, ((round(motor.absolute_position(port.E)) / 90) * 90) + ${deg + f1}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel});\n`,
+        "F2": `motor.run_to_absolute_position(port.E, ((round(motor.absolute_position(port.E)) / 90) * 90) + ${dog + f2}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel});\n`,
     };
 
     CLP_RIGHT = {
         // Face R
-        "R": `motor.run_to_absolute_position(port.B,  motor.absolute_position(port.B) - ${deg + r}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel});\n`,
-        "R'": `motor.run_to_absolute_position(port.B, motor.absolute_position(port.B)+ ${deg + r1}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel});\n`,
-        "R2": `motor.run_to_absolute_position(port.B, motor.absolute_position(port.B)+ ${dog + r2}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel});\n`,
+        "R": `motor.run_to_absolute_position(port.B,  ((round(motor.absolute_position(port.B)) / 90) * 90) - ${deg + r}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel});\n`,
+        "R'": `motor.run_to_absolute_position(port.B, ((round(motor.absolute_position(port.B)) / 90) * 90) + ${deg + r1}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel});\n`,
+        "R2": `motor.run_to_absolute_position(port.B, ((round(motor.absolute_position(port.B)) / 90) * 90) + ${dog + r2}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel});\n`,
 
         // Face B
-        "B": `motor.run_to_absolute_position(port.F,  motor.absolute_position(port.F) - ${deg + b}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel});\n`,
-        "B'": `motor.run_to_absolute_position(port.F, motor.absolute_position(port.F) + ${deg + b1}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel});\n`,
-        "B2": `motor.run_to_absolute_position(port.F, motor.absolute_position(port.F) + ${dog + b2}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel});\n`,
+        "B": `motor.run_to_absolute_position(port.F,  ((round(motor.absolute_position(port.F)) / 90) * 90) - ${deg + b}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel});\n`,
+        "B'": `motor.run_to_absolute_position(port.F, ((round(motor.absolute_position(port.F)) / 90) * 90) + ${deg + b1}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel});\n`,
+        "B2": `motor.run_to_absolute_position(port.F, ((round(motor.absolute_position(port.F)) / 90) * 90) + ${dog + b2}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel});\n`,
 
         // Face D
-        "D": `motor.run_to_absolute_position(port.D,  motor.absolute_position(port.D)- ${deg + d}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel});\n`,
-        "D'": `motor.run_to_absolute_position(port.D, motor.absolute_position(port.D)+ ${deg + d1}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel});\n`,
-        "D2": `motor.run_to_absolute_position(port.D, motor.absolute_position(port.D)+ ${dog + d2}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel});\n`,
+        "D": `motor.run_to_absolute_position(port.D,  ((round(motor.absolute_position(port.D)) / 90) * 90) - ${deg + d}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel});\n`,
+        "D'": `motor.run_to_absolute_position(port.D, ((round(motor.absolute_position(port.D)) / 90) * 90) + ${deg + d1}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel});\n`,
+        "D2": `motor.run_to_absolute_position(port.D, ((round(motor.absolute_position(port.D)) / 90) * 90) + ${dog + d2}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel});\n`,
     };
+    return regen()
 }
+
 /*
 function regen() {
     CLP_LEFT = {
