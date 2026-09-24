@@ -915,6 +915,7 @@ document.addEventListener('DOMContentLoaded', () => {
         "w": startCube,
         "s": spin,
         "f": fullscreen,
+        "x": wiggle,
         "backspace": scramble
     }
     document.body.addEventListener('keydown', (e) => {
