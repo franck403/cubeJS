@@ -24,9 +24,9 @@ let intScramble = 300;
 
 let intSolveFast = 170;
 
-let u = 0, f = 0, l = 0, r = 0, b = 0, d = 0;
-let u1 = 0, f1 = 0, l1 = 0, r1 = 0, b1 = 0, d1 = 0;
-let u2 = 0, f2 = 0, l2 = 0, r2 = 0, b2 = 0, d2 = 0;
+let u = 4, f = 4, l = 4, r = 4, b = 5, d = 8;
+let u1 = 5, f1 = 5, l1 = 5, r1 = 5, b1 = 6, d1 = 11;
+let u2 = 0, f2 = 0, l2 = 0, r2 = 0, b2 = 10, d2 = 8;
 
 let cb = 3; // back deg corr
 let cd = 3; // down deg corr
@@ -63,11 +63,11 @@ let CLP_RIGHT;
 
 // COMMANDS
 
-let decel = 1000
-let acel = 1000
+let acel = 5000
+let decel = acel/2
 
 //p = port.A\\n await motor.run_to_relative_position(p, round(motor.relative_position(p) / 90) * 90, 500)
-/*
+
 function regen() {
     CLP_LEFT = {
         // Face U
@@ -102,8 +102,8 @@ function regen() {
         "D'": `motor.run_to_absolute_position(port.D, motor.absolute_position(port.D)+ ${deg + d1}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel});\n`,
         "D2": `motor.run_to_absolute_position(port.D, motor.absolute_position(port.D)+ ${dog + d2}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel});\n`,
     };
-}*/
-
+}
+/*
 function regen() {
     CLP_LEFT = {
         "U": `async def move_u():\n    await motor.run_for_degrees(port.A, -(${deg + u}), 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel})\n    await motor.run_to_relative_position(port.A, round(motor.relative_position(port.A) / 90) * 90, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel})\n`,
@@ -132,7 +132,7 @@ function regen() {
         "D'": `async def move_d_prime():\n    await motor.run_for_degrees(port.D, ${deg + d1}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel})\n    await motor.run_to_relative_position(port.D, round(motor.relative_position(port.D) / 90) * 90, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel})\n`,
         "D2": `async def move_d2():\n    await motor.run_for_degrees(port.D, ${dog + d2}, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel})\n    await motor.run_to_relative_position(port.D, round(motor.relative_position(port.D) / 90) * 90, 1000, stop=motor.SMART_BRAKE, acceleration=${acel}, deceleration=${decel})\n`,
     };
-}
+}*/
 
 regen();
 
