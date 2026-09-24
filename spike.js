@@ -467,6 +467,7 @@ async function runMovement(move, sleep = 220, noCube = false) {
     await sendLine(writer, cmd);
     sleepT(180)
     let side = cmd.slice(36,37)
+    // maybe angle correction
     await sendLine(writer, `motor.run_to_absolute_position(port.${side},  round((round(motor.absolute_position(port.A)) / 90) * 90), 1000, stop=motor.SMART_BRAKE, acceleration=10000, deceleration=9000);\n`)
     const mov = move.charAt(0);
     const sym = move.charAt(1);
