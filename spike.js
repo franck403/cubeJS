@@ -707,7 +707,6 @@ function rvsMove(move) {
     }
 }
 
-
 // NAVBAR
 
 async function fullConnect() {
