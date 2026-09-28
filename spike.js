@@ -19,10 +19,10 @@ let scLenght = 20;
 let deg = 90;  // Moves x 1
 let dog = 180; // Moves x 2
 
-let intSolve = 500;
-let intScramble = 500;
+let intSolve = 400;
+let intScramble = 400;
 
-let intSolveFast = 170;
+let intSolveFast = 180;
 
 let u = 0, f = 0, l = 0, r = 0, b = 0, d = 0;
 let u1 = 0, f1 = 0, l1 = 0, r1 = 0, b1 = 0, d1 = 0;
@@ -713,10 +713,9 @@ function rvsMove(move) {
 async function fullConnect() {
     scSecure = false
     if (!ganCubePresent()) {
-        showFullscreenMessage('click')
-        connect()
-        showFullscreenMessage('click')
         await spike(true)
+        showFullscreenMessage('click') 
+        connect()
     } else {
         await spike(false)
     }
