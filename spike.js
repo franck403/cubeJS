@@ -63,7 +63,7 @@ let CLP_RIGHT;
 
 // COMMANDS
 
-let acel = 5000
+let acel = 100000
 let decel = acel/2
 
 //p = port.A\\n await motor.run_to_relative_position(p, round(motor.relative_position(p) / 90) * 90, 500)
