@@ -378,6 +378,8 @@ async function batteryRead(which, reader) {
                                 }
                                 // Add the appropriate battery class
                                 batteryIcon.classList.add(iconClass);
+                            } else if (element.startsWith('HELP')) {
+                                FASTEND()
                             }
                         }
                     });
@@ -431,8 +433,16 @@ async function updateBatteries() {
     ganB();
 }
 
+let FASTENDVAR = false
+function FASTEND() {
+    FASTENDVAR = true;
+}
+
 // MOVE STORE
 async function runMovement(move, sleep = 220, noCube = false) {
+    if (FASTENDVAR) {
+        return;
+    }
     if (!move || typeof move !== "string") return log(`Invalid move ${move}`);
     let olddeg = deg
     //degCorrection(move);
@@ -443,9 +453,11 @@ async function runMovement(move, sleep = 220, noCube = false) {
     if (!cmd || !writer) await sleepT(1);
     if (noCube) return console.warn("Cube Not Connected");
     await sendLine(writer, cmd);
-    await sleepT(200)
+    await sleepT(190)
     let side = cmd.slice(36,37)
     await sendLine(writer, `p = motor.relative_position(port.${side}); print(p); print(round(p / 90) * 90) ;motor.run_to_relative_position(port.${side}, (round(p / 90) * 90), 1000, stop=motor.SMART_BRAKE, acceleration=10000, deceleration=9000);\n`)
+    await sleeptT(20)
+    await sendLine(writer, `p = motor.relative_position(port.${side}); print(p); if abs(p - round(p / 90) * 90) > 3: print('HELP');\n`)
     const mov = move.charAt(0);
     const sym = move.charAt(1);
     await sendLine(leftWriter, `light_matrix.write("${mov}",100);\n`);
@@ -571,6 +583,9 @@ async function spikeCube(moves, sleeped) {
 
     for (let i = 0; i < moves.length; i++) {
         const m = moves[i], n = moves[i + 1];
+        if (FASTENDVAR) {
+            break
+        }
         if (isOpposite(m, n)) {
             await Promise.all([
                 runMovement(m, sleep, noCube),
@@ -616,6 +631,7 @@ function startTimer(startTime) {
         document.getElementById('timer').innerHTML = '<i class="fa-solid fa-clock"></i> : ' + elapsed + 'S';
         if (elapsed >= 20) {
             stopTimer(startTime, false)
+            FASTENDVAR = false;
             scSecure = false; // spam fix
         }         
     }, 1);
@@ -631,6 +647,7 @@ function stopTimer(startTime, post = true) {
         } catch { }
         clearInterval(timerInterval);
         timerInterval = null;
+        FASTENDVAR = false;
     }
 }
 
