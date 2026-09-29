@@ -16,17 +16,17 @@ let bcState = false;
 
 let scLenght = 20;
 
-let deg = 90;  // Moves x 1
+let deg = 95;  // Moves x 1
 let dog = 180; // Moves x 2
 
-let intSolve = 400;
-let intScramble = 400;
+let intSolve = 300;
+let intScramble = 300;
 
 let intSolveFast = 180;
 
-let u = 0, f = 0, l = 0, r = 0, b = 0, d = 0;
-let u1 = 0, f1 = 0, l1 = 0, r1 = 0, b1 = 0, d1 = 0;
-let u2 = 0, f2 = 0, l2 = 0, r2 = 0, b2 = 0, d2 = 0;
+let u = 0, f = 0, l = 0, r = 0, b = 6, d = 6;
+let u1 = 0, f1 = 0, l1 = 0, r1 = 0, b1 = 6, d1 = 6;
+let u2 = 0, f2 = 0, l2 = 0, r2 = 0, b2 = 6, d2 = 6;
 
 let cb = 0; // back deg corr
 let cd = 0; // down deg corr
@@ -430,34 +430,13 @@ async function updateBatteries() {
     await Promise.all([sendLine(leftWriter, clearDisplay), sendLine(rightWriter, clearDisplay)]);
     ganB();
 }
- 
-// MOVE
+
 // MOVE STORE
-let lastMove = {
-    u : '', 
-    l : '', 
-    f : '', 
-    r : '', 
-    b : '',
-    d : '',
-}
-
-function sameSideFixer(move) {
-    lm = lastMove[move.slice(0,1)]
-    lastMove[move.slice(0,1)] = move
-    if (lm == move) {
-        return 90
-    } else {
-        return 95
-    }
-    return deg
-}
-
 async function runMovement(move, sleep = 220, noCube = false) {
     if (!move || typeof move !== "string") return log(`Invalid move ${move}`);
     let olddeg = deg
-    deg = sameSideFixer(move)
-    degCorrection(move);
+    //degCorrection(move);
+    regen()
     const cmd = CLP_LEFT[move] || CLP_RIGHT[move];
     const writer = CLP_LEFT[move] ? leftWriter : rightWriter;
     const wait = (move.startsWith("B") || move.startsWith("D") ? sleep + 5 : sleep) * (move.endsWith("2") ? 2 : 1);
@@ -466,7 +445,7 @@ async function runMovement(move, sleep = 220, noCube = false) {
     await sendLine(writer, cmd);
     await sleepT(200)
     let side = cmd.slice(36,37)
-    await sendLine(writer, `motor.run_for_degrees(port.${side},5,1100);p = motor.relative_position(port.${side}); print(p); print(round(p / 90) * 90) ;motor.run_to_relative_position(port.${side}, (round(p / 90) * 90), 1000, stop=motor.SMART_BRAKE, acceleration=10000, deceleration=9000);\n`)
+    await sendLine(writer, `p = motor.relative_position(port.${side}); print(p); print(round(p / 90) * 90) ;motor.run_to_relative_position(port.${side}, (round(p / 90) * 90), 1000, stop=motor.SMART_BRAKE, acceleration=10000, deceleration=9000);\n`)
     const mov = move.charAt(0);
     const sym = move.charAt(1);
     await sendLine(leftWriter, `light_matrix.write("${mov}",100);\n`);
@@ -813,6 +792,27 @@ async function sexyMoves1() {
     console.log("Start Sexy Move 1")
     await spikeCube(sexyMove1, 200)
     console.log("End Sexy Move 1")
+}
+
+let LOPSX = false
+
+async function ToogleLN() {
+    if (LOPX) {
+        LOPX = false;
+    } else {
+        LOPX = true;
+    }
+}
+
+async function ln() {
+    LOPSX = true; 
+    while (LOPSX) {
+        await spikeCube(sexyMove1, 200)
+    }
+}
+
+async function ln() {
+    LOPSX = false;
 }
 
 async function sexyMoves2() {
