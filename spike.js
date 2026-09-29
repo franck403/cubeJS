@@ -28,8 +28,8 @@ let u = 0, f = 0, l = 0, r = 0, b = 0, d = 0;
 let u1 = 0, f1 = 0, l1 = 0, r1 = 0, b1 = 0, d1 = 0;
 let u2 = 0, f2 = 0, l2 = 0, r2 = 0, b2 = 0, d2 = 0;
 
-let cb = 3; // back deg corr
-let cd = 3; // down deg corr
+let cb = 0; // back deg corr
+let cd = 0; // down deg corr
 
 let lb = localStorage.lb || 0;
 let ld = localStorage.ld || 0;
