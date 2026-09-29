@@ -810,27 +810,45 @@ document.addEventListener("fullscreenchange", (e) => {
 // SEXY MOVES
 
 async function sexyMoves1() {
-    console.log("Start Sexy Move 1")
+    console.info("Start Sexy Move 1")
     await spikeCube(sexyMove1, 200)
-    console.log("End Sexy Move 1")
+    console.info("End Sexy Move 1")
+}
+let sm1l = false
+function sexyMoves1Loop() {
+    if (!sm1l) {
+        console.info('Start Sexy Move 1 Loop')
+        sm1l = true
+        sm1lf()
+    } else {
+        console.info('End Sexy Move 1 Loop')
+        sm1l = false
+    }
+}
+
+async function sm1lf() {
+    if (sm1l) {
+        await spikeCube(sexyMove1, 200);
+        setTimeout(sm1lf, 10)
+    }
 }
 
 async function sexyMoves2() {
-    console.log("Start Sexy Move 2")
+    console.info("Start Sexy Move 2")
     await spikeCube(sexyMove2, 200)
-    console.log("End Sexy Move 2")
+    console.info("End Sexy Move 2")
 }
 
 async function sexyMoves3() {
-    console.log("Start Sexy Move 3")
+    console.info("Start Sexy Move 3")
     await spikeCube(sexyMove3, 200)
-    console.log("End Sexy Move 3")
+    console.info("End Sexy Move 3")
 }
 
 async function cubecubes() {
-    console.log("Start CUBECUBE")
+    console.info("Start CUBECUBE")
     await spikeCube(cubecube, 200)
-    console.log("End CUBECUBE")
+    console.info("End CUBECUBE")
 }
 
 let still = [];
