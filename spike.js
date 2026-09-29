@@ -800,7 +800,7 @@ async function ToogleLN() {
     if (LOPX) {
         LOPX = false;
     } else {
-        LOPX = true;
+        ln()
     }
 }
 
