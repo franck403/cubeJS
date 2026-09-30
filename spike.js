@@ -472,7 +472,7 @@ function genPython(line) {
 }
 
 // MOVE STORE
-async function runMovement(move, sleep = 220, noCube = false) {
+async function runMovement(move, sleep = 220) {
     if (FASTENDVAR) {
         return;
     }
@@ -483,7 +483,6 @@ async function runMovement(move, sleep = 220, noCube = false) {
     const writer = CLP_LEFT[move] ? leftWriter : rightWriter;
     const wait = (move.startsWith("B") || move.startsWith("D") ? sleep + 5 : sleep) * (move.endsWith("2") ? 2 : 1);
     if (!cmd || !writer) await sleepT(1);
-    if (!noCube) return console.warn("Cube Not Connected");
     if (SpikeState.left && SpikeState.right && ganCubePresent()) {
         await sendLine(writer, cmd);
         await sleepT(10)
@@ -604,8 +603,6 @@ async function spikeCube(moves, sleeped) {
     console.info(moves)
     if (scSecure) return console.warn("NO SPAM !!!");
     scSecure = true;
-    const noCube = ganCubePresent();
-    if (!noCube) return console.warn("Cube Not Connected")
     const sleep = sleeped || window.sleeped;
     console.log(sleep)
 
@@ -630,11 +627,11 @@ async function spikeCube(moves, sleeped) {
         }
         if (isOpposite(m, n)) {
             await Promise.all([
-                runMovement(m, sleep, noCube),
-                runMovement(n, sleep /*+ 10*/, noCube)
+                runMovement(m, sleep),
+                runMovement(n, sleep /*+ 10*/)
             ]);
             i++;
-        } else await runMovement(m, sleep, noCube);
+        } else await runMovement(m, sleep);
     }
     stopTimer(start);
 
@@ -751,7 +748,7 @@ async function fullConnect() {
     scSecure = false
     if (!ganCubePresent()) {
         await spike(true)
-        showFullscreenMessage('click')
+        await showFullscreenMessage('click')
         connect()
     } else {
         await spike(false)
@@ -856,22 +853,32 @@ async function sexyMoves1() {
 let LOPSX = false
 
 async function ToogleLN() {
-    if (LOPX) {
-        LOPX = false;
+    if (LOPSX) {
+        LOPSX = false;
+        document.getElementById('stB').classList.add('da')
+        document.getElementById('stB').classList.remove('ds')
     } else {
+        LOPSX = true;
+        document.getElementById('stB').classList.remove('da')
+        document.getElementById('stB').classList.add('ds')
         ln()
     }
 }
 
 async function ln() {
-    LOPSX = true;
     while (LOPSX) {
-        await spikeCube(sexyMove1, 200)
+        if (!FASTENDVAR) {
+            await spikeCube(sexyMove1, 200)
+        } else {
+            stopLN()
+        }
     }
 }
 
-async function ln() {
+async function stopLN() {
     LOPSX = false;
+    document.getElementById('stB').classList.add('da')
+    document.getElementById('stB').classList.remove('ds')
 }
 
 async function sexyMoves2() {

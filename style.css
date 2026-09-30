@@ -282,6 +282,12 @@ body {
 .topBar button {background:#39ADAD;}
 .btn  {background:#114B5F;}
 .bat {background: #7A306C;color: #FF84E8;}
+.btn.ds {
+    background-color: red !important;
+}
+.btn.da {
+    background-color: #ffe98a !important;
+}
 
 .move {
     position:fixed;
