@@ -1,6 +1,6 @@
 importScripts(
-  'https://cdn.jsdelivr.net/gh/ldez/cubejs/lib/cube.js',
-  'https://cdn.jsdelivr.net/gh/ldez/cubejs/lib/solve.js',
+  './lc.js',
+  './ls.js',
   './localSolver.js'
 );
 
