@@ -391,6 +391,9 @@ async function batteryRead(which, reader) {
                         } else if (element.startsWith('HELP')) {
                             console.log('STOPING')
                             FASTEND()
+                        } else if (element.startsWith('PAUSE')) {
+                            console.log('Wiggling')
+                            FASTWIGGLE()
                         } else {
                             console.log(element)
                         }
@@ -457,6 +460,16 @@ function FASTEND() {
     }, 20000)
 }
 
+let FASTWIGGLEVAR = false;
+
+async function FASTWIGGLE() {
+    FASTWIGGLEVAR = true;
+    await wiggle()
+    await sendLine(writer, `p = motor.relative_position(port.${side}); print(p); print('HELP') if abs(p - round(p / 90) * 90) >= 5 else None\n`)
+    await sleepT(10)
+    FASTWIGGLEVAR = false;
+}
+
 function randomID() {
     const chars = 'abcdefghijklmnopqrstuvwxyz';
     let result = '';
@@ -479,6 +492,11 @@ async function runMovement(move, sleep = 220) {
     if (!move || typeof move !== "string") return log(`Invalid move ${move}`);
     //degCorrection(move);
     regen()
+    if (FASTWIGGLEVAR) {
+        while (FASTWIGGLEVAR) {
+            await sleepT(10)
+        }
+    }
     const cmd = CLP_LEFT[move] || CLP_RIGHT[move];
     const writer = CLP_LEFT[move] ? leftWriter : rightWriter;
     const wait = (move.startsWith("B") || move.startsWith("D") ? sleep + 5 : sleep) * (move.endsWith("2") ? 2 : 1);
@@ -494,7 +512,7 @@ async function runMovement(move, sleep = 220) {
         let side = cmd.slice(36, 37)
         await sendLine(writer, genPython(`p = motor.relative_position(port.${side}); print(p); c = round(p / 90) * 90; print("cor" + str(c)) ; motor.run_to_relative_position(port.${side}, c, 1000, stop=motor.SMART_COAST, acceleration=10000, deceleration=9000);\n`))
         await sleepT(50)
-        await sendLine(writer, `p = motor.relative_position(port.${side}); print(p); print('HELP') if abs(p - round(p / 90) * 90) >= 5 else None\n`)
+        await sendLine(writer, `p = motor.relative_position(port.${side}); print(p); print('PAUSE') if abs(p - round(p / 90) * 90) >= 5 else None\n`)
         await sleepT(wait - 200 > 30 ? wait - 200 : 30);
     } else if (!ganCubePresent()) {
         await sleepT(sleep)
