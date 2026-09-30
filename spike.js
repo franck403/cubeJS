@@ -481,15 +481,16 @@ async function runMovement(move, sleep = 220, noCube = false) {
     if (!noCube) return console.warn("Cube Not Connected");
     if (SpikeState.left && SpikeState.right && ganCubePresent()) {
         await sendLine(writer, cmd);
-        await sleepT(190)
-        let side = cmd.slice(36, 37)
-        await sendLine(writer, `p = motor.relative_position(port.${side}); print(p); c = round(p / 90) * 90); print("cor" + str(c)) ; motor.run_to_relative_position(port.${side}, c, 1000, stop=motor.SMART_COAST, acceleration=10000, deceleration=9000);\n`)
-        await sleepT(30)
-        await sendLine(writer, `p = motor.relative_position(port.${side}); print(p); print('HELP') if abs(p - round(p / 90) * 90) >= 5 else None\n`)
+        await sleepT(10)
         const mov = move.charAt(0);
         const sym = move.charAt(1);
         await sendLine(leftWriter, `light_matrix.write("${mov}",100);\n`);
         await sendLine(rightWriter, `light_matrix.write("${sym}",100);\n`);
+        await sleepT(190)
+        let side = cmd.slice(36, 37)
+        await sendLine(writer, `p = motor.relative_position(port.${side}); print(p); c = round(p / 90) * 90); print("cor" + str(c)) ; motor.run_to_relative_position(port.${side}, c, 1000, stop=motor.SMART_COAST, acceleration=10000, deceleration=9000);\n`)
+        await sleepT(50)
+        await sendLine(writer, `p = motor.relative_position(port.${side}); print(p); print('HELP') if abs(p - round(p / 90) * 90) >= 5 else None\n`)
         await sleepT(wait - 200 > 30 ? wait - 200 : 30);
     } else if (!ganCubePresent()) {
         await sleepT(sleep)
