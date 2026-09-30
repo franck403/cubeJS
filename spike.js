@@ -457,13 +457,18 @@ function FASTEND() {
     }, 20000)
 }
 
+function randomID() {
+    const chars = 'abcdefghijklmnopqrstuvwxyz';
+    let result = '';
+    for (let i = 0; i < 5; i++) {
+      result += chars[Math.floor(Math.random() * chars.length)];
+    }
+    return result;
+}
+
 function genPython(line) {
-    const cleaned = line
-        .split('\n')
-        .map(l => l.replace(/eruda:\d+/g, '').replace(/>>>|\.\.\./g, '').trim())
-        .filter(l => l.length > 0)
-        .join('; ');
-    return `async def main():\n    ${cleaned}\n\nmain()\n\n`;
+    const rdi = randomID()
+    return `exec("import runloop\\nasync def _${rdi}():\\n    ${line}\\nrunloop.run(_${rdi}())")`;
 }
 
 // MOVE STORE
@@ -488,7 +493,7 @@ async function runMovement(move, sleep = 220, noCube = false) {
         await sendLine(rightWriter, `light_matrix.write("${sym}",100);\n`);
         await sleepT(190)
         let side = cmd.slice(36, 37)
-        await sendLine(writer, `p = motor.relative_position(port.${side}); print(p); c = round(p / 90) * 90; print("cor" + str(c)) ; motor.run_to_relative_position(port.${side}, c, 1000, stop=motor.SMART_COAST, acceleration=10000, deceleration=9000);\n`)
+        await sendLine(writer, genPython(`p = motor.relative_position(port.${side}); print(p); c = round(p / 90) * 90; print("cor" + str(c)) ; motor.run_to_relative_position(port.${side}, c, 1000, stop=motor.SMART_COAST, acceleration=10000, deceleration=9000);\n`))
         await sleepT(50)
         await sendLine(writer, `p = motor.relative_position(port.${side}); print(p); print('HELP') if abs(p - round(p / 90) * 90) >= 5 else None\n`)
         await sleepT(wait - 200 > 30 ? wait - 200 : 30);
@@ -588,7 +593,7 @@ async function spikeMove(move) {
 }
 
 async function wiggle() {
-    const cmd = `exec("import runloop\\nasync def _w():\\n    for p in [port.A, port.B, port.C, port.D, port.E, port.F]:\\n        try:\\n            await motor.run_for_degrees(p, 3, 500)\\n            await motor.run_for_degrees(p, -3, 500)\\n            pos = motor.relative_position(p)\\n            target = round(pos / 90) * 90\\n            await motor.run_to_relative_position(p, target, 500)\\n        except Exception as e:\\n            print(p, e)\\nrunloop.run(_w())")`;
+    const cmd = `exec("import runloop\\nasync def _w():\\n    for p in [port.A, port.B, port.C, port.D, port.E, port.F]:\\n        try:\\n            await motor.run_for_degrees(p, 3, 500)\\n            await motor.run_for_degrees(p, -3, 500)\\n            pos = motor.relative_position(p)\\n            target = round(pos / 90) * 90\\n            await motor.run_to_relative_position(p, target, 500)\\n        except Exception as e:\\n            print(p, e)\\nrunloop.run(_w())")\n`;
     await Promise.all([sendLine(leftWriter, cmd), sendLine(rightWriter, cmd)]);
 }
 
