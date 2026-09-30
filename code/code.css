@@ -5,11 +5,11 @@ body {
   margin: 0;
   padding: 20px;
   background: #000;
-  --yellow: #fccd03;
-  --lyellow: #ffe98a;
+  --yellow: #130710;
+  --lyellow: #7a306c;
   --lblue: #39adad;
-  --blue: #114b5f;
-  --mauve: #7a306c;
+  --blue: #08161b;
+  --mauve: #180a15;
   --lmauve: #88457b;
 }
 
