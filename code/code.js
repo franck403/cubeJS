@@ -11,13 +11,14 @@ function createColumns() {
   if (!files) return;
   const container = document.getElementById('container');
   container.innerHTML = '';
-
+  let sda = 1;
   ['html', 'css', 'js'].forEach(type => {
     const column = document.createElement('div');
     column.className = 'scroll-column';
 
     const banner = document.createElement('div');
-    banner.className = 'banner';
+    banner.className = 'banner banner' + sda;
+    sda += 1
     const filenameSpan = document.createElement('span');
     filenameSpan.className = 'filename';
     filenameSpan.textContent = files[type][0].name;
@@ -52,10 +53,7 @@ function loadFiles() {
         fetch(file.path)
           .then(res => res.text())
           .then(code => ({ id: file.id, code }))
-          .catch(error => ({
-            id: file.id,
-            code: `<!-- Error: ${error.message} -->`
-          }))
+          .catch(error => (console.log('a')))
       );
     });
   });

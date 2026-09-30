@@ -1,51 +1,76 @@
+@import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
 body {
-  font-family: Arial, sans-serif;
+  font-family: "Poppins", sans-serif;
   margin: 0;
   padding: 20px;
   background: #000;
+  --yellow: #fccd03;
+  --lyellow: #ffe98a;
+  --lblue: #39adad;
+  --blue: #114b5f;
+  --mauve: #7a306c;
+  --lmauve: #88457b;
 }
+
 .container {
   display: flex;
   gap: 20px;
   justify-content: center;
 }
+
 .scroll-column {
-  width: 33vw;
-  height: 92vh;
+  height: calc(100vh - 40px);
   background: #1e1e1e;
   border-radius: 8px;
   overflow: hidden;
   position: relative;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
+
 .banner {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   height: 30px;
-  background: #2a2a2a;
-  color: #fff;
+  color: black;
   padding: 0 12px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   font-size: 12px;
   z-index: 10;
-  border-bottom: 1px solid #444;
 }
+
+.banner1 {
+  background-color: var(--lmauve);
+  color:white;
+}
+
+.banner2 {
+  background-color: var(--lblue);
+}
+
+.banner3 {
+  background-color: var(--lyellow);
+}
+
 .banner .filename {
   font-weight: bold;
 }
+
 .banner .filetype {
   color: #aaa;
   font-size: 11px;
 }
+
 .scroll-column pre {
   margin: 30px 0 0 0;
   padding: 10px;
   height: calc(100% - 30px);
 }
+
 .scroll-column code {
   position: absolute;
   width: 100%;
@@ -59,22 +84,37 @@ body {
 
 .scroll-column:nth-child(1) {
   width: 40vw;
+  background-color: var(--mauve);
 }
+
 .scroll-column:nth-child(2) {
   width: 25vw;
+  background-color: var(--blue);
 }
+
 .scroll-column:nth-child(3) {
   width: 35vw;
+  background-color: var(--yellow);
+}
+
+#css, #js {
+  color: black;
+  font-size: 1rem;
 }
 
 #html {
-  color: #B85F00;
+  color:white;
+  font-size: 1rem;
 }
 
-#css {
-  color: #005FCC;
+.language-html  {
+  background-color: var(--mauve);
 }
 
-#js {
-  color: #C7A600;
+.language-css {
+  background-color: var(--blue);
+}
+
+.language-js {
+  background-color: var(--yellow);
 }
