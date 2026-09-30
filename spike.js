@@ -478,7 +478,7 @@ async function runMovement(move, sleep = 220, noCube = false) {
         let side = cmd.slice(36,37)
         await sendLine(writer, genPython(`p = motor.relative_position(port.${side}); print(p); c = round(p / 90) * 90); print("cor" + str(c)) ; await motor.run_for_degrees(port${side},(5 if c > p else (-5 if c < p else None)),1000); await motor.run_to_relative_position(port.${side}, c, 1000, stop=motor.HOLD, acceleration=10000, deceleration=9000);`))
         await sleepT(20)
-        await sendLine(writer, `p = motor.relative_position(port.${side}); print(p); if abs(p - round(p / 90) * 90) > 3: print('HELP');\n`)
+        await sendLine(writer, `p = motor.relative_position(port.${side}); print(p); print('HELP') if abs(p - round(p / 90) * 90) > 3 else None\n`)        
         const mov = move.charAt(0);
         const sym = move.charAt(1);
         await sendLine(leftWriter, `light_matrix.write("${mov}",100);\n`);
