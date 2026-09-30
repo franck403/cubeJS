@@ -510,7 +510,7 @@ async function runMovement(move, sleep = 220) {
         await sendLine(rightWriter, `light_matrix.write("${sym}",100);\n`);
         await sleepT(190)
         let side = cmd.slice(36, 37)
-        await sendLine(writer, genPython(`p = motor.relative_position(port.${side}); print(p); c = round(p / 90) * 90; print("cor" + str(c)) ; motor.run_to_relative_position(port.${side}, c, 1000, stop=motor.SMART_COAST, acceleration=10000, deceleration=9000);\n`))
+        await sendLine(writer, `p = motor.relative_position(port.${side}); print(p); c = round(p / 90) * 90; print("cor" + str(c)) ; motor.run_to_relative_position(port.${side}, c, 1000, stop=motor.SMART_COAST, acceleration=10000, deceleration=9000);\n`)
         await sleepT(50)
         await sendLine(writer, `p = motor.relative_position(port.${side}); print(p); print('PAUSE') if abs(p - round(p / 90) * 90) >= 5 else None\n`)
         await sleepT(wait - 200 > 30 ? wait - 200 : 30);
