@@ -434,8 +434,15 @@ async function updateBatteries() {
 }
 
 let FASTENDVAR = false
+let FASTENDTIMEOUT = null;
 function FASTEND() {
     FASTENDVAR = true;
+    if (FASTENDTIMEOUT) {
+        clearTimeout(FASTENDTIMEOUT)
+    }
+    FASTENDTIMEOUT = setTimeout(()=> {
+        FASTENDVAR = false
+    },20000)
 }
 
 function genPython(line) {
