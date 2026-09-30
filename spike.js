@@ -455,7 +455,7 @@ async function runMovement(move, sleep = 220, noCube = false) {
     await sendLine(writer, cmd);
     await sleepT(190)
     let side = cmd.slice(36,37)
-    await sendLine(writer, `p = motor.relative_position(port.${side}); print(p); print(round(p / 90) * 90) ;motor.run_to_relative_position(port.${side}, (round(p / 90) * 90), 1000, stop=motor.SMART_BRAKE, acceleration=10000, deceleration=9000);\n`)
+    await sendLine(writer, `p = motor.relative_position(port.${side}); print(p); c = round(p / 90) * 90); print("cor" + str(c)) ;motor.run_for_degrees(port${side},(5 if c > p else (-5 if c < p else None)),1000); motor.run_to_relative_position(port.${side}, c, 1000, stop=motor.SMART_BRAKE, acceleration=10000, deceleration=9000);\n`)
     await sleeptT(20)
     await sendLine(writer, `p = motor.relative_position(port.${side}); print(p); if abs(p - round(p / 90) * 90) > 3: print('HELP');\n`)
     const mov = move.charAt(0);
