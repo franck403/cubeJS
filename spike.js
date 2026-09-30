@@ -236,6 +236,16 @@ async function openSpike(which) {
             writer = port.writable.getWriter();
         }
 
+        port.addEventListener('disconnect',()=> {
+            if (which === "left") {
+                leftPort = leftWriter = leftReader = null;
+                SpikeState.left = false;
+            } else {
+                rightPort = rightWriter = rightReader = null;
+                SpikeState.right = false;
+            }
+        })
+        
         await writer.write(new Uint8Array([3]));
 
         abortCtrl = new AbortController();
@@ -327,8 +337,7 @@ async function disconnectSpike(which) {
 
 function ganCubePresent() {
     var b = document.getElementById('cube-view').contentWindow;
-    //return b.document.getElementById("batteryLevel").value == "- n/a -"
-    return false
+    return b.document.getElementById("batteryLevel").value != "- n/a -"
 }
 
 function areBothSpikesConnected() {
@@ -456,7 +465,6 @@ async function runMovement(move, sleep = 220, noCube = false) {
         return;
     }
     if (!move || typeof move !== "string") return log(`Invalid move ${move}`);
-    let olddeg = deg
     //degCorrection(move);
     regen()
     const cmd = CLP_LEFT[move] || CLP_RIGHT[move];
@@ -464,18 +472,27 @@ async function runMovement(move, sleep = 220, noCube = false) {
     const wait = (move.startsWith("B") || move.startsWith("D") ? sleep + 5 : sleep) * (move.endsWith("2") ? 2 : 1);
     if (!cmd || !writer) await sleepT(1);
     if (noCube) return console.warn("Cube Not Connected");
-    await sendLine(writer, cmd);
-    await sleepT(190)
-    let side = cmd.slice(36,37)
-    await sendLine(writer, genPython(`p = motor.relative_position(port.${side}); print(p); c = round(p / 90) * 90); print("cor" + str(c)) ; await motor.run_for_degrees(port${side},(5 if c > p else (-5 if c < p else None)),1000); await motor.run_to_relative_position(port.${side}, c, 1000, stop=motor.HOLD, acceleration=10000, deceleration=9000);`))
-    await sleepT(20)
-    await sendLine(writer, `p = motor.relative_position(port.${side}); print(p); if abs(p - round(p / 90) * 90) > 3: print('HELP');\n`)
-    const mov = move.charAt(0);
-    const sym = move.charAt(1);
-    await sendLine(leftWriter, `light_matrix.write("${mov}",100);\n`);
-    await sendLine(rightWriter, `light_matrix.write("${sym}",100);\n`);
-    await sleepT(wait - 170 > 30 ? wait - 170 : 30 );
-    deg = olddeg;
+    if (SpikeState.left && SpikeState.right && ganCubePresent()) {
+        await sendLine(writer, cmd);
+        await sleepT(190)
+        let side = cmd.slice(36,37)
+        await sendLine(writer, genPython(`p = motor.relative_position(port.${side}); print(p); c = round(p / 90) * 90); print("cor" + str(c)) ; await motor.run_for_degrees(port${side},(5 if c > p else (-5 if c < p else None)),1000); await motor.run_to_relative_position(port.${side}, c, 1000, stop=motor.HOLD, acceleration=10000, deceleration=9000);`))
+        await sleepT(20)
+        await sendLine(writer, `p = motor.relative_position(port.${side}); print(p); if abs(p - round(p / 90) * 90) > 3: print('HELP');\n`)
+        const mov = move.charAt(0);
+        const sym = move.charAt(1);
+        await sendLine(leftWriter, `light_matrix.write("${mov}",100);\n`);
+        await sendLine(rightWriter, `light_matrix.write("${sym}",100);\n`);
+        await sleepT(wait - 170 > 30 ? wait - 170 : 30 );    
+    } else {
+        await sleepT(sleep)
+        if (move.endsWith('2')) {
+            window.mover(move.replace('2',''))
+            window.mover(move.replace('2',''))
+        } else {
+            window.mover(move)
+        }
+    }
 }
 
 function degCorrection(move) {
