@@ -481,7 +481,7 @@ function randomID() {
 
 function genPython(line) {
     const rdi = randomID()
-    return `exec("import runloop\\nasync def _${rdi}():\\n    ${line}\\nrunloop.run(_${rdi}())")`;
+    return `exec("import runloop\\nasync def _gem():\\n    ${line}\\nrunloop.run(_gem())")`;
 }
 
 // MOVE STORE
