@@ -19,8 +19,8 @@ let scLenght = 20;
 let deg = 95;  // Moves x 1
 let dog = 180; // Moves x 2
 
-let intSolve = 300;
-let intScramble = 300;
+let intSolve = 250;
+let intScramble = 250;
 
 let intSolveFast = 180;
 
@@ -38,7 +38,7 @@ var silence = true;
 
 let timerInterval = null;
 
-window.sleeped = 300;
+window.sleeped = intSolve;
 
 let nxt;
 let wrong;
@@ -485,9 +485,9 @@ function genPython(line) {
     return `exec("import runloop\\nasync def _gem():\\n    ${line}\\nrunloop.run(_gem())")`;
 }
 
-tm1 = 190
-tm2 = 10
-tm3 = 30
+tm1 = 5
+tm2 = 175
+tm3 = 25
 
 // MOVE STORE
 async function runMovement(move, sleep = 220) {
@@ -508,17 +508,17 @@ async function runMovement(move, sleep = 220) {
     if (!cmd || !writer) await sleepT(1);
     if (SpikeState.left && SpikeState.right && ganCubePresent()) {
         await sendLine(writer, cmd);
-        await sleepT(tm2)
+        await sleepT(tm1)
         const mov = move.charAt(0);
         const sym = move.charAt(1);
         await sendLine(leftWriter, `light_matrix.write("${mov}",100);\n`);
         await sendLine(rightWriter, `light_matrix.write("${sym}",100);\n`);
-        await sleepT(tm1)
+        await sleepT(tm2)
         let side = cmd.slice(36, 37)
         await sendLine(writer, `p = motor.relative_position(port.${side}); print(p); c = round(p / 90) * 90; print("cor" + str(c)) ; motor.run_to_relative_position(port.${side}, c, 1000, stop=motor.SMART_COAST, acceleration=10000, deceleration=9000);\n`)
         await sleepT(tm3)
-        await sendLine(writer, `p = motor.relative_position(port.${side}); print(p); print('HELP') if abs(p - round(p / 90) * 90) >= 5 else None\n`)
-        await sleepT(wait - 200 > 30 ? wait - 200 : 30);
+        await sendLine(writer, `p = motor.relative_position(port.${side}); print(p); print('HELP') if abs(p - round(p / 90) * 90) >= 6 else None\n`)
+        await sleepT(wait - tm1 - tm2 - tm3);
     } else if (!ganCubePresent()) {
         await sleepT(sleep)
         if (move.endsWith('2')) {
