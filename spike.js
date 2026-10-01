@@ -393,7 +393,8 @@ async function batteryRead(which, reader) {
                             FASTEND()
                         } else if (element.startsWith('PAUSE')) {
                             console.log('Wiggling')
-                            FASTWIGGLE()
+                            side = which == 'left' ? leftWriter : rightWriter
+                            FASTWIGGLE(side)
                         } else {
                             console.log(element)
                         }
@@ -462,7 +463,7 @@ function FASTEND() {
 
 let FASTWIGGLEVAR = false;
 
-async function FASTWIGGLE() {
+async function FASTWIGGLE(writer) {
     FASTWIGGLEVAR = true;
     await wiggle()
     await sendLine(writer, `p = motor.relative_position(port.${side}); print(p); print('HELP') if abs(p - round(p / 90) * 90) >= 5 else None\n`)
