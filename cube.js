@@ -18,6 +18,7 @@ setTimeout(()=> {
     if (loader) loader.remove()
   } catch {}
 },10000)
+
 const worker = new Worker('Corker.js');
 
 worker.onmessage = function (e) {

@@ -56,7 +56,18 @@ async function move(mov) {
         clockwise = !clockwise;
     }
     await window.rotateFace(face, clockwise);
+    saveCUBE()
 }
+
+function saveCUBE() {
+    localStorage.setItem('cubeState', cube.asString());
+}
+
+function recoverCUBE() {
+    
+}
+
+
 window.mover = move;
 
 var ifr = document.getElementById('cube-view')
