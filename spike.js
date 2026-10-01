@@ -485,9 +485,9 @@ function genPython(line) {
     return `exec("import runloop\\nasync def _gem():\\n    ${line}\\nrunloop.run(_gem())")`;
 }
 
-tm1 = 5
-tm2 = 175
-tm3 = 25
+let tm1 = 5
+let tm2 = 175
+let tm3 = 25
 
 // MOVE STORE
 async function runMovement(move, sleep = 220) {
