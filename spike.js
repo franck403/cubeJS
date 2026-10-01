@@ -16,7 +16,7 @@ let bcState = false;
 
 let scLenght = 20;
 
-let deg = 95;  // Moves x 1
+let deg = 90;  // Moves x 1
 let dog = 180; // Moves x 2
 
 let intSolve = 250;
@@ -64,7 +64,7 @@ let CLP_RIGHT;
 // COMMANDS
 
 let acel = 100000
-let decel = acel / 2
+let decel = acel
 
 //p = port.A\\n await motor.run_to_relative_position(p, round(motor.relative_position(p) / 90) * 90, 500)
 // motor.absolute_position(port.A)
@@ -485,9 +485,9 @@ function genPython(line) {
     return `exec("import runloop\\nasync def _gem():\\n    ${line}\\nrunloop.run(_gem())")`;
 }
 
-let tm1 = 5
-let tm2 = 175
-let tm3 = 25
+let tm2 = 180
+let tm3 = 20
+let d4 = 15
 
 // MOVE STORE
 async function runMovement(move, sleep = 220) {
@@ -508,17 +508,20 @@ async function runMovement(move, sleep = 220) {
     if (!cmd || !writer) await sleepT(1);
     if (SpikeState.left && SpikeState.right && ganCubePresent()) {
         await sendLine(writer, cmd);
-        await sleepT(tm1)
         const mov = move.charAt(0);
         const sym = move.charAt(1);
         await sendLine(leftWriter, `light_matrix.write("${mov}",100);\n`);
         await sendLine(rightWriter, `light_matrix.write("${sym}",100);\n`);
         await sleepT(tm2)
         let side = cmd.slice(36, 37)
-        await sendLine(writer, `p = motor.relative_position(port.${side}); print(p); c = round(p / 90) * 90; print("cor" + str(c)) ; motor.run_to_relative_position(port.${side}, c, 1000, stop=motor.SMART_COAST, acceleration=10000, deceleration=9000);\n`)
-        await sleepT(tm3)
-        await sendLine(writer, `p = motor.relative_position(port.${side}); print(p); print('HELP') if abs(p - round(p / 90) * 90) >= 6 else None\n`)
-        await sleepT(wait - tm1 - tm2 - tm3);
+        if (wait >= 220) {
+            await sendLine(writer, `p = motor.relative_position(port.${side}); print(p); c = round(p / 90) * 90; print("cor" + str(c)) ; motor.run_to_relative_position(port.${side}, c, 1000, stop=motor.HOLD, acceleration=10000, deceleration=9000);\n`)
+            await sleepT(tm3)    
+        } else {
+            sleepT(1)
+        }
+        await sendLine(writer, `p = motor.absolute_position(port.${side}); print(p); print('HELP') if abs(p - round(p / 90) * 90) > ${d4} else None\n`)
+        await sleepT(wait - tm2 - tm3);
     } else if (!ganCubePresent()) {
         await sleepT(sleep)
         if (move.endsWith('2')) {
@@ -810,13 +813,9 @@ async function startCube() {
 async function idiot() {
     if (window.sleeped != intSolveFast) {
         window.sleeped = intSolveFast
-        decel = 10000
-        acel = 5000000
         document.body.classList.add('fast')
     } else {
         window.sleeped = intSolve
-        decel = 1000
-        acel = 1000000
         document.body.classList.remove('fast')
     }
 }
