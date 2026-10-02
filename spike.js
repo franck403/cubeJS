@@ -281,7 +281,7 @@ async function openSpike(which) {
 async function SerialL(readable) {
     while (true) {
         const { value, done } = await reader.read();
-        console.log(value);
+        console.debug(`RX: ${value}`);
     }
 }
 
@@ -291,7 +291,7 @@ async function spike(cubeed) {
 }
 
 async function sendLine(writer, text) {
-    console.debug(text);
+    console.debug(`TX: ${text}`);
     if (!writer) return;
     const normalized = text.replace(/\r?\n/g, '\r\n');
     const encoder = new TextEncoder();
@@ -352,7 +352,7 @@ async function batteryRead(which, reader) {
         try {
             while (true) {
                 const { value, done } = await reader.read();
-                console.log(value)
+                if (value == "" || value == " ") return;
                 if (done) break;
                 if (value) {
                     value.split('\n').forEach(element => {
@@ -389,14 +389,22 @@ async function batteryRead(which, reader) {
                                 batteryIcon.classList.add(iconClass);
                             }
                         } else if (element.startsWith('HELP')) {
-                            console.log('STOPING')
+                            console.warn('STOPING')
                             FASTEND()
                         } else if (element.startsWith('PAUSE')) {
-                            console.log('Wiggling')
+                            console.info('Wiggling')
                             side = which == 'left' ? leftWriter : rightWriter
                             FASTWIGGLE(side)
+                        } else if (element.startsWith('cl')) {
+                            CubeLoaded = Number(element.replace('cl','')) > 0 ? true : false
+                            if (CubeLoaded) {
+                                console.info(`Cube in: true`)
+                            } else {
+                                console.warn(`Cube in: false`)
+                            }
+                            //updateLoadedState()
                         } else {
-                            console.log(element)
+                            console.debug(`RX: ${element}`)
                         }
                     });
                 }
@@ -406,6 +414,8 @@ async function batteryRead(which, reader) {
         }
     })();
 }
+
+let CubeLoaded = 0
 
 function batteryPercentage(voltage, minVolt, maxVolt) {
     if (voltage <= minVolt) return 0;
@@ -622,6 +632,11 @@ async function wiggle() {
     await Promise.all([sendLine(leftWriter, cmd), sendLine(rightWriter, cmd)]);
 }
 
+setInterval(()=> {
+    if (!scSecure && SpikeState.left && SpikeState.right) {
+        sendLine(leftWriter, "import color_sensor;import color; print('cl' + str(color_sensor.color(port.B)))")
+    }
+},2000)
 
 async function spikeCube(moves, sleeped) {
     regen()

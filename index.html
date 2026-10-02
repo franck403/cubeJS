@@ -12,7 +12,7 @@
   <script>
     eruda.init();
     let debug = false;
-    debug = new URLSearchParams(window.location.search).get('debug') === 'true';
+    debug = new URLSearchParams(window.location.search).get('debug') == 'true';
     window.debug = debug;
     if (debug) {eruda.show()};
     console.debug = (...args) => {
@@ -30,8 +30,11 @@
   <script src="keyboard.js"></script>
 
   <!-- Load Three.js and OrbitControls using classic script tags for compatibility -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script src="orbit.js"></script>
+  <script src="lib/three.min.js"></script>
+  <script src="lib/OBJLoader.js"></script>
+  <script src="lib/MTLLoader.js"></script>
+  <script src="lib/STLLoader.js"></script>
+  <script src="lib/orbit.js"></script>
 
   <!-- load visual.js FIRST so drawCube is defined -->
   <script src="visual.js"></script>
