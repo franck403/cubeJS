@@ -1,369 +1,547 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Multi-Screen Presentation Manager</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-    </style>
-</head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Display Sync | Robot Gan Spike </title>
+<link rel="icon" type="image/png" href="icon.png" />
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
 
-    <header class="border-b border-slate-800 bg-slate-900/60 backdrop-blur-md sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                    </svg>
-                </div>
-                <div>
-                    <h1 class="font-bold text-lg tracking-tight">DisplaySync Manager</h1>
-                    <p class="text-xs text-slate-400">Multi-Display Presentation Controller</p>
-                </div>
-            </div>
-            <div class="flex items-center space-x-3">
-                <button onclick="detectScreens()" class="inline-flex items-center space-x-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium px-4 py-2 rounded-xl transition shadow-lg shadow-indigo-600/20">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                    </svg>
-                    <span>Detect Screens</span>
-                </button>
-            </div>
+:root {
+    --yellow: #130710;
+    --lyellow: #7a306c;
+    --lblue: #39adad;
+    --blue: #08161b;
+    --mauve: #180a15;
+    --lmauve: #88457b;
+
+    --ink: #f4eaf2;
+    --ink-2: #b99eb4;
+    --ink-3: #7f6a7b;
+    --line: #2c1428;
+    --ok: #4fd49a;
+    --err: #ee5f7d;
+
+    --s1: #39adad;
+    --s2: #88457b;
+    --s3: #8fd6cf;
+    --s4: #c46fb3;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { min-height: 100%; }
+body {
+    font-family: "Poppins", sans-serif;
+    margin: 0;
+    padding: 20px;
+    background: #000;
+    color: var(--ink);
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+}
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--lblue); outline-offset: 2px; }
+
+.app { max-width: 1180px; margin: 0 auto; padding: 8px 4px 40px; display: flex; flex-direction: column; gap: 22px; }
+
+/* Top bar */
+.top { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.top h1 { font-size: 30px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; }
+.top p { color: var(--ink-2); margin-top: 4px; font-weight: 300; }
+.top-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+.btn {
+    border: 0; cursor: pointer; border-radius: 10px; padding: 10px 18px;
+    font-weight: 600; font-size: 14px; background: var(--lblue); color: var(--blue);
+    transition: transform .12s ease, filter .12s ease, background .12s ease;
+}
+.btn:hover { filter: brightness(1.12); }
+.btn:active { transform: translateY(1px); }
+.btn.ghost { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--lmauve); }
+.btn.ghost:hover { background: rgba(136,69,123,.18); filter: none; }
+.btn.danger-ghost { background: transparent; color: var(--err); box-shadow: inset 0 0 0 1.5px rgba(238,95,125,.55); }
+.btn.danger-ghost:hover { background: rgba(238,95,125,.1); filter: none; }
+
+/* Stage (display map) */
+.stage { background: var(--blue); border: 1px solid #12303a; border-radius: 18px; padding: 18px 20px 16px; }
+.stage-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.stage-head h2 { font-size: 15px; font-weight: 600; }
+.stage-head span { font-size: 13px; color: var(--lblue); font-weight: 500; }
+.map-wrap { height: 230px; display: flex; align-items: center; justify-content: center; margin-top: 10px; }
+.map { position: relative; }
+.mon {
+    position: absolute; background: var(--mauve); border: 2px solid var(--lyellow);
+    border-radius: 8px; padding: 8px 10px; overflow: hidden;
+    display: flex; flex-direction: column; justify-content: space-between;
+}
+.mon.primary { border-color: var(--lblue); }
+.mon-name { font-weight: 600; font-size: 13px; }
+.mon-meta { font-size: 11px; color: var(--ink-2); font-weight: 300; }
+.mon-chips { display: flex; gap: 5px; flex-wrap: wrap; }
+.chip {
+    width: 22px; height: 22px; border-radius: 6px; font-size: 12px; font-weight: 700;
+    display: grid; place-items: center; border: 2px solid transparent;
+}
+.chip.off { background: transparent !important; border-color: currentColor; }
+.stage-note { margin-top: 10px; font-size: 13px; color: var(--ink-2); min-height: 20px; font-weight: 300; }
+.stage-note b { color: var(--ink); font-weight: 600; }
+
+/* Slots */
+.slots-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+.slots-head h2 { font-size: 18px; font-weight: 600; }
+.slots-head p { color: var(--ink-2); font-size: 13px; font-weight: 300; }
+
+.slot {
+    background: var(--yellow); border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px;
+    display: grid; align-items: end; gap: 12px;
+    grid-template-columns: 44px minmax(220px, 1fr) 190px 150px auto;
+}
+.slot-id {
+    width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center;
+    font-weight: 700; font-size: 20px; position: relative;
+}
+.slot-id::after {
+    content: ""; position: absolute; right: -4px; top: -4px; width: 12px; height: 12px;
+    border-radius: 50%; background: var(--ink-3); border: 2px solid var(--yellow);
+}
+.slot.active .slot-id::after { background: var(--ok); }
+.field { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.field label { font-size: 12px; font-weight: 500; color: var(--ink-2); }
+.field input, .field select {
+    width: 100%; height: 44px; padding: 0 12px; background: var(--mauve);
+    border: 1.5px solid var(--line); border-radius: 10px; transition: border-color .12s, background .12s;
+}
+.field input::placeholder { color: var(--ink-3); }
+.field select option { background: var(--mauve); color: var(--ink); }
+.field input:hover, .field select:hover { border-color: var(--lyellow); }
+.field input:focus, .field select:focus { border-color: var(--lblue); outline: none; }
+.slot-actions { display: flex; gap: 8px; }
+.slot-actions .btn { height: 44px; padding: 0 14px; }
+
+/* Toasts */
+#toasts { position: fixed; left: 20px; bottom: 20px; display: flex; flex-direction: column; gap: 8px; z-index: 50; pointer-events: none; }
+.toast {
+    background: var(--mauve); color: var(--ink); padding: 11px 16px; border-radius: 10px; font-size: 14px; font-weight: 500;
+    border: 1px solid var(--lyellow); border-left: 4px solid var(--lblue);
+    box-shadow: 0 8px 24px rgba(0,0,0,.6); animation: tin .18s ease-out;
+}
+.toast.error { border-left-color: var(--err); }
+.toast.ok { border-left-color: var(--ok); }
+@keyframes tin { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+.foot { color: var(--ink-3); font-size: 12.5px; font-weight: 300; }
+
+@media (max-width: 960px) {
+    .slot { grid-template-columns: 44px 1fr; }
+    .slot .field, .slot .slot-actions { grid-column: 1 / -1; }
+    .slot-id { grid-row: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+    <header class="top">
+        <div>
+            <h1>Display Sync</h1>
+            <p>Send each URL to its own screen.</p>
+        </div>
+        <div class="top-actions">
+            <button class="btn ghost" id="btn-detect">Detect displays</button>
+            <button class="btn" id="btn-launch-all">Launch all</button>
+            <button class="btn danger-ghost" id="btn-close-all">Close all</button>
         </div>
     </header>
 
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full space-y-8">
-        
-        <section class="bg-slate-900/40 border border-slate-800/80 rounded-2xl p-6 shadow-xl backdrop-blur-sm">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-                <div>
-                    <h2 class="text-lg font-semibold text-white">Detected Displays</h2>
-                    <p class="text-sm text-slate-400">Displays available for window placement via Window Management API</p>
-                </div>
-                <div id="screen-count-badge" class="px-3 py-1 bg-slate-800 text-indigo-400 border border-slate-700/50 rounded-full text-xs font-semibold">
-                    Not scanned yet
-                </div>
-            </div>
-            <div id="screens-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div class="border border-dashed border-slate-800 rounded-xl p-5 text-center text-slate-500 text-sm flex flex-col items-center justify-center h-32">
-                    <svg class="w-8 h-8 mb-2 opacity-50" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"></path>
-                    </svg>
-                    Click "Detect Screens" to scan displays
-                </div>
-            </div>
-        </section>
-
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div>
-                <h2 class="text-xl font-bold tracking-tight text-white">Screen Configurations (Up to 4)</h2>
-                <p class="text-sm text-slate-400">Configure URL targets and assign destination monitors for your presentations.</p>
-            </div>
-            <div class="flex items-center space-x-3 w-full sm:w-auto">
-                <button onclick="launchAll()" class="flex-1 sm:flex-none px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium rounded-xl transition shadow-lg shadow-emerald-600/20 flex items-center justify-center space-x-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                    <span>Launch All</span>
-                </button>
-                <button onclick="closeAll()" class="flex-1 sm:flex-none px-4 py-2 bg-rose-600/20 border border-rose-500/30 hover:bg-rose-600/30 text-rose-300 text-sm font-medium rounded-xl transition flex items-center justify-center space-x-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                    <span>Close All</span>
-                </button>
-            </div>
+    <section class="stage" aria-labelledby="stage-title">
+        <div class="stage-head">
+            <h2 id="stage-title">Your displays</h2>
+            <span id="stage-count">Not scanned yet</span>
         </div>
+        <div class="map-wrap"><div class="map" id="map"></div></div>
+        <div class="stage-note" id="stage-note"></div>
+    </section>
 
-        <div id="slots-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- Slot 1 -->
-            <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 flex flex-col justify-between space-y-4 shadow-xl relative overflow-hidden group">
-                <div class="absolute top-0 left-0 w-1 h-full bg-indigo-500"></div>
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-8 h-8 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 font-bold text-sm">1</div>
-                        <h3 class="font-semibold text-white">Presentation Slot 1</h3>
-                    </div>
-                    <span id="status-1" class="px-2.5 py-1 bg-slate-800 text-slate-400 text-xs rounded-full font-medium border border-slate-700/50">Inactive</span>
-                </div>
-                <div class="space-y-3">
-                    <div>
-                        <label class="block text-xs font-medium text-slate-400 mb-1">Target URL</label>
-                        <input type="url" id="url-1" placeholder="https://example.com/slide1" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-200 placeholder-slate-600 focus:outline-none focus:border-indigo-500 transition">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium text-slate-400 mb-1">Target Display</label>
-                        <select id="screen-select-1" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-indigo-500 transition">
-                            <option value="auto">Auto / Primary Display</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="flex items-center space-x-2 pt-2 border-t border-slate-800/60">
-                    <button onclick="launchScreen(1)" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold py-2.5 rounded-xl transition shadow-md shadow-indigo-600/20">Launch Window</button>
-                    <button onclick="closeScreen(1)" class="px-4 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold py-2.5 rounded-xl transition">Close</button>
-                </div>
-            </div>
-
-            <!-- Slot 2 -->
-            <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 flex flex-col justify-between space-y-4 shadow-xl relative overflow-hidden group">
-                <div class="absolute top-0 left-0 w-1 h-full bg-violet-500"></div>
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-8 h-8 rounded-lg bg-violet-500/10 border border-violet-500/20 flex items-center justify-center text-violet-400 font-bold text-sm">2</div>
-                        <h3 class="font-semibold text-white">Presentation Slot 2</h3>
-                    </div>
-                    <span id="status-2" class="px-2.5 py-1 bg-slate-800 text-slate-400 text-xs rounded-full font-medium border border-slate-700/50">Inactive</span>
-                </div>
-                <div class="space-y-3">
-                    <div>
-                        <label class="block text-xs font-medium text-slate-400 mb-1">Target URL</label>
-                        <input type="url" id="url-2" placeholder="https://example.com/slide2" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-200 placeholder-slate-600 focus:outline-none focus:border-violet-500 transition">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium text-slate-400 mb-1">Target Display</label>
-                        <select id="screen-select-2" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-violet-500 transition">
-                            <option value="auto">Auto / Primary Display</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="flex items-center space-x-2 pt-2 border-t border-slate-800/60">
-                    <button onclick="launchScreen(2)" class="flex-1 bg-violet-600 hover:bg-violet-500 text-white text-xs font-semibold py-2.5 rounded-xl transition shadow-md shadow-violet-600/20">Launch Window</button>
-                    <button onclick="closeScreen(2)" class="px-4 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold py-2.5 rounded-xl transition">Close</button>
-                </div>
-            </div>
-
-            <!-- Slot 3 -->
-            <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 flex flex-col justify-between space-y-4 shadow-xl relative overflow-hidden group">
-                <div class="absolute top-0 left-0 w-1 h-full bg-sky-500"></div>
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-8 h-8 rounded-lg bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400 font-bold text-sm">3</div>
-                        <h3 class="font-semibold text-white">Presentation Slot 3</h3>
-                    </div>
-                    <span id="status-3" class="px-2.5 py-1 bg-slate-800 text-slate-400 text-xs rounded-full font-medium border border-slate-700/50">Inactive</span>
-                </div>
-                <div class="space-y-3">
-                    <div>
-                        <label class="block text-xs font-medium text-slate-400 mb-1">Target URL</label>
-                        <input type="url" id="url-3" placeholder="https://example.com/slide3" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-200 placeholder-slate-600 focus:outline-none focus:border-sky-500 transition">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium text-slate-400 mb-1">Target Display</label>
-                        <select id="screen-select-3" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-sky-500 transition">
-                            <option value="auto">Auto / Primary Display</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="flex items-center space-x-2 pt-2 border-t border-slate-800/60">
-                    <button onclick="launchScreen(3)" class="flex-1 bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold py-2.5 rounded-xl transition shadow-md shadow-sky-600/20">Launch Window</button>
-                    <button onclick="closeScreen(3)" class="px-4 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold py-2.5 rounded-xl transition">Close</button>
-                </div>
-            </div>
-
-            <!-- Slot 4 -->
-            <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 flex flex-col justify-between space-y-4 shadow-xl relative overflow-hidden group">
-                <div class="absolute top-0 left-0 w-1 h-full bg-teal-500"></div>
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-8 h-8 rounded-lg bg-teal-500/10 border border-teal-500/20 flex items-center justify-center text-teal-400 font-bold text-sm">4</div>
-                        <h3 class="font-semibold text-white">Presentation Slot 4</h3>
-                    </div>
-                    <span id="status-4" class="px-2.5 py-1 bg-slate-800 text-slate-400 text-xs rounded-full font-medium border border-slate-700/50">Inactive</span>
-                </div>
-                <div class="space-y-3">
-                    <div>
-                        <label class="block text-xs font-medium text-slate-400 mb-1">Target URL</label>
-                        <input type="url" id="url-4" placeholder="https://example.com/slide4" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-200 placeholder-slate-600 focus:outline-none focus:border-teal-500 transition">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium text-slate-400 mb-1">Target Display</label>
-                        <select id="screen-select-4" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-teal-500 transition">
-                            <option value="auto">Auto / Primary Display</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="flex items-center space-x-2 pt-2 border-t border-slate-800/60">
-                    <button onclick="launchScreen(4)" class="flex-1 bg-teal-600 hover:bg-teal-500 text-white text-xs font-semibold py-2.5 rounded-xl transition shadow-md shadow-teal-600/20">Launch Window</button>
-                    <button onclick="closeScreen(4)" class="px-4 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold py-2.5 rounded-xl transition">Close</button>
-                </div>
-            </div>
+    <section aria-labelledby="slots-title">
+        <div class="slots-head">
+            <h2 id="slots-title">Windows</h2>
+            <p>Outlined square = ready, filled = open.</p>
         </div>
+        <div id="slots"></div>
+    </section>
 
-    </main>
+    <p class="foot">Needs Chrome or Edge with window management permission. Allow pop-ups for this page so Launch all can open every window. In Fullscreen mode, click once inside the new window to go fullscreen (browsers require a click). Esc leaves fullscreen, click again to re-enter. Sites that refuse to be embedded won't show in Fullscreen mode, use Normal for those.</p>
+</div>
 
-    <div id="notifications" class="fixed bottom-5 right-5 z-50 flex flex-col space-y-2 pointer-events-none"></div>
+<div id="toasts" role="status" aria-live="polite"></div>
 
-    <footer class="border-t border-slate-900 py-6 mt-12 bg-slate-950 text-center text-xs text-slate-500">
-        <p>Requires Chrome 100+ with Window Management API permission enabled in browser settings.</p>
-    </footer>
+<script>
+(() => {
+    const IDS = [1, 2, 3, 4];
+    const COLORS = { 1: 'var(--s1)', 2: 'var(--s2)', 3: 'var(--s3)', 4: 'var(--s4)' };
+    const ON = { 1: 'var(--blue)', 2: '#fff', 3: 'var(--blue)', 4: 'var(--blue)' }; // text color on each slot color
+    const STORE_KEY = 'displaysync.v3';
+    const MODES = [
+        { v: 'normal',     label: 'Normal' },
+        { v: 'fullscreen', label: 'Fullscreen' }
+    ];
 
-    <script>
-        let screenDetails = null;
-        const openedWindows = {};
+    let screenDetails = null;
+    const wins = {};
+    let cfg = loadCfg();
 
-        function showNotification(message, type = 'info') {
-            const container = document.getElementById('notifications');
-            const el = document.createElement('div');
-            el.className = `pointer-events-auto px-4 py-3 rounded-xl shadow-2xl text-white text-xs font-medium transition-all transform translate-y-2 opacity-0 flex items-center space-x-3 border ${type === 'error' ? 'bg-rose-950/90 border-rose-500/50 text-rose-200' : 'bg-slate-900/90 border-slate-700 text-slate-200 backdrop-blur-md'}`;
-            el.innerHTML = `<span>${message}</span>`;
-            container.appendChild(el);
-            setTimeout(() => { el.classList.remove('translate-y-2', 'opacity-0'); }, 10);
-            setTimeout(() => {
-                el.classList.add('translate-y-2', 'opacity-0');
-                setTimeout(() => el.remove(), 300);
-            }, 3500);
+    /* ---------- storage ---------- */
+    function loadCfg() {
+        const base = {};
+        IDS.forEach(i => base[i] = { url: '', screen: 'auto', mode: 'normal' });
+        try {
+            const saved = JSON.parse(localStorage.getItem(STORE_KEY) || '{}');
+            IDS.forEach(i => { if (saved[i]) Object.assign(base[i], saved[i]); });
+        } catch (e) {}
+        IDS.forEach(i => { if (base[i].mode !== 'normal' && base[i].mode !== 'fullscreen') base[i].mode = 'normal'; });
+        return base;
+    }
+    function saveCfg() {
+        try { localStorage.setItem(STORE_KEY, JSON.stringify(cfg)); } catch (e) {}
+    }
+
+    /* ---------- toasts ---------- */
+    function toast(msg, type = '') {
+        const el = document.createElement('div');
+        el.className = 'toast ' + type;
+        el.textContent = msg;
+        document.getElementById('toasts').appendChild(el);
+        setTimeout(() => el.remove(), 3200);
+    }
+
+    /* ---------- screens ---------- */
+    function getScreens() {
+        if (screenDetails && screenDetails.screens && screenDetails.screens.length) {
+            return screenDetails.screens.map((s, i) => ({
+                i,
+                left: s.left, top: s.top, width: s.width, height: s.height,
+                availLeft: s.availLeft ?? s.left, availTop: s.availTop ?? s.top,
+                availWidth: s.availWidth ?? s.width, availHeight: s.availHeight ?? s.height,
+                isPrimary: !!s.isPrimary
+            }));
         }
+        const s = window.screen;
+        return [{
+            i: 0,
+            left: s.availLeft ?? 0, top: s.availTop ?? 0, width: s.width, height: s.height,
+            availLeft: s.availLeft ?? 0, availTop: s.availTop ?? 0,
+            availWidth: s.availWidth, availHeight: s.availHeight,
+            isPrimary: true
+        }];
+    }
 
-        async function detectScreens() {
+    function resolveScreen(id) {
+        const list = getScreens();
+        const sel = cfg[id].screen;
+        if (sel !== 'auto' && list[parseInt(sel, 10)]) return list[parseInt(sel, 10)];
+        return list.find(s => !s.isPrimary) || list[0];
+    }
+
+    async function detectScreens(silent) {
+        if (!('getScreenDetails' in window)) {
+            if (!silent) toast('This browser has no Window Management API. Use Chrome or Edge.', 'error');
+            refreshAll();
+            return;
+        }
+        try {
+            screenDetails = await window.getScreenDetails();
+            screenDetails.addEventListener('screenschange', () => { refreshAll(); });
+            refreshAll();
+            if (!silent) toast(`Found ${screenDetails.screens.length} display(s)`, 'ok');
+        } catch (e) {
+            refreshAll();
+            if (!silent) toast('Permission denied. Allow window management in the address bar.', 'error');
+        }
+    }
+
+    /* ---------- window placement ---------- */
+    // Normal fills the work area (above the taskbar). Fullscreen is first placed on the whole display,
+    // so the browser fullscreens on the right monitor.
+    function rectFor(scr, mode) {
+        return mode === 'fullscreen'
+            ? { l: scr.left, t: scr.top, w: scr.width, h: scr.height }
+            : { l: scr.availLeft, t: scr.availTop, w: scr.availWidth, h: scr.availHeight };
+    }
+
+    function fit(win, scr, mode) {
+        const r = rectFor(scr, mode);
+        const apply = () => {
             try {
-                if ('getScreenDetails' in window) {
-                    screenDetails = await window.getScreenDetails();
-                    renderScreenList();
-                    updateDropdowns();
-                    showNotification(`Successfully detected ${screenDetails.screens.length} screen(s).`, 'info');
-                } else {
-                    showNotification('Window Management API is not supported in this browser.', 'error');
-                }
-            } catch (err) {
-                showNotification('Permission denied or window management API error.', 'error');
+                if (win.closed) return;
+                win.moveTo(r.l, r.t);
+                win.resizeTo(r.w, r.h);
+                win.moveTo(r.l, r.t); // resize can shift the origin, so move again
+            } catch (e) {}
+        };
+        // Chrome ignores move/resize while the popup is still opening or navigating,
+        // so retry for a few seconds.
+        [0, 80, 200, 450, 900, 1600, 2500].forEach(t => setTimeout(apply, t));
+    }
+
+    function normUrl(raw) {
+        const v = raw.trim();
+        if (!v) return 'about:blank';
+        if (/^[a-z][a-z0-9+.-]*:/i.test(v)) return v;
+        return 'https://' + v;
+    }
+
+    // Page written into the popup for Fullscreen mode: the target URL in a full-size frame,
+    // plus a click-to-fullscreen overlay (browsers only allow fullscreen from a user click inside the window).
+    function wrapperHtml(url, id) {
+        const u = JSON.stringify(url).replace(/</g, '\\u003c');
+        return '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Window ' + id + '</title>' +
+            '<style>' +
+            'html,body{margin:0;height:100%;background:#000;overflow:hidden}' +
+            'iframe{position:fixed;left:0;top:0;width:100%;height:100%;border:0;background:#fff}' +
+            '#go{position:fixed;left:0;top:0;width:100%;height:100%;display:none;align-items:center;justify-content:center;' +
+            'background:rgba(8,22,27,.72);color:#fff;font:600 20px Poppins,Segoe UI,sans-serif;cursor:pointer;z-index:2;text-align:center}' +
+            '#go.show{display:flex}' +
+            '</style></head><body>' +
+            '<iframe id="f" allow="fullscreen; autoplay; camera; microphone; clipboard-write; display-capture" allowfullscreen></iframe>' +
+            '<div id="go">Click here (or press any key) for fullscreen</div>' +
+            '<script>' +
+            'var go=document.getElementById("go"),de=document.documentElement;' +
+            'document.getElementById("f").src=' + u + ';' +
+            'function inFs(){return !!document.fullscreenElement}' +
+            'function sync(){go.className=inFs()?"":"show"}' +
+            'function enter(){if(!inFs()&&de.requestFullscreen){var p=de.requestFullscreen();if(p&&p.catch)p.catch(function(){})}}' +
+            'document.addEventListener("fullscreenchange",sync);' +
+            'go.addEventListener("click",enter);' +
+            'window.addEventListener("keydown",enter);' +
+            'sync();try{enter()}catch(e){}' +
+            '<\/script></body></html>';
+    }
+
+    function loadInto(win, id, url, mode) {
+        if (mode === 'fullscreen') {
+            try {
+                win.document.open();
+                win.document.write(wrapperHtml(url, id));
+                win.document.close();
+                return true;
+            } catch (e) { return false; } // window is on another origin, can't rewrite it
+        }
+        try { win.location.href = url; return true; } catch (e) { return false; }
+    }
+
+    function isOpen(id) { return wins[id] && !wins[id].closed; }
+
+    function launch(id, quiet) {
+        const scr = resolveScreen(id);
+        const mode = cfg[id].mode;
+        const url = normUrl(cfg[id].url);
+        const r = rectFor(scr, mode);
+
+        let win = isOpen(id) ? wins[id] : null;
+        if (win) {
+            fit(win, scr, mode);
+            if (!loadInto(win, id, url, mode)) {
+                try { win.close(); } catch (e) {}
+                win = null;
             }
         }
-
-        function renderScreenList() {
-            const container = document.getElementById('screens-container');
-            const badge = document.getElementById('screen-count-badge');
-            if (!screenDetails || !screenDetails.screens) return;
-
-            badge.textContent = `${screenDetails.screens.length} Screen(s) Connected`;
-            container.innerHTML = '';
-
-            screenDetails.screens.forEach((screen, index) => {
-                const card = document.createElement('div');
-                card.className = `border rounded-xl p-4 flex flex-col justify-between transition ${screen.isPrimary ? 'bg-indigo-950/20 border-indigo-500/40 shadow-lg shadow-indigo-500/5' : 'bg-slate-900/40 border-slate-800'}`;
-                card.innerHTML = `
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="text-xs font-bold text-slate-300">Display ${index + 1}</span>
-                        ${screen.isPrimary ? '<span class="px-2 py-0.5 bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[10px] font-semibold rounded-md">Primary</span>' : '<span class="px-2 py-0.5 bg-slate-800 text-slate-400 text-[10px] font-semibold rounded-md">External</span>'}
-                    </div>
-                    <div class="space-y-1 text-xs text-slate-400">
-                        <p>Resolution: <span class="text-slate-200 font-medium">${screen.width} × ${screen.height}</span></p>
-                        <p>Position: <span class="text-slate-200 font-medium">X: ${screen.left}, Y: ${screen.top}</span></p>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        function updateDropdowns() {
-            if (!screenDetails || !screenDetails.screens) return;
-            for (let i = 1; i <= 4; i++) {
-                const select = document.getElementById(`screen-select-${i}`);
-                const currentVal = select.value;
-                select.innerHTML = '<option value="auto">Auto / Primary Display</option>';
-                screenDetails.screens.forEach((screen, index) => {
-                    const opt = document.createElement('option');
-                    opt.value = index;
-                    opt.textContent = `Screen ${index + 1} (${screen.width}x${screen.height})${screen.isPrimary ? ' [Primary]' : ''}`;
-                    select.appendChild(opt);
-                });
-                select.value = currentVal;
-            }
-        }
-
-        async function launchScreen(id) {
-            if (!screenDetails) {
-                try {
-                    if ('getScreenDetails' in window) {
-                        screenDetails = await window.getScreenDetails();
-                        renderScreenList();
-                        updateDropdowns();
-                    }
-                } catch (e) {}
-            }
-
-            const urlInput = document.getElementById(`url-${id}`);
-            const screenSelect = document.getElementById(`screen-select-${id}`);
-            const url = urlInput.value.trim() || 'about:blank';
-            
-            let targetScreen = null;
-            if (screenSelect.value !== 'auto' && screenDetails && screenDetails.screens) {
-                targetScreen = screenDetails.screens[parseInt(screenSelect.value)];
-            } else if (screenDetails && screenDetails.screens) {
-                targetScreen = screenDetails.screens.find(s => !s.isPrimary) || screenDetails.screens[0];
-            }
-
-            let features = 'menubar=no,toolbar=no,location=no,status=no,resizable=yes,scrollbars=yes';
-            if (targetScreen) {
-                features += `,left=${targetScreen.left},top=${targetScreen.top},width=${targetScreen.width},height=${targetScreen.height}`;
-            } else {
-                features += ',width=1280,height=800';
-            }
-
-            if (openedWindows[id] && !openedWindows[id].closed) {
-                openedWindows[id].close();
-            }
-
-            const win = window.open(url, `presentation_window_${id}`, features);
+        if (!win) {
+            const features = `popup=yes,left=${r.l},top=${r.t},width=${r.w},height=${r.h}`;
+            win = window.open('about:blank', `displaysync_${id}_${Date.now()}`, features);
             if (win) {
-                openedWindows[id] = win;
-                if (targetScreen) {
-                    try {
-                        win.moveTo(targetScreen.left, targetScreen.top);
-                        win.resizeTo(targetScreen.width, targetScreen.height);
-                    } catch (err) {}
-                }
-                updateStatus(id, true);
-                showNotification(`Launched Slot ${id} successfully.`, 'info');
-            } else {
-                showNotification(`Failed to open window for Slot ${id}. Check popup blocker.`, 'error');
+                fit(win, scr, mode);
+                const w = win;
+                setTimeout(() => loadInto(w, id, url, mode), 150);
             }
         }
-
-        function closeScreen(id) {
-            if (openedWindows[id] && !openedWindows[id].closed) {
-                openedWindows[id].close();
-                delete openedWindows[id];
-                updateStatus(id, false);
-                showNotification(`Closed Slot ${id}.`, 'info');
-            } else {
-                showNotification(`Slot ${id} is not currently active.`, 'error');
-            }
+        if (!win) {
+            if (!quiet) toast(`Window ${id} was blocked. Allow pop-ups for this page.`, 'error');
+            return false;
         }
+        wins[id] = win;
+        try { win.focus(); } catch (e) {}
+        refreshAll();
+        if (!quiet) toast(mode === 'fullscreen' ? `Window ${id} opened, click inside it for fullscreen` : `Window ${id} opened`, 'ok');
+        return true;
+    }
 
-        function updateStatus(id, active) {
-            const badge = document.getElementById(`status-${id}`);
-            if (active) {
-                badge.textContent = 'Active';
-                badge.className = 'px-2.5 py-1 bg-emerald-500/10 text-emerald-400 text-xs rounded-full font-medium border border-emerald-500/20';
-            } else {
-                badge.textContent = 'Inactive';
-                badge.className = 'px-2.5 py-1 bg-slate-800 text-slate-400 text-xs rounded-full font-medium border border-slate-700/50';
-            }
+    function closeSlot(id, quiet) {
+        if (isOpen(id)) {
+            wins[id].close();
+            delete wins[id];
+            refreshAll();
+            if (!quiet) toast(`Window ${id} closed`);
+        } else if (!quiet) {
+            toast(`Window ${id} isn't open`, 'error');
         }
+    }
 
-        function launchAll() {
-            for (let i = 1; i <= 4; i++) {
-                const urlInput = document.getElementById(`url-${i}`);
-                if (urlInput.value.trim() !== '') {
-                    launchScreen(i);
-                }
-            }
-        }
+    function refit(id) {
+        if (!isOpen(id)) { toast(`Window ${id} isn't open`, 'error'); return; }
+        fit(wins[id], resolveScreen(id), cfg[id].mode);
+        try { wins[id].focus(); } catch (e) {}
+        toast(`Window ${id} moved back to its display`, 'ok');
+    }
 
-        function closeAll() {
-            for (let i = 1; i <= 4; i++) {
-                closeScreen(i);
-            }
-        }
+    /* ---------- UI: slots ---------- */
+    function buildSlots() {
+        const host = document.getElementById('slots');
+        host.innerHTML = '';
+        host.style.cssText = 'display:flex;flex-direction:column;gap:12px';
+        IDS.forEach(id => {
+            const row = document.createElement('div');
+            row.className = 'slot';
+            row.id = `slot-${id}`;
+            row.innerHTML = `
+                <div class="slot-id" style="background:${COLORS[id]};color:${ON[id]}" aria-hidden="true">${id}</div>
+                <div class="field">
+                    <label for="url-${id}">Address for window ${id}</label>
+                    <input type="text" id="url-${id}" placeholder="https://example.com/slides" autocomplete="off" spellcheck="false">
+                </div>
+                <div class="field">
+                    <label for="screen-${id}">Display</label>
+                    <select id="screen-${id}"></select>
+                </div>
+                <div class="field">
+                    <label for="mode-${id}">Mode</label>
+                    <select id="mode-${id}">${MODES.map(m => `<option value="${m.v}">${m.label}</option>`).join('')}</select>
+                </div>
+                <div class="slot-actions">
+                    <button class="btn" data-act="launch" style="background:${COLORS[id]};color:${ON[id]}">Launch</button>
+                    <button class="btn ghost" data-act="refit">Refit</button>
+                    <button class="btn ghost" data-act="close">Close</button>
+                </div>`;
+            host.appendChild(row);
 
-        window.addEventListener('load', () => {
-            detectScreens();
+            const url = row.querySelector(`#url-${id}`);
+            const scr = row.querySelector(`#screen-${id}`);
+            const mode = row.querySelector(`#mode-${id}`);
+            url.value = cfg[id].url;
+            mode.value = cfg[id].mode;
+
+            url.addEventListener('input', () => { cfg[id].url = url.value; saveCfg(); });
+            url.addEventListener('keydown', e => { if (e.key === 'Enter') launch(id); });
+            scr.addEventListener('change', () => { cfg[id].screen = scr.value; saveCfg(); renderMap(); });
+            mode.addEventListener('change', () => { cfg[id].mode = mode.value; saveCfg(); });
+            row.querySelector('[data-act="launch"]').addEventListener('click', () => launch(id));
+            row.querySelector('[data-act="refit"]').addEventListener('click', () => refit(id));
+            row.querySelector('[data-act="close"]').addEventListener('click', () => closeSlot(id));
         });
-    </script>
+        fillDropdowns();
+    }
+
+    function fillDropdowns() {
+        const list = getScreens();
+        IDS.forEach(id => {
+            const sel = document.getElementById(`screen-${id}`);
+            if (!sel) return;
+            sel.innerHTML = '<option value="auto">Auto (first external)</option>' +
+                list.map((s, i) => `<option value="${i}">Display ${i + 1}, ${s.width}×${s.height}${s.isPrimary ? ', main' : ''}</option>`).join('');
+            if (cfg[id].screen !== 'auto' && !list[parseInt(cfg[id].screen, 10)]) cfg[id].screen = 'auto';
+            sel.value = cfg[id].screen;
+        });
+    }
+
+    function updateStatus() {
+        IDS.forEach(id => {
+            const row = document.getElementById(`slot-${id}`);
+            if (row) row.classList.toggle('active', !!isOpen(id));
+        });
+    }
+
+    /* ---------- UI: map ---------- */
+    function renderMap() {
+        const list = getScreens();
+        const map = document.getElementById('map');
+        const wrap = map.parentElement;
+        const count = document.getElementById('stage-count');
+        const note = document.getElementById('stage-note');
+
+        const minX = Math.min(...list.map(s => s.left));
+        const minY = Math.min(...list.map(s => s.top));
+        const maxX = Math.max(...list.map(s => s.left + s.width));
+        const maxY = Math.max(...list.map(s => s.top + s.height));
+        const totalW = maxX - minX, totalH = maxY - minY;
+
+        const availW = Math.max(wrap.clientWidth, 200);
+        const availH = wrap.clientHeight || 230;
+        const k = Math.min(availW / totalW, availH / totalH);
+
+        map.style.width = Math.round(totalW * k) + 'px';
+        map.style.height = Math.round(totalH * k) + 'px';
+        map.innerHTML = '';
+
+        list.forEach((s, i) => {
+            const m = document.createElement('div');
+            m.className = 'mon' + (s.isPrimary ? ' primary' : '');
+            m.style.left = ((s.left - minX) * k) + 'px';
+            m.style.top = ((s.top - minY) * k) + 'px';
+            m.style.width = (s.width * k - 4) + 'px';
+            m.style.height = (s.height * k - 4) + 'px';
+
+            const chips = IDS.filter(id => resolveScreen(id).i === s.i).map(id => {
+                const on = isOpen(id);
+                return `<span class="chip ${on ? '' : 'off'}" style="background:${COLORS[id]};color:${on ? ON[id] : COLORS[id]}">${id}</span>`;
+            }).join('');
+
+            m.innerHTML = `
+                <div>
+                    <div class="mon-name">Display ${i + 1}${s.isPrimary ? ' (main)' : ''}</div>
+                    <div class="mon-meta">${s.width}×${s.height} at ${s.left}, ${s.top}</div>
+                </div>
+                <div class="mon-chips">${chips}</div>`;
+            map.appendChild(m);
+        });
+
+        const detected = !!(screenDetails && screenDetails.screens);
+        count.textContent = detected ? `${list.length} display${list.length === 1 ? '' : 's'}` : 'Not scanned yet';
+        note.innerHTML = detected
+            ? (list.length === 1 ? 'Only one display found. All windows will open on it.' : 'Windows open on the display you pick.')
+            : 'Showing this display only. Press <b>Detect displays</b> to place windows on other screens.';
+    }
+
+    function refreshAll() {
+        fillDropdowns();
+        renderMap();
+        updateStatus();
+    }
+
+    /* ---------- bulk ---------- */
+    function launchAll() {
+        let n = 0;
+        IDS.forEach(id => {
+            if (cfg[id].url.trim() !== '') { if (launch(id, true)) n++; }
+        });
+        toast(n ? `Launched ${n} window${n === 1 ? '' : 's'}` : 'Enter at least one address first', n ? 'ok' : 'error');
+    }
+    function closeAll() {
+        let n = 0;
+        IDS.forEach(id => { if (isOpen(id)) { closeSlot(id, true); n++; } });
+        toast(n ? `Closed ${n} window${n === 1 ? '' : 's'}` : 'No windows are open', n ? '' : 'error');
+    }
+
+    /* ---------- init ---------- */
+    document.getElementById('btn-detect').addEventListener('click', () => detectScreens(false));
+    document.getElementById('btn-launch-all').addEventListener('click', launchAll);
+    document.getElementById('btn-close-all').addEventListener('click', closeAll);
+    window.addEventListener('resize', renderMap);
+
+    // keep status in sync when a window is closed by hand
+    setInterval(() => {
+        let changed = false;
+        IDS.forEach(id => { if (wins[id] && wins[id].closed) { delete wins[id]; changed = true; } });
+        if (changed) { renderMap(); updateStatus(); }
+    }, 800);
+
+    buildSlots();
+    renderMap();
+    updateStatus();
+    detectScreens(true);
+})();
+</script>
 </body>
 </html>
