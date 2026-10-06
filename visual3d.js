@@ -7,11 +7,11 @@ let currentFrontFace = 'F'; // Default: front face is 'F'
 
 const colors = {
     "U": 0xFFFFFF,
-    "D": 0xFFFFFF, 
-    "L": 0xFFFFFF, 
-    "R": 0xFFFFFF, 
-    "F": 0xFFFFFF, 
-    "B": 0xFFFFFF 
+    "D": 0xFFFFFF,
+    "L": 0xFFFFFF,
+    "R": 0xFFFFFF,
+    "F": 0xFFFFFF,
+    "B": 0xFFFFFF
 }
 // Maps the facelet position from the cube.js string to a 3D color.
 // The cube.js string order is U, R, D, L, B, F.
@@ -123,13 +123,13 @@ function resetCube() {
     const solvedState = cube.asString();
 
     // Create a new scene to prevent WebGL crashes
-    while(scene.children.length > 0) {
+    while (scene.children.length > 0) {
         scene.remove(scene.children[0]);
     }
 
     // Rebuild cubelets
     cubed = []; // Clear existing cubelets array
-    
+
     const cubeletSize = 0.95;
     const offset = 1;
     const offCenterFix = 0;
@@ -154,12 +154,12 @@ function resetCube() {
                     y * offset + offCenterFix,
                     z * offset + offCenterFix
                 );
-                
+
                 // Ensure clean rotation state
                 cubelet.rotation.set(0, 0, 0);
                 cubelet.quaternion.identity();
                 cubelet.updateMatrix();
-                
+
                 scene.add(cubelet);
                 cubed.push(cubelet);
 
@@ -185,7 +185,7 @@ function resetCube() {
     // Force a renderer clear and reset
     renderer.clear();
     renderer.resetState();
-    
+
     // Re-enable animations after a short delay
     setTimeout(() => {
         sdr = false
@@ -203,7 +203,7 @@ function recover() {
     const state = parsed;
     console.log(state);
     // Clear the scene
-    while(scene.children.length > 0) {
+    while (scene.children.length > 0) {
         scene.remove(scene.children[0]);
     }
 
@@ -268,8 +268,13 @@ function recover() {
     console.log("Recovered cube:", state);
 
     setTimeout(() => { sdr = false; }, 2000);
-    
+
 }
+
+let gltfMixer = null;
+let gltfAction = null;
+let gltfClip = null;
+let gltfClock = new THREE.Clock();
 
 /**
  * Initializes the 3D cube scene, camera, and renderer.
@@ -348,8 +353,91 @@ function init3DCube(containerId = "cube3d") {
     // Initial render from the logical cube state
     update3DCubeFromState(cube.asString());
 
+
+    const gltfLoader = new THREE.GLTFLoader();
+    gltfLoader.load(
+        "robot_solver.glb",
+        (gltf) => {
+            console.log("GLB loaded", gltf);
+            console.log("animations:", gltf.animations.map(a => a.name));
+
+            robotRoot = gltf.scene;
+
+            // Force everything visible (some exporters ship hidden groups)
+            robotRoot.traverse(o => { o.visible = true; });
+
+            // --- measure before scaling ---
+            let box = new THREE.Box3().setFromObject(robotRoot);
+            let size = box.getSize(new THREE.Vector3());
+            console.log("raw size:", size, "raw scale:", robotRoot.scale);
+
+            // --- scale so the largest dimension is ~3 (cube is ~3 wide) ---
+            const maxDim = Math.max(size.x, size.y, size.z) || 1;
+            const targetSize = 11.5;
+            robotRoot.scale.setScalar(targetSize / maxDim);
+
+            // --- recenter so it stands on y=0, centered on x/z ---
+            box = new THREE.Box3().setFromObject(robotRoot);
+            const center = box.getCenter(new THREE.Vector3());
+            robotRoot.position.x -= center.x;
+            robotRoot.position.z -= center.z;
+            robotRoot.position.y -= box.min.y;
+
+            // --- move it off to the side so it doesn't overlap the cube ---
+            robotRoot.position.x = 5.41;
+            robotRoot.position.z = 1.6;
+            robotRoot.position.y = -4.9;
+
+
+            scene.add(robotRoot);
+
+            // --- extra light so the robot isn't flat/black ---
+            const dir = new THREE.DirectionalLight(0xffffff, 1.5);
+            dir.position.set(5, 10, 7);
+            scene.add(dir);
+
+            // --- play the exported timeline ---
+
+            gltfClip = THREE.AnimationClip.findByName(gltf.animations, "SimStudio")
+                || gltf.animations[0];
+
+            gltfMixer = new THREE.AnimationMixer(robotRoot);
+            gltfAction = gltfMixer.clipAction(gltfClip);
+            gltfAction.setLoop(THREE.LoopOnce, 1);
+            gltfAction.clampWhenFinished = true;   // hold last frame instead of snapping to frame 0
+
+            robotRoot.visible = false;
+
+            // --- also log post-fix bbox to confirm ---
+            const box2 = new THREE.Box3().setFromObject(robotRoot);
+            console.log("scaled bbox:", box2.min, box2.max);
+            watchCube(gltfAction);   
+            gltfAction.play();
+            goToFrame(300)
+            gltfAction.play();
+        },
+        undefined,
+        (err) => console.error("GLB load failed:", err)
+    );
+
     window.addEventListener('resize', onWindowResize, false);
     animate3D();
+}
+
+const FPS = 30;   // match the export
+
+function goToFrame(frame) {
+    if (!gltfAction || !gltfClip) return;
+    const t = THREE.MathUtils.clamp(frame / FPS, 0, gltfClip.duration);
+
+    gltfAction.paused = true;   // stop the mixer from advancing it
+    gltfAction.time   = t;
+    gltfMixer.update(0);        // apply immediately
+}
+
+
+function robotVisble() {
+    robotRoot.visible = !robotRoot.visible;
 }
 
 /**
@@ -458,6 +546,10 @@ function update3DCubeFromState(stateString) {
  */
 function animate3D() {
     requestAnimationFrame(animate3D);
+    const dt = gltfClock.getDelta();
+    if (gltfMixer) {
+        gltfMixer.update(dt);
+    }
     controls.update();
     renderer.render(scene, camera);
 }

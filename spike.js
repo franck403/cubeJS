@@ -415,7 +415,40 @@ async function batteryRead(which, reader) {
     })();
 }
 
-let CubeLoaded = 0
+let CubeLoaded = false
+
+let lastCubeLoaded = null; // remembers previous state
+let watcherDASDA;
+
+function watchCube(gltfAction) {
+    clearInterval(watcherDASDA);
+    watcherDASDA = setInterval(() => {
+        // first run: just remember it, don't fire
+        if (lastCubeLoaded === null) {
+            lastCubeLoaded = CubeLoaded;
+            return;
+        }
+
+        // only act when it actually changed
+        if (CubeLoaded !== lastCubeLoaded) {
+            lastCubeLoaded = CubeLoaded;
+
+            if (CubeLoaded) {
+                console.warn('Cube in: true → reverse');
+                goToFrame(300)
+                gltfAction.timeScale = -1;
+                gltfAction.play();
+                gltfAction.paused = false;
+            } else {
+                console.info('Cube in: false → forward');
+                gltfAction.reset();
+                gltfAction.timeScale = 1;
+                gltfAction.play();
+            }
+        }
+    }, 100);
+};
+
 
 function batteryPercentage(voltage, minVolt, maxVolt) {
     if (voltage <= minVolt) return 0;
