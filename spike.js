@@ -667,7 +667,7 @@ async function wiggle() {
 
 setInterval(()=> {
     if (!scSecure && SpikeState.left && SpikeState.right) {
-        sendLine(leftWriter, "import color_sensor;import color; print('cl' + str(color_sensor.color(port.B)))")
+        sendLine(leftWriter, "import color_sensor;import color; print('cl' + str(color_sensor.color(port.B)))\n\n")
     }
 },2000)
 
