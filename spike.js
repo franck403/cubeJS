@@ -278,12 +278,6 @@ async function openSpike(which) {
     }
 }
 
-async function SerialL(readable) {
-    while (true) {
-        const { value, done } = await reader.read();
-        console.debug(`RX: ${value}`);
-    }
-}
 
 async function spike(cubeed) {
     await openSpike('left')
@@ -354,6 +348,7 @@ async function batteryRead(which, reader) {
                 const { value, done } = await reader.read();
                 if (value == "" || value == " ") return;
                 if (done) break;
+                console.debug(`RX: ${value}`)
                 if (value) {
                     value.split('\n').forEach(element => {
                         if (element.startsWith('Ba')) {
@@ -404,7 +399,6 @@ async function batteryRead(which, reader) {
                             }
                             //updateLoadedState()
                         } else {
-                            console.debug(`RX: ${element}`)
                         }
                     });
                 }
@@ -509,6 +503,7 @@ let FASTWIGGLEVAR = false;
 async function FASTWIGGLE(writer) {
     FASTWIGGLEVAR = true;
     await wiggle()
+    await sleepT(10)
     await sendLine(writer, `p = motor.relative_position(port.${side}); print(p); print('HELP') if abs(p - round(p / 90) * 90) >= 5 else None\n`)
     await sleepT(10)
     FASTWIGGLEVAR = false;
@@ -530,7 +525,7 @@ function genPython(line) {
 
 let tm2 = 180
 let tm3 = 20
-let d4 = 15
+let d4 = 10
 
 // MOVE STORE
 async function runMovement(move, sleep = 220) {
@@ -553,17 +548,17 @@ async function runMovement(move, sleep = 220) {
         await sendLine(writer, cmd);
         const mov = move.charAt(0);
         const sym = move.charAt(1);
-        await sendLine(leftWriter, `light_matrix.write("${mov}",100);\n`);
-        await sendLine(rightWriter, `light_matrix.write("${sym}",100);\n`);
+        await sendLine(leftWriter, `light_matrix.write("${mov}",100);\n\n`);
+        await sendLine(rightWriter, `light_matrix.write("${sym}",100);\n\n`);
         await sleepT(tm2)
         let side = cmd.slice(36, 37)
         if (wait >= 220) {
-            await sendLine(writer, `p = motor.relative_position(port.${side}); print(p); c = round(p / 90) * 90; print("cor" + str(c)) ; motor.run_to_relative_position(port.${side}, c, 1000, stop=motor.HOLD, acceleration=10000, deceleration=9000);\n`)
+            await sendLine(writer, `p = motor.relative_position(port.${side}); print(p); c = round(p / 90) * 90; print("cor" + str(c)) ; motor.run_to_relative_position(port.${side}, c, 800, acceleration=10000, deceleration=9000);\n\n`)
             await sleepT(tm3)    
         } else {
             sleepT(1)
         }
-        await sendLine(writer, `p = motor.absolute_position(port.${side}); print(p); print('HELP') if abs(p - round(p / 90) * 90) > ${d4} else None\n`)
+        await sendLine(writer, `p = motor.absolute_position(port.${side}); print(p); print('PAUSE') if abs(p - round(p / 90) * 90) > ${d4} else None;\n\n`)
         await sleepT(wait - tm2 - tm3);
     } else if (!ganCubePresent()) {
         await sleepT(sleep)
@@ -667,7 +662,7 @@ async function wiggle() {
 
 setInterval(()=> {
     if (!scSecure && SpikeState.left && SpikeState.right) {
-        sendLine(leftWriter, "import color_sensor;import color; print('cl' + str(color_sensor.color(port.B)))\n\n")
+        sendLine(leftWriter, "import color_sensor;import color; print('cl' + str(color_sensor.color(port.B)));\n\n")
     }
 },2000)
 
