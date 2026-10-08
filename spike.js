@@ -346,9 +346,8 @@ async function batteryRead(which, reader) {
         try {
             while (true) {
                 const { value, done } = await reader.read();
-                if (value == "" || value == " ") return;
                 if (done) break;
-                console.debug(`RX: ${value}`)
+                console.log(`RX: ${value}`)
                 if (value) {
                     value.split('\n').forEach(element => {
                         if (element.startsWith('Ba')) {
@@ -525,7 +524,7 @@ function genPython(line) {
 
 let tm2 = 180
 let tm3 = 20
-let d4 = 10
+let d4 = 5
 
 // MOVE STORE
 async function runMovement(move, sleep = 220) {
@@ -553,12 +552,12 @@ async function runMovement(move, sleep = 220) {
         await sleepT(tm2)
         let side = cmd.slice(36, 37)
         if (wait >= 220) {
-            await sendLine(writer, `p = motor.relative_position(port.${side}); print(p); c = round(p / 90) * 90; print("cor" + str(c)) ; motor.run_to_relative_position(port.${side}, c, 800, acceleration=10000, deceleration=9000);\n\n`)
+            await sendLine(writer, `p = motor.relative_position(port.${side}); c = round(p / 90) * 90; motor.run_to_relative_position(port.${side}, c, 800, acceleration=10000, deceleration=9000);`)
             await sleepT(tm3)    
         } else {
             sleepT(1)
         }
-        await sendLine(writer, `p = motor.absolute_position(port.${side}); print(p); print('PAUSE') if abs(p - round(p / 90) * 90) > ${d4} else None;\n\n`)
+        await sendLine(writer, `p = motor.relative_position(port.${side}); print(p); print('STOP') if abs(p - round(p / 90) * 90) > ${d4} else None;\n\n`)
         await sleepT(wait - tm2 - tm3);
     } else if (!ganCubePresent()) {
         await sleepT(sleep)
