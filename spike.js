@@ -53,7 +53,7 @@ const clearDisplay = `light_matrix.clear();\n`
 let CLP_LEFT;
 let CLP_RIGHT;
 
-let Abort = false;
+let AbortRun = false;
 
 // =========================================================================================================
 
@@ -113,25 +113,31 @@ const ALL_MOVES = Object.keys({ ...CLP_LEFT, ...CLP_RIGHT });
 
 // DEFAULT
 
+// Faces that share an axis (opposite faces)
+const AXIS = { U: 'UD', D: 'UD', R: 'LR', L: 'LR', F: 'FB', B: 'FB' };
+
 /**
- * Generate a random scramble table
- * @param {number} count - number of moves
+ * Generate a random scramble with no same-face or same-axis-triple sequences
+ * @param {number} length - number of moves
  * @returns {string[]} - array of move notations
  */
 function generateScramble(length = 20) {
     const result = [];
-    let last
-    for (let i = 0; i < length; i++) {
-        let m;
-        do m = ALL_MOVES[Math.random() * ALL_MOVES.length | 0];
-        while (i && m[0] === result[i - 1][0]);
-        if (!last) {
-            result.push(m);
-            last = m;
-        } else if (!last.startsWith(m.charAt(0))) {
-            result.push(m);
-            last = m;
+    while (result.length < length) {
+        const m = ALL_MOVES[Math.random() * ALL_MOVES.length | 0];
+        const face = m[0];
+
+        if (result.length >= 1) {
+            const prev = result[result.length - 1][0];
+            // Reject same face: U U', U U2, U U
+            if (face === prev) continue;
+            // Reject three moves in a row on the same axis: U D U
+            if (result.length >= 2 &&
+                AXIS[face] === AXIS[prev] &&
+                AXIS[result[result.length - 2][0]] === AXIS[face]) continue;
         }
+
+        result.push(m);
     }
     return result;
 }
@@ -500,7 +506,7 @@ let d4 = 5
 // MOVE STORE
 async function runMovement(move, sleep = 220) {
     if (!move || typeof move !== "string") return log(`Invalid move ${move}`);
-    if (Abort) return 'FAIL';
+    if (AbortRun) return 'FAIL';
     regen()
     const cmd = CLP_LEFT[move] || CLP_RIGHT[move];
     const writer = CLP_LEFT[move] ? leftWriter : rightWriter;
@@ -508,10 +514,10 @@ async function runMovement(move, sleep = 220) {
     const which = CLP_LEFT[move] ? 'left' : 'right';
     if (!cmd || !writer) return;
     if (SpikeState.left && SpikeState.right && ganCubePresent()) {
-        const moveReply = await sendLineWait(writer, cmd + "print('OK')");
+        const moveReply = await sendLineWait(which, writer, cmd + "print('OK')");
         if (moveReply !== 'OK') {
             log(`${which} move ${move} failed: ${moveReply}`);
-            Abort = true;
+            AbortRun = true;
             await stopAll('move failed')
             return 'FAIL';
         }
@@ -527,7 +533,7 @@ motor.run_to_absolute_position(port.${side}, c, 800, acceleration=10000, deceler
 p = motor.absolute_position(port.${side})
 print('STOP' if abs(p - round(p / 90) * 90) > ${d4} else 'OK')
 `;
-        const alignReply = await sendLineWait(writer, alignLines);
+        const alignReply = await sendLineWait(which, writer, alignLines);
         if (alignReply !== 'OK') {
             log(`${which} move ${move} failed: ${alignReply}`);
             await stopAll('align failed');
@@ -613,7 +619,7 @@ async function wiggle(which) {
 
 // Stops every motor on both hubs and cancels any move that is waiting.
 async function stopAll(reason = 'manual') {
-    Abort = true;
+    AbortRun = true;
 
     for (const which of ['left', 'right']) {
         const writer = which === 'left' ? leftWriter : rightWriter;
@@ -644,7 +650,7 @@ setInterval(() => {
 }, 2000)
 
 async function spikeCube(moves, sleeped) {
-    Abort = false
+    AbortRun = false
     regen()
     moves = simplifyMoves(moves);
     console.info(moves)
@@ -667,18 +673,25 @@ async function spikeCube(moves, sleeped) {
     const start = new Date();
     startTimer(start);
 
+    async function rnMovementWrapper(move, sleep) {
+        let r = await runMovement(move, sleep);
+        if (r == 'FAIL') {
+            AbortRun = true
+        }
+    }
+
     for (let i = 0; i < moves.length; i++) {
         const m = moves[i], n = moves[i + 1];
-        if (Abort) {
+        if (AbortRun) {
             break
         }
         if (isOpposite(m, n)) {
             await Promise.all([
-                runMovement(m, sleep),
-                runMovement(n, sleep /*+ 10*/)
+                rnMovementWrapper(m, sleep),
+                rnMovementWrapper(n, sleep)
             ]);
             i++;
-        } else await runMovement(m, sleep);
+        } else await rnMovementWrapper(m, sleep);
     }
     stopTimer(start);
 
@@ -742,33 +755,18 @@ const normalize = (m) => m?.replace(/2|'/g, "");
 const isOpposite = (a, b) => normalize(a) && normalize(b) && oppositeFace[normalize(a)] === normalize(b);
 
 function simplifyMoves(moves) {
+    const SUFFIX = { 1: "", 2: "2", 3: "'" };
+    const qt = m => (m.endsWith("2") ? 2 : m.endsWith("'") ? 3 : 1);
     const out = [];
-    for (let i = 0; i < moves.length; i++) {
-        const a = moves[i];
-        const b = moves[i + 1];
-
-        if (!b) {
-            out.push(a);
-            continue;
-        }
-
-        const fa = normalize(a);
-        const fb = normalize(b);
-
-        if (fa === fb && !a.includes("'") && !b.includes("'")) {
-            out.push(fa + "2");
-            i++;
-        } else if (fa === fb && a.includes("'") !== b.includes("'")) {
-            i++;
-        } else if (oppositeFace[fa] === fb) {
-            out.push(a);
-        } else if (fa === fb && (a.includes("2") || b.includes("2"))) {
-            const isA2 = a.includes("2");
-            const isBPrime = b.includes("'");
-            out.push(isA2 ? (isBPrime ? fa : fa + "'") : (isBPrime ? fa + "'" : fa + "2"));
-            i++;
+    for (const m of moves) {
+        const face = m[0];
+        const last = out[out.length - 1];
+        if (last && last[0] === face) {
+            out.pop();
+            const total = (qt(last) + qt(m)) % 4;
+            if (total) out.push(face + SUFFIX[total]);
         } else {
-            out.push(a);
+            out.push(m);
         }
     }
     return out;
@@ -947,14 +945,13 @@ async function solve2ndCube(mvs) {
     still = [...mvs];
     nxt.innerHTML = still[0];
     await new Promise((resolve) => {
-        bc.onmessage = (e) => {
+        const onMove = (e) => {
             const data = e.data;
             if (typeof data !== "string" || !data.startsWith("Move: ")) return;
 
             const move = data.replace("Move: ", "").trim();
             const expected = still[0];
-            console.log(expected)
-            const next = still[1]
+            const next = still[1];
 
             if (move === expected) {
                 still.shift();
@@ -962,34 +959,37 @@ async function solve2ndCube(mvs) {
                     console.info(`Next: ${next}`);
                     nxt.innerHTML = next;
                     if (wrong) {
-                        nxt.classList.remove("wrong")
+                        nxt.classList.remove("wrong");
                         wrong = false;
                     }
                 }
             } else {
-                const rvs = rvsMove(move)
-                console.warn(`No: ${move}, do: ${rvs}, expected: ${expected}`)
-                still.push(rvs)
+                const rvs = rvsMove(move);
+                console.warn(`No: ${move}, do: ${rvs}, expected: ${expected}`);
+                still.push(rvs);
                 nxt.innerHTML = rvs;
-                nxt.classList.add("wrong")
+                nxt.classList.add("wrong");
                 wrong = true;
             }
 
             if (still.length === 0) {
+                bc.removeEventListener("message", onMove); // detach when done
                 resolve();
             }
         };
+
+        bc.addEventListener("message", onMove);
     });
 
     window.dontMove = false;
-    nxt.clasList.remove("active")
+    nxt.classList.remove("active")
     console.info("2nd cube solved");
 }
 
 // KEYBOARD MAPPIMG
+nxt = document.getElementById("nxt");
 
 document.addEventListener('DOMContentLoaded', () => {
-    nxt = document.getElementById("nxt");
     const keyToCubeMove = {
         5: 'U',
         t: "U'",
@@ -1015,7 +1015,7 @@ document.addEventListener('DOMContentLoaded', () => {
         "2": sexyMoves2,
         "3": sexyMoves3,
         "c": fullConnect,
-        "r": reset,
+        "r": reset, // defined in a other file
         "enter": solve,
         "w": startCube,
         "s": spin,
