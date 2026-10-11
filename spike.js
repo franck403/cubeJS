@@ -19,20 +19,14 @@ let scLenght = 20;
 let deg = 90;  // Moves x 1
 let dog = 180; // Moves x 2
 
-let intSolve = 250;
-let intScramble = 250;
+let intSolve = 100;
+let intScramble = 100;
 
-let intSolveFast = 180;
+let intSolveFast = 0;
 
-let u = 0, f = 0, l = 0, r = 0, b = 6, d = 6;
-let u1 = 0, f1 = 0, l1 = 0, r1 = 0, b1 = 6, d1 = 6;
-let u2 = 0, f2 = 0, l2 = 0, r2 = 0, b2 = 6, d2 = 6;
-
-let cb = 0; // back deg corr
-let cd = 0; // down deg corr
-
-let lb = localStorage.lb || 0;
-let ld = localStorage.ld || 0;
+let u = 0, f = 0, l = 0, r = 0, b = 0, d = 0;
+let u1 = 0, f1 = 0, l1 = 0, r1 = 0, b1 = 0, d1 = 0;
+let u2 = 0, f2 = 0, l2 = 0, r2 = 0, b2 = 0, d2 = 0;
 
 var silence = true;
 
@@ -48,16 +42,18 @@ const sexyMove2 = ["L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2",
 const sexyMove3 = ["R2", "L2", "U2", "R2", "L2", "U2", "R2", "L2", "U2", "R2", "L2", "U2"];
 const cubecube = ["F", "L", "F", "U'", "R", "U", "F2", "L2", "U'", "L'", "B", "D'", "B'", "L2", "U"]
 
-const startup = "cor=1.5\n\nimport motor\n\nfrom hub import port, light_matrix, sound\n\nimport time\n\nlayer = motor.run_for_degrees\n\nlight_matrix.clear();\n\n";
+const startup = "cor=1.5\n\nimport motor\n\nimport runloop\n\nfrom hub import port, light_matrix, sound\n\nimport time\n\nlayer = motor.run_for_degrees\n\nlight_matrix.clear();\n\n";
 const connectSound = "sound.beep(392,120);time.sleep_ms(120);sound.beep(494,120);time.sleep_ms(120);sound.beep(587,150);time.sleep_ms(150);sound.beep(784,200)";
 const scrambleSound = "sound.beep(784,100);time.sleep_ms(100);sound.beep(659,100);time.sleep_ms(100);sound.beep(587,100);time.sleep_ms(100);sound.beep(494,150);time.sleep_ms(150);sound.beep(392,200)";
 const solveSound = "sound.beep(392,100);time.sleep_ms(100);sound.beep(494,100);time.sleep_ms(100);sound.beep(587,100);time.sleep_ms(100);sound.beep(659,150);time.sleep_ms(150);sound.beep(784,200);time.sleep_ms(200);sound.beep(988,300)";
 const music = "sound.beep(196, 800) ; time.sleep_ms(850)  # G3\nsound.beep(262, 1000) ; time.sleep_ms(1050)  # C4\nsound.beep(220, 950) ; time.sleep_ms(950)  # A3\nsound.beep(294, 1200) ; time.sleep_ms(1250)  # D4\nsound.beep(247, 1000) ; time.sleep_ms(1050)  # B3\nsound.beep(196, 1500) ; time.sleep_ms(1550)  # G3\nsound.beep(330, 800) ; time.sleep_ms(850)  # E4\nsound.beep(262, 1400) ; time.sleep_ms(1450)  # C4";
-const getBattery = `import hub\n\nprint("Ba" + str(hub.battery_voltage()))`
+const getBattery = `import hub\nprint("Ba" + str(hub.battery_voltage()))`
 const clearDisplay = `light_matrix.clear();\n`
 
 let CLP_LEFT;
 let CLP_RIGHT;
+
+let Abort = false;
 
 // =========================================================================================================
 
@@ -66,7 +62,6 @@ let CLP_RIGHT;
 let acel = 100000
 let decel = acel
 
-//p = port.A\\n await motor.run_to_relative_position(p, round(motor.relative_position(p) / 90) * 90, 500)
 // motor.absolute_position(port.A)
 // motor.absolute_position(port.A)
 function regen() {
@@ -105,36 +100,7 @@ function regen() {
     };
 }
 
-/*
-function regen() {
-    CLP_LEFT = {
-        "U": `async def move_u():\n    await motor.run_for_degrees(port.A, -(${deg + u}), 1000, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel})\n    await motor.run_to_relative_position(port.A, round(motor.relative_position(port.A) / 90) * 90, 1000, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel})\n`,
-        "U'": `async def move_u_prime():\n    await motor.run_for_degrees(port.A, ${deg + u1}, 1000, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel})\n    await motor.run_to_relative_position(port.A, round(motor.relative_position(port.A) / 90) * 90, 1000, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel})\n`,
-        "U2": `async def move_u2():\n    await motor.run_for_degrees(port.A, ${dog + u2}, 1000, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel})\n    await motor.run_to_relative_position(port.A, round(motor.relative_position(port.A) / 90) * 90, 1000, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel})\n`,
-
-        "L": `async def move_l():\n    await motor.run_for_degrees(port.C, -(${deg + l}), 1000, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel})\n    await motor.run_to_relative_position(port.C, round(motor.relative_position(port.C) / 90) * 90, 1000, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel})\n`,
-        "L'": `async def move_l_prime():\n    await motor.run_for_degrees(port.C, ${deg + l1}, 1000, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel})\n    await motor.run_to_relative_position(port.C, round(motor.relative_position(port.C) / 90) * 90, 1000, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel})\n`,
-        "L2": `async def move_l2():\n    await motor.run_for_degrees(port.C, ${dog + l2}, 1000, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel})\n    await motor.run_to_relative_position(port.C, round(motor.relative_position(port.C) / 90) * 90, 1000, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel})\n`,
-
-        "F": `async def move_f():\n    await motor.run_for_degrees(port.E, -(${deg + f}), 1000, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel})\n    await motor.run_to_relative_position(port.E, round(motor.relative_position(port.E) / 90) * 90, 1000, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel})\n`,
-        "F'": `async def move_f_prime():\n    await motor.run_for_degrees(port.E, ${deg + f1}, 1000, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel})\n    await motor.run_to_relative_position(port.E, round(motor.relative_position(port.E) / 90) * 90, 1000, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel})\n`,
-        "F2": `async def move_f2():\n    await motor.run_for_degrees(port.E, ${dog + f2}, 1000, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel})\n    await motor.run_to_relative_position(port.E, round(motor.relative_position(port.E) / 90) * 90, 1000, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel})\n`,
-    };
-
-    CLP_RIGHT = {
-        "R": `async def move_r():\n    await motor.run_for_degrees(port.B, -(${deg + r}), 1000, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel})\n    await motor.run_to_relative_position(port.B, round(motor.relative_position(port.B) / 90) * 90, 1000, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel})\n`,
-        "R'": `async def move_r_prime():\n    await motor.run_for_degrees(port.B, ${deg + r1}, 1000, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel})\n    await motor.run_to_relative_position(port.B, round(motor.relative_position(port.B) / 90) * 90, 1000, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel})\n`,
-        "R2": `async def move_r2():\n    await motor.run_for_degrees(port.B, ${dog + r2}, 1000, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel})\n    await motor.run_to_relative_position(port.B, round(motor.relative_position(port.B) / 90) * 90, 1000, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel})\n`,
-
-        "B": `async def move_b():\n    await motor.run_for_degrees(port.F, -(${deg + b}), 1000, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel})\n    await motor.run_to_relative_position(port.F, round(motor.relative_position(port.F) / 90) * 90, 1000, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel})\n`,
-        "B'": `async def move_b_prime():\n    await motor.run_for_degrees(port.F, ${deg + b1}, 1000, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel})\n    await motor.run_to_relative_position(port.F, round(motor.relative_position(port.F) / 90) * 90, 1000, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel})\n`,
-        "B2": `async def move_b2():\n    await motor.run_for_degrees(port.F, ${dog + b2}, 1000, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel})\n    await motor.run_to_relative_position(port.F, round(motor.relative_position(port.F) / 90) * 90, 1000, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel})\n`,
-
-        "D": `async def move_d():\n    await motor.run_for_degrees(port.D, -(${deg + d}), 1000, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel})\n    await motor.run_to_relative_position(port.D, round(motor.relative_position(port.D) / 90) * 90, 1000, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel})\n`,
-        "D'": `async def move_d_prime():\n    await motor.run_for_degrees(port.D, ${deg + d1}, 1000, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel})\n    await motor.run_to_relative_position(port.D, round(motor.relative_position(port.D) / 90) * 90, 1000, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel})\n`,
-        "D2": `async def move_d2():\n    await motor.run_for_degrees(port.D, ${dog + d2}, 1000, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel})\n    await motor.run_to_relative_position(port.D, round(motor.relative_position(port.D) / 90) * 90, 1000, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel})\n`,
-    };
-}*/
+const waiting = { left: null, right: null };
 
 regen();
 
@@ -265,7 +231,7 @@ async function openSpike(which) {
         }
 
         // start listening for RX
-        batteryRead(which, reader);
+        SerialCmd(which, reader);
 
         await sendLine(writer, startup);
         if (!silence) {
@@ -292,6 +258,45 @@ async function sendLine(writer, text) {
     const bytes = encoder.encode(normalized);
     await writer.write(bytes);
     await writer.write(encoder.encode('\r\n'));
+}
+
+const queues = { left: Promise.resolve(), right: Promise.resolve() };
+
+let jobCounter = 0;
+
+// Turns plain motor lines into an async function that runs on the hub.
+// Motor calls get `await`, and every line is indented under the function.
+function wrapForRunloop(textDirty) {
+    const name = `job_${++jobCounter}`;
+    const body = textDirty
+        .split(/\r?\n/)
+        .map(line => line.trim())
+        .filter(line => line.length > 0)
+        .map(line => line.replace(/motor\.(run_\w+)\(/g, 'await motor.$1('))
+        .map(line => '    ' + line)
+        .join('\\n');
+    return `exec("import runloop\\nasync def ${name}():\\n${body}\\nrunloop.run(${name}())")`;
+}
+
+function sendLineWait(which, writer, textDirty, timeoutMs = 5000) {
+    const text = wrapForRunloop(textDirty);
+    const job = queues[which].then(() => new Promise((resolve) => {
+        const timer = setTimeout(() => {
+            waiting[which] = null;
+            resolve('TIMEOUT');
+        }, timeoutMs);
+
+        waiting[which] = (reply) => {
+            clearTimeout(timer);
+            resolve(reply);
+        };
+
+        sendLine(writer, text);
+    }));
+
+    // Keep the queue moving even if this job fails.
+    queues[which] = job.catch(() => { });
+    return job;
 }
 
 async function disconnectSpike(which) {
@@ -338,74 +343,79 @@ function areBothSpikesConnected() {
     return SpikeState.left && SpikeState.right && leftPort && rightPort;
 }
 
-// BATTERIES
+// serial command readers
+const buffers = { left: '', right: '' };
 
-async function batteryRead(which, reader) {
+async function SerialCmd(which, reader) {
     if (!reader) return;
-    (async () => {
-        try {
-            while (true) {
-                const { value, done } = await reader.read();
-                if (done) break;
-                console.log(`RX: ${value}`)
-                if (value) {
-                    value.split('\n').forEach(element => {
-                        if (element.startsWith('Ba')) {
-                            const batteryValue = parseFloat(element.replace('Ba', '')) / 1000;
-                            const batteryPercentageValue = batteryPercentage(batteryValue, 6.0, 8.4);
-                            // Update the battery icon for the correct side
-                            const batteryIcon = document.getElementById(`${which}`);
-                            if (batteryIcon) {
-                                // Remove all existing battery classes
-                                batteryIcon.classList.remove(
-                                    'icon-battery-0',
-                                    'icon-battery-25',
-                                    'icon-battery-50',
-                                    'icon-battery-75',
-                                    'icon-battery-100',
-                                    'fa-solid',
-                                    'fa-xmark'
-                                );
-                                // Map the battery level to the closest icon class
-                                let iconClass;
-                                if (batteryPercentageValue == 0) {
-                                    iconClass = 'icon-battery-0';
-                                } else if (batteryPercentageValue <= 25) {
-                                    iconClass = 'icon-battery-25';
-                                } else if (batteryPercentageValue <= 50) {
-                                    iconClass = 'icon-battery-50';
-                                } else if (batteryPercentageValue <= 75) {
-                                    iconClass = 'icon-battery-75';
-                                } else {
-                                    iconClass = 'icon-battery-100';
-                                }
-                                // Add the appropriate battery class
-                                batteryIcon.classList.add(iconClass);
-                            }
-                        } else if (element.startsWith('HELP')) {
-                            console.warn('STOPING')
-                            FASTEND()
-                        } else if (element.startsWith('PAUSE')) {
-                            console.info('Wiggling')
-                            side = which == 'left' ? leftWriter : rightWriter
-                            FASTWIGGLE(side)
-                        } else if (element.startsWith('cl')) {
-                            CubeLoaded = Number(element.replace('cl','')) > 0 ? true : false
-                            if (CubeLoaded) {
-                                console.info(`Cube in: true`)
-                            } else {
-                                console.warn(`Cube in: false`)
-                            }
-                            //updateLoadedState()
-                        } else {
-                        }
-                    });
-                }
-            }
-        } catch (err) {
-            log(`RX error [${which}]:`, err?.message || err);
+    while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        console.log(`RX: ${value}`)
+        let combinedvalue = null;
+        let buffer = buffers[which]
+        if (value.indexOf('\n') == -1) {
+            // skip iteration and append to the buffer
+            buffer += value
+            continue
+        } else {
+            combinedvalue = buffer + value.slice(0, value.lastIndexOf('\n') + 1)
+            buffer = value.slice(value.lastIndexOf('\n') + 1, value.length)
         }
-    })();
+
+        combinedvalue.split('\n').forEach(elementDirty => {
+            var element = elementDirty.trim()
+            if (element.startsWith('Ba')) {
+                const batteryValue = parseFloat(element.replace('Ba', '')) / 1000;
+                const batteryPercentageValue = batteryPercentage(batteryValue, 6.0, 8.4);
+                // Update the battery icon for the correct side
+                const batteryIcon = document.getElementById(`${which}`);
+                if (batteryIcon) {
+                    // Remove all existing battery classes
+                    batteryIcon.classList.remove(
+                        'icon-battery-0',
+                        'icon-battery-25',
+                        'icon-battery-50',
+                        'icon-battery-75',
+                        'icon-battery-100',
+                        'fa-solid',
+                        'fa-xmark'
+                    );
+                    // Map the battery level to the closest icon class
+                    let iconClass;
+                    if (batteryPercentageValue == 0) {
+                        iconClass = 'icon-battery-0';
+                    } else if (batteryPercentageValue <= 25) {
+                        iconClass = 'icon-battery-25';
+                    } else if (batteryPercentageValue <= 50) {
+                        iconClass = 'icon-battery-50';
+                    } else if (batteryPercentageValue <= 75) {
+                        iconClass = 'icon-battery-75';
+                    } else {
+                        iconClass = 'icon-battery-100';
+                    }
+                    // Add the appropriate battery class
+                    batteryIcon.classList.add(iconClass);
+                }
+            } else if (element == 'HELP' || element == 'STOP') {
+                const finish = waiting[which];
+                waiting[which] = null;
+                if (finish) finish(element);
+            } else if (element.startsWith('cl')) {
+                CubeLoaded = Number(element.replace('cl', '')) > 0 ? true : false
+                if (CubeLoaded) {
+                    console.info(`Cube in: true`)
+                } else {
+                    console.warn(`Cube in: false`)
+                }
+            } else if (element == 'OK') {
+                const finish = waiting[which];
+                waiting[which] = null;
+                if (finish) finish(element);
+            } else {
+            }
+        });
+    }
 }
 
 let CubeLoaded = false
@@ -485,80 +495,45 @@ async function updateBatteries() {
     ganB();
 }
 
-let FASTENDVAR = false
-let FASTENDTIMEOUT = null;
-function FASTEND() {
-    FASTENDVAR = true;
-    if (FASTENDTIMEOUT) {
-        clearTimeout(FASTENDTIMEOUT)
-    }
-    FASTENDTIMEOUT = setTimeout(() => {
-        FASTENDVAR = false
-    }, 20000)
-}
-
-let FASTWIGGLEVAR = false;
-
-async function FASTWIGGLE(writer) {
-    FASTWIGGLEVAR = true;
-    await wiggle()
-    await sleepT(10)
-    await sendLine(writer, `p = motor.relative_position(port.${side}); print(p); print('HELP') if abs(p - round(p / 90) * 90) >= 5 else None\n`)
-    await sleepT(10)
-    FASTWIGGLEVAR = false;
-}
-
-function randomID() {
-    const chars = 'abcdefghijklmnopqrstuvwxyz';
-    let result = '';
-    for (let i = 0; i < 5; i++) {
-      result += chars[Math.floor(Math.random() * chars.length)];
-    }
-    return result;
-}
-
-function genPython(line) {
-    const rdi = randomID()
-    return `exec("import runloop\\nasync def _gem():\\n    ${line}\\nrunloop.run(_gem())")`;
-}
-
-let tm2 = 180
-let tm3 = 20
 let d4 = 5
 
 // MOVE STORE
 async function runMovement(move, sleep = 220) {
-    if (FASTENDVAR) {
-        return;
-    }
     if (!move || typeof move !== "string") return log(`Invalid move ${move}`);
-    //degCorrection(move);
+    if (Abort) return 'FAIL';
     regen()
-    if (FASTWIGGLEVAR) {
-        while (FASTWIGGLEVAR) {
-            await sleepT(10)
-        }
-    }
     const cmd = CLP_LEFT[move] || CLP_RIGHT[move];
     const writer = CLP_LEFT[move] ? leftWriter : rightWriter;
     const wait = (move.startsWith("B") || move.startsWith("D") ? sleep + 5 : sleep) * (move.endsWith("2") ? 2 : 1);
-    if (!cmd || !writer) await sleepT(1);
+    const which = CLP_LEFT[move] ? 'left' : 'right';
+    if (!cmd || !writer) return;
     if (SpikeState.left && SpikeState.right && ganCubePresent()) {
-        await sendLine(writer, cmd);
+        const moveReply = await sendLineWait(writer, cmd + "print('OK')");
+        if (moveReply !== 'OK') {
+            log(`${which} move ${move} failed: ${moveReply}`);
+            Abort = true;
+            await stopAll('move failed')
+            return 'FAIL';
+        }
         const mov = move.charAt(0);
         const sym = move.charAt(1);
         await sendLine(leftWriter, `light_matrix.write("${mov}",100);\n\n`);
         await sendLine(rightWriter, `light_matrix.write("${sym}",100);\n\n`);
-        await sleepT(tm2)
         let side = cmd.slice(36, 37)
-        if (wait >= 220) {
-            await sendLine(writer, `p = motor.relative_position(port.${side}); c = round(p / 90) * 90; motor.run_to_relative_position(port.${side}, c, 800, acceleration=10000, deceleration=9000);`)
-            await sleepT(tm3)    
-        } else {
-            sleepT(1)
+        const alignLines = `
+p = motor.absolute_position(port.${side})
+c = round(p / 90) * 90
+motor.run_to_absolute_position(port.${side}, c, 800, acceleration=10000, deceleration=9000, direction=motor.SHORTEST_PATH)
+p = motor.absolute_position(port.${side})
+print('STOP' if abs(p - round(p / 90) * 90) > ${d4} else 'OK')
+`;
+        const alignReply = await sendLineWait(writer, alignLines);
+        if (alignReply !== 'OK') {
+            log(`${which} move ${move} failed: ${alignReply}`);
+            await stopAll('align failed');
+            return 'FAIL';
         }
-        await sendLine(writer, `p = motor.relative_position(port.${side}); print(p); print('STOP') if abs(p - round(p / 90) * 90) > ${d4} else None;\n\n`)
-        await sleepT(wait - tm2 - tm3);
+        await sleepT(wait);
     } else if (!ganCubePresent()) {
         await sleepT(sleep)
         if (move.endsWith('2')) {
@@ -570,43 +545,6 @@ async function runMovement(move, sleep = 220) {
     }
 }
 
-function degCorrection(move) {
-    if (move.startsWith("B")) {
-        if (move.endsWith("2") || move.endsWith("'")) {
-            b = lb === 1 ? cb : 0;
-            b1 = b;
-            b2 = b;
-            lb = 2;
-            localStorage.lb = lb
-            console.debug(`B - 1 - ${b}`);
-        } else {
-            b = lb === 2 ? cb : 0;
-            b1 = b;
-            b2 = b;
-            lb = 1;
-            localStorage.lb = lb
-            console.debug(`B - 2 - ${b}`);
-        }
-    } else if (move.startsWith("D")) {
-        if (move.endsWith("2") || move.endsWith("'")) {
-            d = ld === 1 ? cd : 0;
-            d1 = d;
-            d2 = d;
-            ld = 2;
-            localStorage.ld = ld
-            console.debug(`D - 1 - ${d}`);
-        } else {
-            d = ld === 2 ? cd : 0;
-            d1 = d;
-            d2 = d;
-            ld = 1;
-            localStorage.ld = ld
-            console.debug(`D - 2 - ${d}`);
-        }
-    }
-    regen();
-}
-
 async function resetMotors() {
     if (!SpikeState.left && !SpikeState.right) {
         log("No Spike connected");
@@ -616,7 +554,7 @@ async function resetMotors() {
     log("Resetting motors to home position...");
 
     // Reset all motors on the left side
-    bettew = 4000
+    let bettew = 4000
     if (SpikeState.left) {
         await sendLine(leftWriter, "motor.run_to_absolute_position(port.A, 0, 50, direction=motor.SHORTEST_PATH, stop=motor.BRAKE, acceleration=1000, deceleration=1000000);");
         await sleepT(bettew)
@@ -654,18 +592,59 @@ async function spikeMove(move) {
     scSecure = false
 }
 
-async function wiggle() {
-    const cmd = `exec("import runloop\\nasync def _w():\\n    for p in [port.A, port.B, port.C, port.D, port.E, port.F]:\\n        try:\\n            await motor.run_for_degrees(p, 3, 500)\\n            await motor.run_for_degrees(p, -3, 500)\\n            pos = motor.relative_position(p)\\n            target = round(pos / 90) * 90\\n            await motor.run_to_relative_position(p, target, 500)\\n        except Exception as e:\\n            print(p, e)\\nrunloop.run(_w())")\n`;
-    await Promise.all([sendLine(leftWriter, cmd), sendLine(rightWriter, cmd)]);
+// Ports on each hub, same as your wiggle uses
+const PORTS = { left: ['A', 'C', 'E'], right: ['B', 'D', 'F'] };
+
+async function wiggle(which) {
+    const writer = which === 'left' ? leftWriter : rightWriter;
+    const lines = [];
+
+    for (const p of PORTS[which]) {
+        lines.push(`motor.run_for_degrees(port.${p}, 3, 500)`);
+        lines.push(`motor.run_for_degrees(port.${p}, -3, 500)`);
+        lines.push(`a = motor.absolute_position(port.${p}); c = round(a / 90) * 90`);
+        lines.push(`motor.run_to_absolute_position(port.${p}, c, 500, direction=motor.SHORTEST_PATH)`);
+    }
+    lines.push(`print('OK')`);
+
+    return sendLineWait(which, writer, lines.join('\n'), 8000);
 }
 
-setInterval(()=> {
+
+// Stops every motor on both hubs and cancels any move that is waiting.
+async function stopAll(reason = 'manual') {
+    Abort = true;
+
+    for (const which of ['left', 'right']) {
+        const writer = which === 'left' ? leftWriter : rightWriter;
+        if (!writer) continue;
+
+        // Ctrl-C interrupts the program running on the hub (same byte openSpike sends)
+        await writer.write(new Uint8Array([3]));
+
+        // Brake every port on this hub
+        const stopLine = PORTS[which]
+            .map(p => `motor.stop(port.${p}, stop=motor.BRAKE)`)
+            .join('; ');
+        await sendLine(writer, stopLine);
+
+        // Finish any move that is waiting for a reply, so it returns 'STOP' now
+        const pending = waiting[which];
+        waiting[which] = null;
+        if (pending) pending('STOP');
+    }
+
+    log(`All motors stopped: ${reason}`);
+}
+
+setInterval(() => {
     if (!scSecure && SpikeState.left && SpikeState.right) {
         sendLine(leftWriter, "import color_sensor;import color; print('cl' + str(color_sensor.color(port.B)));\n\n")
     }
-},2000)
+}, 2000)
 
 async function spikeCube(moves, sleeped) {
+    Abort = false
     regen()
     moves = simplifyMoves(moves);
     console.info(moves)
@@ -674,7 +653,7 @@ async function spikeCube(moves, sleeped) {
     const sleep = sleeped || window.sleeped;
     console.log(sleep)
 
-    await wiggle();
+    await Promise.all([wiggle('left'), wiggle('right')]);
 
     await sleepT(2000)
 
@@ -690,7 +669,7 @@ async function spikeCube(moves, sleeped) {
 
     for (let i = 0; i < moves.length; i++) {
         const m = moves[i], n = moves[i + 1];
-        if (FASTENDVAR) {
+        if (Abort) {
             break
         }
         if (isOpposite(m, n)) {
@@ -705,7 +684,7 @@ async function spikeCube(moves, sleeped) {
 
     await sleepT(200)
 
-    await wiggle();
+    await Promise.all([wiggle('left'), wiggle('right')]);
 
     await sleepT(2000)
     await updateBatteries();
@@ -738,7 +717,6 @@ function startTimer(startTime) {
         document.getElementById('timer').innerHTML = '<i class="fa-solid fa-clock"></i> : ' + elapsed + 'S';
         if (elapsed >= 20) {
             stopTimer(startTime, false)
-            FASTENDVAR = false;
             scSecure = false; // spam fix
         }
     }, 1);
@@ -754,7 +732,6 @@ function stopTimer(startTime, post = true) {
         } catch { }
         clearInterval(timerInterval);
         timerInterval = null;
-        FASTENDVAR = false;
     }
 }
 
@@ -931,11 +908,7 @@ async function ToogleLN() {
 
 async function ln() {
     while (LOPSX) {
-        if (!FASTENDVAR) {
-            await spikeCube(sexyMove1, 200)
-        } else {
-            stopLN()
-        }
+        await spikeCube(sexyMove1, 200)
     }
 }
 
@@ -1047,7 +1020,7 @@ document.addEventListener('DOMContentLoaded', () => {
         "w": startCube,
         "s": spin,
         "f": fullscreen,
-        "x": wiggle,
+        "x": () => { Promise.all([wiggle('left'), wiggle('right')]) },
         "backspace": scramble
     }
     document.body.addEventListener('keydown', (e) => {
