@@ -2,6 +2,7 @@
 
 // Global variables for the scene, camera, renderer, and cubelets
 let scene, camera, renderer, cubed = [], animating = false, controls;
+let robotRoot = null;
 
 let currentFrontFace = 'F'; // Default: front face is 'F'
 
@@ -13,6 +14,179 @@ const colors = {
     "F": 0xFFFFFF,
     "B": 0xFFFFFF
 }
+
+// Official LEGO plastic colors (Bricklink / LEGO Color Guide values) used to correct the robot
+const LEGO_PALETTE = {
+    red:         0xC91A09,
+    blue:        0x0055BF,
+    mediumAzure: 0x6ACEE8,
+    yellow:      0xF2CD37,
+    green:       0x237841,
+    black:       0x212121,
+    white:       0xF4F4F4,
+    lightgrey:   0xA0A5A9, // Light Bluish Gray
+    darkgrey:    0x6C6E68, // Dark Bluish Gray (neutral, not olive)
+    orange:      0xFE8A18,
+    lime:        0xBBE90B,
+    tan:         0xE4CD9E
+};
+
+// Color used for motors (and any blue part detected on the robot)
+const MOTOR_COLOR = LEGO_PALETTE.mediumAzure;
+
+// Exact per-part overrides. Key = any part of the material/mesh name (case-insensitive),
+// value = hex. Checked before everything else, so use it for any part that still looks wrong.
+// Example: { "axle": 0x888888, "gear": 0x6C6E68 }
+const PART_OVERRIDES = {};
+
+// Name keywords checked in order (more specific first)
+const LEGO_NAME_KEYS = [
+    ['darkgrey', 'darkgrey'], ['darkgray', 'darkgrey'], ['darkbluishgrey', 'darkgrey'],
+    ['lightgrey', 'lightgrey'], ['lightgray', 'lightgrey'], ['lightbluishgrey', 'lightgrey'],
+    ['grey', 'lightgrey'], ['gray', 'lightgrey'],
+    ['azure', 'mediumAzure'], ['lightblue', 'mediumAzure'],
+    ['red', 'red'], ['blue', 'blue'], ['yellow', 'yellow'], ['green', 'green'],
+    ['black', 'black'], ['white', 'white'], ['orange', 'orange'], ['lime', 'lime'], ['tan', 'tan']
+];
+
+// Returns an override hex if any PART_OVERRIDES key appears in the name, or null
+function overrideColorFromName(name) {
+    if (!name) return null;
+    const n = name.toLowerCase();
+    for (const key in PART_OVERRIDES) {
+        if (n.includes(key.toLowerCase())) return PART_OVERRIDES[key];
+    }
+    return null;
+}
+
+// Returns a LEGO palette hex from a material/mesh name, or null if no keyword matches
+function legoColorFromName(name) {
+    if (!name) return null;
+    const n = name.toLowerCase().replace(/[\s_\-]/g, '');
+    for (const [keyword, paletteKey] of LEGO_NAME_KEYS) {
+        if (n.includes(keyword)) return LEGO_PALETTE[paletteKey];
+    }
+    return null;
+}
+
+// Returns the palette hex closest (RGB distance) to the given hex
+function nearestLegoColor(hex) {
+    const r = (hex >> 16) & 0xFF, g = (hex >> 8) & 0xFF, b = hex & 0xFF;
+    let best = null, bestDist = Infinity;
+    for (const key in LEGO_PALETTE) {
+        const p = LEGO_PALETTE[key];
+        const pr = (p >> 16) & 0xFF, pg = (p >> 8) & 0xFF, pb = p & 0xFF;
+        const d = (pr - r) ** 2 + (pg - g) ** 2 + (pb - b) ** 2;
+        if (d < bestDist) { bestDist = d; best = p; }
+    }
+    return best;
+}
+
+// True when a hex color is clearly blue (e.g. #0070FC, #0055BF)
+function isBlueish(hex) {
+    const r = (hex >> 16) & 0xFF, g = (hex >> 8) & 0xFF, b = hex & 0xFF;
+    return b > 120 && b > r + 60 && b > g + 20;
+}
+
+// Average color of a texture as a hex number, or null if it can't be read
+function averageTextureHex(map) {
+    const img = map && map.image;
+    if (!img || !img.width) return null;
+    try {
+        const c = document.createElement('canvas');
+        c.width = 16;
+        c.height = 16;
+        const ctx = c.getContext('2d');
+        ctx.drawImage(img, 0, 0, 16, 16);
+        const d = ctx.getImageData(0, 0, 16, 16).data;
+        let r = 0, g = 0, b = 0, n = 0;
+        for (let i = 0; i < d.length; i += 4) {
+            r += d[i]; g += d[i + 1]; b += d[i + 2]; n++;
+        }
+        return (Math.round(r / n) << 16) | (Math.round(g / n) << 8) | Math.round(b / n);
+    } catch (e) {
+        return null;
+    }
+}
+
+// Joins the names of an object and all its parents (used to detect motors)
+function ancestorNames(obj) {
+    const names = [];
+    for (let p = obj; p; p = p.parent) {
+        if (p.name) names.push(p.name);
+    }
+    return names.join(' ');
+}
+
+// Corrects the robot's materials to LEGO colors
+function applyLegoColors(root) {
+    const report = [];
+    root.traverse(o => {
+        if (!o.isMesh) return;
+        const mats = Array.isArray(o.material) ? o.material : [o.material];
+        mats.forEach(mat => {
+            if (!mat || !mat.color) return;
+            const label = mat.name || o.name || '(unnamed)';
+            const originalHex = mat.color.getHex();
+
+            // For textured materials, the color that actually shows is the texture's average
+            const texAvg = mat.map ? averageTextureHex(mat.map) : null;
+            const seenHex = texAvg !== null ? texAvg : originalHex;
+            const seenLabel = texAvg !== null ? 'texture avg' : 'color';
+
+            const context = ancestorNames(o) + ' ' + (mat.name || '');
+            const overrideHex = overrideColorFromName(context);
+
+            // Motors and blue parts: detected by name, or by blue color/texture
+            const isMotor = /motor/i.test(context) || isBlueish(seenHex);
+
+            let target = null;
+            let source = 'name';
+            if (overrideHex !== null) {
+                target = overrideHex;
+                source = 'override';
+            } else if (isMotor) {
+                target = MOTOR_COLOR;
+                source = 'motor/blue (' + seenLabel + ')';
+            } else {
+                target = legoColorFromName(mat.name) ?? legoColorFromName(o.name);
+                if (target === null && mat.map) {
+                    // Textured part with no name match: use the palette color nearest its average
+                    if (texAvg !== null) {
+                        target = nearestLegoColor(texAvg);
+                        source = 'nearest (texture avg)';
+                    } else {
+                        source = 'kept (texture unreadable)';
+                    }
+                }
+                if (target === null && !mat.map) {
+                    target = nearestLegoColor(originalHex);
+                    source = 'nearest';
+                }
+            }
+
+            if (target !== null) {
+                // The texture would multiply the color and keep the old look, so drop it
+                mat.map = null;
+                mat.emissiveMap = null;
+                mat.vertexColors = false;
+                mat.color.setHex(target);
+                if (mat.emissive) mat.emissive.setHex(0x000000);
+                if ('metalness' in mat) mat.metalness = 0;
+                if ('roughness' in mat) mat.roughness = 0.45;
+                mat.needsUpdate = true;
+            }
+            report.push({
+                part: label,
+                method: source,
+                seen: '#' + seenHex.toString(16).padStart(6, '0'),
+                color: target !== null ? '#' + target.toString(16).padStart(6, '0') : '-'
+            });
+        });
+    });
+    console.table(report);
+}
+
 // Maps the facelet position from the cube.js string to a 3D color.
 // The cube.js string order is U, R, D, L, B, F.
 // This function determines the color for a specific face of a given cubelet.
@@ -75,7 +249,8 @@ function get3DColor(face, position) {
                 else if (y === 0 && z === -1) stickerIndex = 14; // R 16 -> D 14 x
                 else if (y === -1 && z === -1) stickerIndex = 17; // DR 17 x
             }
-            break; case 'L': // Orange face (left) FIXED
+            break;
+        case 'L': // Orange face (left) FIXED
             if (x < 0) {
                 if (y === 1 && z === -1) stickerIndex = 36; // ULF
                 else if (y === 0 && z === -1) stickerIndex = 37; // LF
@@ -388,13 +563,12 @@ function init3DCube(containerId = "cube3d") {
             robotRoot.position.z = 1.6;
             robotRoot.position.y = -4.9;
 
-
             scene.add(robotRoot);
 
-            // --- extra light so the robot isn't flat/black ---
-            const dir = new THREE.DirectionalLight(0xffffff, 1.5);
-            dir.position.set(5, 10, 7);
-            scene.add(dir);
+            // --- correct the robot's colors to LEGO palette ---
+            // The scene's ambient light is the only light on the robot, so the palette
+            // colors show exactly. No directional light is added (it washed the colors out).
+            applyLegoColors(robotRoot);
 
             // --- play the exported timeline ---
 
@@ -411,7 +585,7 @@ function init3DCube(containerId = "cube3d") {
             // --- also log post-fix bbox to confirm ---
             const box2 = new THREE.Box3().setFromObject(robotRoot);
             console.log("scaled bbox:", box2.min, box2.max);
-            watchCube(gltfAction);   
+            watchCube(gltfAction);
             gltfAction.play();
             goToFrame(300)
             gltfAction.play();
@@ -707,12 +881,12 @@ async function animate3DSolution(moves, delay = 200) {
 async function animate3DSolution2(moves, delay = 200) {
     console.info(moves)
     for (const move of moves) {
-        const face = move;
+        const face = move[0];
         let times = 1;
         let clockwise = true;
 
-        if (move.contains("2")) times = 2;
-        if (move.contains("'")) clockwise = false;
+        if (move.includes("2")) times = 2;
+        if (move.includes("'")) clockwise = false;
 
         for (let i = 0; i < times; i++) {
             await rotateFace(face, clockwise);

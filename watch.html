@@ -1,609 +1,607 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-<meta charset="UTF-8">
-<link rel="icon" type="image/png" href="icon.png" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Clockstar — Control Mode</title>
-<link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@700&display=swap" rel="stylesheet" />
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" rel="stylesheet">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-  :root{
-    --bg:#0a0a0a;
-    --surface:#151515;
-    --surface-2:#1c1c1c;
-    --line:#2a2a2a;
-    --ink:#f2f1ee;
-    --muted:#9a9a95;
-    --green:#00d97e;
-    --magenta:#ff3b7f;
-  }
-  *{box-sizing:border-box;}
-  html{scroll-behavior:smooth;}
-  body{
-    margin:0;
-    background:var(--bg);
-    color:var(--ink);
-    font-family:'Inter',sans-serif;
-    -webkit-font-smoothing:antialiased;
-  }
-  a{color:inherit;}
-  ::selection{background:var(--magenta);color:#0a0a0a;}
-
-  .wrap{max-width:1180px;margin:0 auto;padding:0 32px;}
-
-  @media (prefers-reduced-motion: reduce){
-    *{animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important;}
-  }
-
-  /* -------- hero-carousel (full screen, 3D flip) -------- */
-  .hero-carousel{
-    position:relative;
-    min-height:100vh;
-    min-height:100dvh;
-    width:100%;
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    padding:48px 0;
-    box-sizing:border-box;
-  }
-  .hero-carousel::before{
-    content:"";
-    position:absolute; inset:0;
-    background:
-      repeating-linear-gradient(180deg, rgba(255,255,255,0.018) 0px, rgba(255,255,255,0.018) 1px, transparent 1px, transparent 3px);
-    pointer-events:none;
-  }
-  /* -------- buttons -------- */
-  .btn{
-    font-family:'Inter',sans-serif; font-weight:500; font-size:14.5px;
-    padding:14px 26px; border-radius:8px; text-decoration:none;
-    display:inline-flex; align-items:center; gap:8px;
-    transition:transform .18s ease, background .18s ease;
-  }
-  .btn-primary{background:var(--ink); color:#0a0a0a;}
-  .btn-primary:hover{background:var(--green); transform:translateY(-1px);}
-  .btn-ghost{border:1px solid var(--line); color:var(--ink);}
-  .btn-ghost:hover{border-color:var(--ink); transform:translateY(-1px);}
-
-  /* -------- shared stat row -------- */
-  .stat-row{
-    display:flex; align-items:baseline; justify-content:space-between;
-    padding:22px 0; border-top:1px solid var(--line);
-  }
-  .stat-row:last-child{border-bottom:1px solid var(--line);}
-  .stat-row .num{font-family:'Fraunces',serif; font-size:34px; font-weight:600;}
-  .stat-row .desc{font-size:14px; color:var(--muted); max-width:26ch; text-align:right;}
-
-  /* -------- carousel (full-screen hero, 3D flip) -------- */
-  .carousel{
-    position:relative;
-    perspective:1800px;
-    padding-top:4px;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-  }
-  .carousel-track-wrap{
-    width:100%;
-    position:relative;
-    /* height locked by JS (px) to the tallest slide so switching never shifts page content */
-    transition:height .35s ease;
-    overflow:hidden;
-  }
-  .carousel-track{
-    position:relative;
-    transform-style:preserve-3d;
-    /* height is set in JS from the tallest slide so switching slides never
-       resizes/shifts the page; all slides are stacked via grid so every
-       slide occupies the exact same cell regardless of its own content height */
-    display:grid;
-  }
-  .carousel-track > .slide{
-    grid-area:1 / 1; /* every slide occupies the same single grid cell -> stacked, no reflow */
-    width:100%;
-  }
-  .slide{
-    flex-direction: column;
-    opacity:0; visibility:hidden;
-    transform:rotateY(-90deg) translateZ(60px);
-    transform-origin:center center;
-    backface-visibility:hidden;
-    transition:opacity .35s ease, transform .7s cubic-bezier(.22,.9,.32,1.1), visibility 0s linear .7s;
-    pointer-events:none;
-    display:flex; /* always flex (never `none`) so its natural height is measurable for the tallest-slide calc */
-    align-items:center; justify-content:center;
-  }
-  .slide.is-active{
-    opacity:1; visibility:visible;
-    transform:rotateY(0deg) translateZ(0);
-    transition:opacity .35s ease .1s, transform .7s cubic-bezier(.22,.9,.32,1.1);
-    pointer-events:auto;
-  }
-  .slide.is-exit-next{
-    transform:rotateY(90deg) translateZ(60px);
-    transition:opacity .35s ease, transform .7s cubic-bezier(.55,0,.78,.1), visibility 0s linear .7s;
-  }
-  .slide.is-exit-prev{
-    transform:rotateY(-90deg) translateZ(60px);
-    transition:opacity .35s ease, transform .7s cubic-bezier(.55,0,.78,.1), visibility 0s linear .7s;
-  }
-  .slide .tag{
-    font-size:12.5px; color:var(--green); display:block; margin-bottom:10px;
-  }
-  .slide h3{
-    font-family:'Fraunces',serif; font-weight:600; font-size:clamp(26px,3.2vw,38px); margin:0 0 24px; line-height:1.35;
-    max-width:22ch; padding-top:4px;
-  }
-  .slide p{font-size:15.5px; line-height:1.75; color:#cfcfca; margin:0 0 18px; max-width:60ch;}
-  .panel-body{
-    display:flex; align-items: center; justify-content: center;
-  }
-  .panel-stats{display:flex; flex-direction:column;}
-  .panel-stats .stat-row{
-    display:flex; align-items:baseline; justify-content:space-between;
-    padding:18px 0; border-top:1px solid var(--line);
-  }
-  .panel-stats .stat-row:last-child{border-bottom:1px solid var(--line);}
-  .panel-stats .num{font-family:'Fraunces',serif; font-size:30px; font-weight:600;}
-  .panel-stats .desc{font-size:13.5px; color:var(--muted); max-width:24ch; text-align:right;}
-
-  /* -------- nav: fixed layout, never resizes/shifts when slides are added/removed -------- */
-  .carousel-nav{
-    display:flex;
-    align-items:center;
-    justify-content:center; /* always centered, regardless of slide count */
-    gap:24px;
-    margin-top:44px; padding-top:28px; border-top:1px solid var(--line);
-    min-height:40px; /* locks vertical size */
-  }
-  .carousel-dots{
-    display:flex; align-items:center; gap:10px;
-    min-width:220px; /* reserves space so removing a dot doesn't shift the arrows/layout */
-    justify-content:center;
-    flex:0 0 auto;
-  }
-  .carousel-dots button{
-    width:28px; height:4px; border-radius:2px; border:none; padding:0;
-    background:var(--line); cursor:pointer;
-    transition:background .25s ease;
-    flex:0 0 auto;
-  }
-  .carousel-dots button.is-active{background:var(--green);}
-  .carousel-dots button:hover{background:#4a4a4a;}
-  .carousel-dots button.is-active:hover{background:var(--green);}
-  .carousel-arrows{
-    display:flex; gap:10px;
-    flex:0 0 auto; /* fixed size, never grows/shrinks with dots count */
-  }
-  .arrow-btn{
-    width:40px; height:40px; border-radius:50%;
-    border:1px solid var(--line); background:transparent; color:var(--ink);
-    display:flex; align-items:center; justify-content:center;
-    cursor:pointer; font-size:16px;
-    transition:border-color .2s, background .2s, transform .2s;
-    flex:0 0 auto;
-  }
-  .arrow-btn:hover{border-color:var(--green); background:var(--surface); transform:translateY(-1px);}
-
-  /* content reused inside carousel panels */
-  .who{
-    display:flex; align-items:center; gap:14px; margin-top:22px;
-    padding-top:20px; border-top:1px solid var(--line);
-  }
-  .avatar{
-    width:42px;height:42px;border-radius:50%;
-    background:var(--surface-2); border:1px solid var(--line);
-    display:flex;align-items:center;justify-content:center;
-    font-family:'Fraunces',serif; font-weight:600; color:var(--green); flex-shrink:0;
-  }
-  .who .name{font-size:14.5px; font-weight:500;}
-  .who .role{font-size:13px; color:var(--muted);}
-  .ticket{
-    background:var(--surface-2); border:1px solid var(--line); border-radius:12px;
-    padding:28px; display:flex; flex-direction:column; justify-content:space-between;
-  }
-  .ticket .price{font-family:'Fraunces',serif; font-size:48px; font-weight:600; color:var(--magenta); line-height:1;}
-  .ticket .price-note{font-size:13.5px; color:var(--muted); margin-top:10px; line-height:1.55;}
-  .ticket ul{list-style:none; margin:22px 0 0; padding:0; font-size:13.5px; color:#cfcfca;}
-  .ticket li{padding:9px 0; border-top:1px solid var(--line); display:flex; justify-content:space-between; gap:12px;}
-  .skills-grid{
-    display:grid; grid-template-columns:1fr 1fr; gap:1px;
-    background:var(--line); border:1px solid var(--line); border-radius:10px; overflow:hidden;
-  }
-  .skill-item{
-    background:var(--surface-2); padding:18px 20px;
-    display:flex; flex-direction:column; gap:4px;
-  }
-  .skill-tag{font-size:14.5px; font-weight:600; color:var(--green);}
-  .skill-desc{font-size:12.5px; color:var(--muted); line-height:1.4;}
-
-  /* -------- connect controls (added for Clockstar control mode) -------- */
-  .status-line{
-    font-family:'SF Mono','Cascadia Code',Consolas,monospace;
-    font-size:13px; color:var(--muted); margin:0 0 20px;
-  }
-  .controlsRow{display:flex; gap:12px; flex-wrap:wrap;}
-  .ctl-btn{
-    font-family:'Inter',sans-serif; font-weight:500; font-size:14.5px;
-    color:#fff; border:none; cursor:pointer; height:50px; padding:0 22px;
-    border-radius:60px; transition:opacity .15s, transform .1s;
-  }
-  .ctl-btn:hover:not(:disabled){opacity:.85;}
-  .ctl-btn:active:not(:disabled){transform:scale(.96);}
-  .ctl-btn:disabled{opacity:.35; cursor:not-allowed;}
-  .ctl-btn.yellow{background:var(--green); color:#0a0a0a;}
-  .ctl-btn.plain{background:var(--surface-2); color:var(--ink);}
-  .unsupported{
-    background:#7A306C; color:#FF84E8; border-radius:12px;
-    padding:14px 18px; font-size:13px; line-height:1.5; margin-bottom:20px;
-  }
-  .hidden{display:none !important;}
-
-  /* -------- responsive -------- */
-  @media (max-width:900px){
-    .panel-stats .desc{text-align:left; max-width:none;}
-    .carousel{padding:0 4px;}
-  }
-  @media (max-width:560px){
-    .wrap{padding:0 16px;}
-    .hero-carousel{padding:16px 0;}
-    .carousel-nav{flex-wrap:nowrap; gap:16px;}
-    .carousel-dots{min-width:140px;}
-    .skills-grid{grid-template-columns:1fr;}
-  }
-
-  :focus-visible{outline:2px solid var(--green); outline-offset:3px;}
-</style>
-</head>
-<body>
-
-<section class="hero-carousel" id="site-carousel">
-  <div class="wrap">
-    <div class="carousel" role="region" aria-label="Robot Gan Spike — commande et informations" aria-live="polite">
-      <div class="carousel-track-wrap" id="carouselTrackWrap">
-      <div class="carousel-track" id="carouselTrack">
-
-        <article class="slide is-active" id="connexionSlide">
-          <span class="tag">Robot Gan Spike</span>
-          <h3>Connexion à la montre</h3>
-          <div id="unsupportedNotice" class="unsupported hidden">
-            Web Bluetooth n'est pas disponible dans ce navigateur (nécessite
-            Chrome/Edge sur desktop ou Android, en HTTPS ou localhost). Safari
-            et Firefox ne sont pas supportés.
-          </div>
-          <div class="status-line" id="statusLine">Déconnecté</div>
-          <div class="controlsRow">
-            <button id="connectBtn" class="ctl-btn yellow"><i class="fa-solid fa-plug"></i> Connecter</button>
-            <button id="disconnectBtn" class="ctl-btn plain" disabled><i class="fa-solid fa-right-to-bracket"></i> Déconnecter</button>
-          </div>
-        </article>
-
-        <article class="slide">
-          <span class="tag">La concentration</span>
-          <h3>Une orientation média de l'information et d'actualité</h3>
-          <div class="panel-body">
-            <div class="panel-text">
-              <p>Offerte de la 1<sup>re</sup> à la 5<sup>e</sup> secondaire, la concentration multimédia permet aux élèves d'explorer le monde des médias et des technologies dans un encadrement pédagogique structuré, à raison de plusieurs périodes par cycle.</p>
-              <p>Le programme se construit en deux volets complémentaires : une base solide en informatique et en éthique numérique, puis une mise en pratique concrète à travers la production de contenu. Les projets réalisés varient d'une année à l'autre selon les élèves et les initiatives du moment.</p>
-            </div>
-          </div>
-        </article>
-
-        <article class="slide">
-          <span class="tag">Infrastructure</span>
-          <h3>Le local multimédia</h3>
-          <div class="panel-body">
-            <div class="panel-text">
-              <p>En 2025-2026, l'achat de portables performants grâce à un prix de 6 000 $ remis par la Caisse Desjardins de Saint-Augustin-de-Desmaures — dans un local entièrement réaménagé pour les élèves.</p>
-              <p>Depuis les éléves font des projets plus pousser grace à la puissance</p>
-              <div class="who">
-                <div class="avatar">MC</div>
-                <div>
-                  <div class="name">M.Charles Marchand  Coté</div>
-                  <div class="role">Responsable du projet Multimédia</div>
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+  <title>Clockstar Control</title>
+  <meta name="description" content="Clockstar — Control Mode">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    /* Lean build: only opacity and transform are animated (compositor-friendly).
+       No canvas, no blur/filter, no box-shadow loops, no 3D perspective, no background-position loops.
+       Palette: near-black ink, neon green and magenta accents. */
+    :root{
+      color-scheme: dark;
+      --bg:#0a0a0a;
+      --surface:#151515;
+      --surface-2:#1c1c1c;
+      --line:#2a2a2a;
+      --ink:#f2f1ee;
+      --muted:#9a9a95;
+      --green:#00d97e;
+      --magenta:#ff3b7f;
+      --amber:#ffd166;
+    }
+    *{box-sizing:border-box;}
+    html{scroll-behavior:smooth;}
+    body{
+      margin:0;
+      color:var(--ink);
+      font-family:'Inter',system-ui,sans-serif;
+      -webkit-font-smoothing:antialiased;
+      overflow-x:hidden;
+      background:
+        radial-gradient(circle at 15% 20%, rgba(0,217,126,.10), transparent 40%),
+        radial-gradient(circle at 85% 80%, rgba(255,59,127,.08), transparent 40%),
+        var(--bg);
+      min-height:100vh;
+    }
+    a{color:inherit;}
+    ::selection{background:var(--magenta);color:#0a0a0a;}
+    :focus-visible{outline:2px solid var(--green); outline-offset:3px;}
+  
+    @media (prefers-reduced-motion: reduce){
+      *{animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important;}
+    }
+  
+    /* ---------- keyframes (transform / opacity only) ---------- */
+    @keyframes revealUp{
+      from{opacity:0; transform:translateY(18px);}
+      to{opacity:1; transform:translateY(0);}
+    }
+    @keyframes enterUp{
+      from{opacity:0; transform:translateY(30px);}
+      to{opacity:1; transform:translateY(0);}
+    }
+    @keyframes dotPing{
+      0%{transform:scale(1); opacity:.9;}
+      100%{transform:scale(2.6); opacity:0;}
+    }
+    @keyframes searchPulse{
+      0%,100%{transform:scale(1);}
+      50%{transform:scale(1.04);}
+    }
+    @keyframes blink{50%{opacity:.25;}}
+    @keyframes shake{
+      0%,100%{transform:translateX(0);}
+      25%{transform:translateX(-5px);}
+      75%{transform:translateX(5px);}
+    }
+    @keyframes confetti{
+      0%{transform:translate(-50%,-50%) rotate(0deg); opacity:1;}
+      100%{transform:translate(calc(-50% + var(--dx)), calc(-50% + var(--dy) + 140px)) rotate(var(--rot)); opacity:0;}
+    }
+  
+    /* ---------- hero ---------- */
+    .hero-carousel{
+      position:relative;
+      min-height:100vh; min-height:100dvh; width:100%;
+      display:flex; flex-direction:column; justify-content:center;
+      padding:48px 0; box-sizing:border-box;
+    }
+    .wrap{max-width:1180px; margin:0 auto; padding:0 32px;}
+  
+    /* ---------- carousel ---------- */
+    .carousel{
+      display:flex; flex-direction:column; align-items:center;
+      animation:enterUp .8s cubic-bezier(.2,.8,.2,1) both;
+    }
+    .carousel-track-wrap{width:100%; position:relative; overflow:hidden;}
+    .carousel-track{display:grid;}
+    .carousel-track > .slide{grid-area:1 / 1; width:100%;}
+    .slide{
+      position:relative;
+      flex-direction:column;
+      opacity:0; visibility:hidden;
+      transform:translateX(36px);
+      transition:opacity .5s ease, transform .5s ease, visibility 0s linear .5s;
+      pointer-events:none;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .slide.is-active{
+      opacity:1; visibility:visible; transform:translateX(0);
+      transition:opacity .5s ease, transform .5s ease;
+      pointer-events:auto;
+    }
+    .slide.is-exit-next{opacity:0; transform:translateX(-36px);}
+    .slide.is-exit-prev{opacity:0; transform:translateX(36px);}
+  
+    /* staggered reveal: runs every time a slide becomes active, resets when it leaves */
+    .reveal{opacity:0;}
+    .slide.is-active .reveal{
+      animation:revealUp .6s cubic-bezier(.2,.8,.2,1) both;
+      animation-delay:calc(var(--i, 0) * 80ms + 180ms);
+    }
+  
+    .slide .tag{
+      font-size:12.5px; color:var(--green); display:block; margin-bottom:10px;
+      font-family:'SF Mono','Cascadia Code',Consolas,monospace; letter-spacing:.08em; text-transform:uppercase;
+    }
+    .slide h3{
+      font-family:'Fraunces',serif; font-weight:600; font-size:clamp(26px,3.2vw,38px);
+      margin:0 0 24px; line-height:1.35; max-width:22ch; padding-top:4px; text-wrap:balance;
+      background-image:linear-gradient(100deg, var(--ink) 35%, var(--green) 50%, var(--ink) 65%);
+      background-size:200% auto;
+      -webkit-background-clip:text; background-clip:text;
+      -webkit-text-fill-color:transparent; color:transparent;
+    }
+    .slide p{font-size:15.5px; line-height:1.75; color:#cfcfca; margin:0 0 18px; max-width:60ch;}
+    .slide .count{font-family:'Fraunces',serif; font-weight:600; color:var(--magenta); font-variant-numeric:tabular-nums;}
+    .panel-body{display:flex; align-items:center; justify-content:center;}
+    .panel-text{min-width:0;}
+  
+    .who{
+      display:flex; align-items:center; gap:14px; margin-top:22px;
+      padding-top:20px; border-top:1px solid var(--line);
+    }
+    .avatar{
+      width:42px; height:42px; border-radius:50%;
+      background:var(--surface-2); border:1px solid var(--line);
+      display:flex; align-items:center; justify-content:center;
+      font-family:'Fraunces',serif; font-weight:600; color:var(--green); flex-shrink:0;
+    }
+    .who .name{font-size:14.5px; font-weight:500;}
+    .who .role{font-size:13px; color:var(--muted);}
+  
+    .skills-grid{
+      display:grid; grid-template-columns:1fr 1fr; gap:1px;
+      background:var(--line); border:1px solid var(--line); border-radius:10px; overflow:hidden;
+      max-width:100%;
+    }
+    .skill-item{
+      background:var(--surface-2); padding:18px 20px;
+      display:flex; flex-direction:column; gap:4px; min-width:0;
+    }
+    .skill-tag{font-size:14.5px; font-weight:600; color:var(--green);}
+    .skill-desc{font-size:12.5px; color:var(--muted); line-height:1.4;}
+  
+    /* ---------- nav ---------- */
+    .carousel-nav{
+      display:flex; align-items:center; justify-content:center; gap:24px;
+      margin-top:44px; padding-top:28px; border-top:1px solid var(--line);
+      min-height:40px; width:100%;
+    }
+    .carousel-dots{
+      display:flex; align-items:center; gap:10px;
+      min-width:220px; justify-content:center; flex:0 0 auto;
+    }
+    .carousel-dots button{
+      width:28px; height:4px; border-radius:2px; border:none; padding:0;
+      background:var(--line); cursor:pointer; flex:0 0 auto;
+      transition:width .3s ease, background .25s ease;
+    }
+    .carousel-dots button:hover{background:#4a4a4a;}
+    .carousel-dots button.is-active{width:44px; background:var(--green);}
+    .carousel-arrows{display:flex; gap:10px; flex:0 0 auto;}
+    .arrow-btn{
+      width:40px; height:40px; border-radius:50%;
+      border:1px solid var(--line); background:transparent; color:var(--ink);
+      display:flex; align-items:center; justify-content:center;
+      cursor:pointer; font-size:16px; flex:0 0 auto;
+      transition:border-color .2s, background .2s;
+    }
+    .arrow-btn:hover{border-color:var(--green); background:var(--surface);}
+  
+    /* ---------- connect controls ---------- */
+    .status-line{
+      display:flex; align-items:center; gap:10px;
+      font-family:'SF Mono','Cascadia Code',Consolas,monospace;
+      font-size:13px; color:var(--muted); margin:0 0 20px;
+    }
+    .status-dot{
+      width:9px; height:9px; border-radius:50%; flex:0 0 auto;
+      background:var(--line);
+    }
+    .status-line[data-state="connecting"] .status-dot{background:var(--amber); animation:blink 1s steps(2,start) infinite;}
+    .status-line[data-state="connected"] .status-dot{background:var(--green); animation:dotPing 1.6s ease-out infinite;}
+    .status-line[data-state="connected"] .status-text{color:var(--ink);}
+    .status-line[data-state="error"] .status-dot{background:var(--magenta);}
+    .status-line[data-state="error"] .status-text{color:var(--magenta); animation:shake .4s ease;}
+    .controlsRow{display:flex; gap:12px; flex-wrap:wrap;}
+    .ctl-btn{
+      font-family:'Inter',sans-serif; font-weight:500; font-size:14.5px;
+      color:#fff; border:none; cursor:pointer; height:50px; padding:0 22px;
+      border-radius:60px; transition:opacity .15s, transform .1s;
+    }
+    .ctl-btn:hover:not(:disabled){opacity:.9;}
+    .ctl-btn:active:not(:disabled){transform:scale(.97);}
+    .ctl-btn:disabled{opacity:.35; cursor:not-allowed;}
+    .ctl-btn.yellow{background:var(--green); color:#0a0a0a;}
+    .ctl-btn.plain{background:var(--surface-2); color:var(--ink);}
+    .ctl-btn.is-searching{animation:searchPulse 1.2s ease-in-out infinite;}
+    .unsupported{
+      background:#7A306C; color:#FF84E8; border-radius:12px;
+      padding:14px 18px; font-size:13px; line-height:1.5; margin-bottom:20px;
+    }
+    .hidden{display:none !important;}
+  
+    /* connect burst (short-lived, removed after 1.4s) */
+    .confetti{
+      position:fixed; width:8px; height:14px; border-radius:2px; z-index:50;
+      pointer-events:none; animation:confetti 1.2s cubic-bezier(.15,.7,.3,1) forwards;
+    }
+  
+    /* ---------- responsive ---------- */
+    @media (max-width:900px){
+      .carousel{padding:0 4px;}
+    }
+    @media (max-width:560px){
+      .wrap{padding:0 16px;}
+      .hero-carousel{padding:24px 0 16px;}
+      .carousel-nav{flex-wrap:nowrap; gap:16px;}
+      .carousel-dots{min-width:140px;}
+      .skills-grid{grid-template-columns:1fr;}
+    }
+  </style>
+  
+  <section class="hero-carousel" id="site-carousel">
+    <div class="wrap">
+      <div class="carousel" role="region" aria-label="Robot Gan Spike — commande et informations" aria-live="polite">
+        <div class="carousel-track-wrap" id="carouselTrackWrap">
+          <div class="carousel-track" id="carouselTrack">
+  
+            <article class="slide is-active" id="connexionSlide">
+              <span class="tag">Robot Gan Spike</span>
+              <h3 class="reveal">Connexion à la montre</h3>
+              <div id="unsupportedNotice" class="unsupported hidden reveal">
+                Web Bluetooth n'est pas disponible dans ce navigateur (nécessite
+                Chrome/Edge sur desktop ou Android, en HTTPS ou localhost). Safari
+                et Firefox ne sont pas supportés.
+              </div>
+              <div class="status-line reveal" id="statusLine" data-state="">
+                <span class="status-dot"></span>
+                <span class="status-text" id="statusText">Déconnecté</span>
+              </div>
+              <div class="controlsRow reveal">
+                <button id="connectBtn" class="ctl-btn yellow">⏻ Connecter</button>
+                <button id="disconnectBtn" class="ctl-btn plain" disabled>⏏ Déconnecter</button>
+              </div>
+            </article>
+  
+            <article class="slide">
+              <span class="tag">La concentration</span>
+              <h3 class="reveal">Une orientation média de l'information et d'actualité</h3>
+              <div class="panel-body">
+                <div class="panel-text">
+                  <p class="reveal">Offerte de la 1<sup>re</sup> à la 5<sup>e</sup> secondaire, la concentration multimédia permet aux élèves d'explorer le monde des médias et des technologies dans un encadrement pédagogique structuré, à raison de plusieurs périodes par cycle.</p>
+                  <p class="reveal">Le programme se construit en deux volets complémentaires : une base solide en informatique et en éthique numérique, puis une mise en pratique concrète à travers la production de contenu. Les projets réalisés varient d'une année à l'autre selon les élèves et les initiatives du moment.</p>
                 </div>
               </div>
-            </div>
+            </article>
+  
+            <article class="slide">
+              <span class="tag">Infrastructure</span>
+              <h3 class="reveal">Le local multimédia</h3>
+              <div class="panel-body">
+                <div class="panel-text">
+                  <p class="reveal">En 2025-2026, l'achat de portables performants grâce à un prix de <span class="count" data-target="60000">60 000 $</span> remis par la Caisse Desjardins de Saint-Augustin-de-Desmaures — dans un local entièrement réaménagé pour les élèves.</p>
+                  <p class="reveal">Depuis les éléves font des projets plus pousser grace à la puissance</p>
+                  <div class="who reveal">
+                    <div class="avatar">MC</div>
+                    <div>
+                      <div class="name">M.Charles Marchand  Coté</div>
+                      <div class="role">Responsable du projet Multimédia</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </article>
+  
+            <article class="slide">
+              <span class="tag">Apprentissages</span>
+              <h3 class="reveal">Compétences et outils développés</h3>
+              <div class="panel-body">
+                <div class="skills-grid">
+                  <div class="skill-item reveal">
+                    <span class="skill-tag">Scratch</span>
+                    <span class="skill-desc">Programmation par blocs, premiers algorithmes</span>
+                  </div>
+                  <div class="skill-item reveal">
+                    <span class="skill-tag">Les base en programmation</span>
+                    <span class="skill-desc">Notions de base, logique de programmation</span>
+                  </div>
+                  <div class="skill-item reveal">
+                    <span class="skill-tag">Montage vidéo</span>
+                    <span class="skill-desc">Tournage et Montage example : stop Motion</span>
+                  </div>
+                  <div class="skill-item reveal">
+                    <span class="skill-tag">Podcast</span>
+                    <span class="skill-desc">Prise de son, animation, enregistrement</span>
+                  </div>
+                  <div class="skill-item reveal">
+                    <span class="skill-tag">Suite Drive</span>
+                    <span class="skill-desc">Apprentisage d'une utilisation optimal des outils bureautiques</span>
+                  </div>
+                  <div class="skill-item reveal">
+                    <span class="skill-tag">Et plus encore</span>
+                    <span class="skill-desc">Selon l'intérêt du groupe</span>
+                  </div>
+                </div>
+              </div>
+            </article>
+  
           </div>
-        </article>
-
-        <article class="slide">
-          <span class="tag">Apprentissages</span>
-          <h3>Compétences et outils développés</h3>
-          <div class="panel-body">
-            <div class="skills-grid">
-              <div class="skill-item">
-                <span class="skill-tag">Scratch</span>
-                <span class="skill-desc">Programmation par blocs, premiers algorithmes</span>
-              </div>
-              <div class="skill-item">
-                <span class="skill-tag">Les base en programmation</span>
-                <span class="skill-desc">Notions de base, logique de programmation</span>
-              </div>
-              <div class="skill-item">
-                <span class="skill-tag">Montage vidéo</span>
-                <span class="skill-desc">Tournage et Montage example : stop Motion</span>
-              </div>
-              <div class="skill-item">
-                <span class="skill-tag">Podcast</span>
-                <span class="skill-desc">Prise de son, animation, enregistrement</span>
-              </div>
-              <div class="skill-item">
-                <span class="skill-tag">Suite Drive</span>
-                <span class="skill-desc">Apprentisage d'une utilisation optimal des outils bureautiques</span>
-              </div>
-              <div class="skill-item">
-                <span class="skill-tag">Et plus encore</span>
-                <span class="skill-desc">Selon l'intérêt du groupe</span>
-              </div>
-            </div>
+        </div>
+  
+        <div class="carousel-nav">
+          <div class="carousel-dots" id="carouselDots"></div>
+          <div class="carousel-arrows">
+            <button type="button" class="arrow-btn" id="prevBtn" aria-label="Précédent">←</button>
+            <button type="button" class="arrow-btn" id="nextBtn" aria-label="Suivant">→</button>
           </div>
-        </article>
-
-      </div>
-      </div>
-
-      <div class="carousel-nav">
-        <div class="carousel-dots" id="carouselDots"></div>
-        <div class="carousel-arrows">
-          <button type="button" class="arrow-btn" id="prevBtn" aria-label="Précédent">←</button>
-          <button type="button" class="arrow-btn" id="nextBtn" aria-label="Suivant">→</button>
         </div>
       </div>
     </div>
-  </div>
-</section>
-
-<script>
-(function(){
-  const track = document.getElementById('carouselTrack');
-  const trackWrap = document.getElementById('carouselTrackWrap');
-  const dotsWrap = document.getElementById('carouselDots');
-  const prevBtn = document.getElementById('prevBtn');
-  const nextBtn = document.getElementById('nextBtn');
-  if(!track || !dotsWrap || !trackWrap) return;
-  const slides = Array.from(track.querySelectorAll('.slide'));
-  if(slides.length === 0) return;
-
-  let current = slides.findIndex(s => s.classList.contains('is-active'));
-  if(current < 0) current = 0;
-  let timer = null;
-  let transitioning = false; // lock: prevents overlapping/queued goTo() calls from desyncing state
-  const INTERVAL = 9000;
-  const TRANSITION_MS = 750; // matches the slide transition duration
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  slides.forEach((_, i) => {
-    const dot = document.createElement('button');
-    dot.type = 'button';
-    dot.setAttribute('aria-label', 'Aller à l\'élément ' + (i + 1));
-    if(i === current) dot.classList.add('is-active');
-    dot.addEventListener('click', () => goTo(i, true));
-    dotsWrap.appendChild(dot);
-  });
-  const dots = Array.from(dotsWrap.children);
-
-  // Measure the tallest slide and lock the wrapper's height to it, so
-  // switching slides (or removing one) never changes page/nav position.
-  function recalcHeight(){
-    let max = 0;
-    slides.forEach(s => {
-      // temporarily force-measure even inactive slides (they're display:flex + opacity:0,
-      // already laid out via the grid stacking, so offsetHeight is accurate as-is)
-      const h = s.offsetHeight;
-      if(h > max) max = h;
+  </section>
+  
+  <script>
+  /* Carousel: crossfade + slide, auto-advance, staggered reveals, count-up numbers.
+     Single timer drives both the slide change and the dots, so nothing drifts out of sync. */
+  (function(){
+    const track = document.getElementById('carouselTrack');
+    const trackWrap = document.getElementById('carouselTrackWrap');
+    const dotsWrap = document.getElementById('carouselDots');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    if(!track || !dotsWrap || !trackWrap) return;
+    const carousel = track.closest('.carousel');
+    const slides = Array.from(track.querySelectorAll('.slide'));
+    if(slides.length === 0) return;
+  
+    let current = slides.findIndex(s => s.classList.contains('is-active'));
+    if(current < 0) current = 0;
+    let timer = null;
+    let transitioning = false;
+    const INTERVAL = 8000;
+    const TRANSITION_MS = 500;
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  
+    // stagger index for each reveal element inside its slide
+    slides.forEach(s => s.querySelectorAll('.reveal').forEach((el, i) => el.style.setProperty('--i', i)));
+  
+    slides.forEach((_, i) => {
+      const dot = document.createElement('button');
+      dot.type = 'button';
+      dot.setAttribute('aria-label', 'Aller à l\'élément ' + (i + 1));
+      if(i === current) dot.classList.add('is-active');
+      dot.addEventListener('click', () => goTo(i, true));
+      dotsWrap.appendChild(dot);
     });
-    if(max > 0) trackWrap.style.height = max + 'px';
-  }
-
-  function render(prevIndex, direction){
-    slides.forEach((s, i) => {
-      s.classList.toggle('is-active', i === current);
-    });
-    if(prevIndex !== null && prevIndex !== current){
-      // give the outgoing slide a directional exit class briefly for the 3D flip
-      const outgoing = slides[prevIndex];
-      outgoing.classList.add(direction === 'next' ? 'is-exit-next' : 'is-exit-prev');
-      window.setTimeout(() => outgoing.classList.remove('is-exit-next', 'is-exit-prev'), TRANSITION_MS);
+    const dots = Array.from(dotsWrap.children);
+  
+    function recalcHeight(){
+      let max = 0;
+      slides.forEach(s => { const h = s.offsetHeight; if(h > max) max = h; });
+      if(max > 0) trackWrap.style.height = max + 'px';
     }
-    dots.forEach((d, i) => d.classList.toggle('is-active', i === current));
-  }
-
-  function removeSlide(slideEl){
-    const idx = slides.indexOf(slideEl);
-    if(idx === -1) return;
-    const wasActive = idx === current;
-    slides.splice(idx, 1);
-    dots[idx].remove();
-    dots.splice(idx, 1);
-    if(slides.length === 0) { stop(); return; }
-    if(idx < current || (idx === current && current === slides.length)){
-      current = Math.max(0, current - 1);
+  
+    function fmt(n){ return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' '); }
+  
+    function countUp(root){
+      root.querySelectorAll('.count').forEach(el => {
+        const target = Number(el.dataset.target) || 0;
+        if(reduceMotion){ el.textContent = fmt(target) + ' $'; return; }
+        const start = performance.now();
+        const dur = 1200;
+        function step(now){
+          const p = Math.min(1, (now - start) / dur);
+          const eased = 1 - Math.pow(1 - p, 3);
+          el.textContent = fmt(Math.round(target * eased)) + ' $';
+          if(p < 1) requestAnimationFrame(step);
+        }
+        requestAnimationFrame(step);
+      });
     }
-    slideEl.remove();
-    if(wasActive){
-      current = current % slides.length;
-      render(null, 'next');
-    } else {
+  
+    function render(prevIndex, direction){
+      slides.forEach((s, i) => s.classList.toggle('is-active', i === current));
+      if(prevIndex !== null && prevIndex !== current){
+        const outgoing = slides[prevIndex];
+        outgoing.classList.add(direction === 'next' ? 'is-exit-next' : 'is-exit-prev');
+        window.setTimeout(() => outgoing.classList.remove('is-exit-next', 'is-exit-prev'), TRANSITION_MS);
+      }
       dots.forEach((d, i) => d.classList.toggle('is-active', i === current));
+      countUp(slides[current]);
     }
+  
+    function removeSlide(slideEl){
+      const idx = slides.indexOf(slideEl);
+      if(idx === -1) return;
+      const wasActive = idx === current;
+      slides.splice(idx, 1);
+      dots[idx].remove();
+      dots.splice(idx, 1);
+      if(slides.length === 0){ stop(); return; }
+      if(idx < current || (idx === current && current === slides.length)){
+        current = Math.max(0, current - 1);
+      }
+      slideEl.remove();
+      if(wasActive){
+        current = current % slides.length;
+        render(null, 'next');
+      } else {
+        dots.forEach((d, i) => d.classList.toggle('is-active', i === current));
+      }
+      recalcHeight();
+    }
+    window.__carouselRemoveSlide = removeSlide;
+  
+    function goTo(i, userTriggered){
+      if(transitioning) return;
+      const prevIndex = current;
+      const total = slides.length;
+      const nextIndex = (i + total) % total;
+      if(nextIndex === prevIndex) return;
+      const direction = ((nextIndex - prevIndex + total) % total) <= total / 2 ? 'next' : 'prev';
+      current = nextIndex;
+      transitioning = true;
+      render(prevIndex, direction);
+      window.setTimeout(() => { transitioning = false; }, TRANSITION_MS);
+      if(userTriggered) restart();
+    }
+  
+    function next(){ goTo(current + 1, true); }
+    function prev(){ goTo(current - 1, true); }
+  
+    function start(){
+      if(reduceMotion) return;
+      if(timer) return;
+      timer = setInterval(() => goTo(current + 1, false), INTERVAL);
+    }
+    function stop(){
+      if(timer){ clearInterval(timer); timer = null; }
+    }
+    function restart(){ stop(); start(); }
+  
+    if(prevBtn) prevBtn.addEventListener('click', prev);
+    if(nextBtn) nextBtn.addEventListener('click', next);
+  
+    carousel.addEventListener('mouseenter', stop);
+    carousel.addEventListener('mouseleave', () => {
+      const sel = window.getSelection();
+      if(sel && !sel.isCollapsed) return;
+      start();
+    });
+    carousel.addEventListener('focusin', stop);
+    carousel.addEventListener('focusout', start);
+  
+    render(null, 'next');
     recalcHeight();
-  }
-  // exposed so other scripts (e.g. the BLE connect handler) can drop a slide
-  window.__carouselRemoveSlide = removeSlide;
-
-  function goTo(i, userTriggered){
-    if(transitioning) return; // ignore clicks/ticks that land mid-transition -> prevents desync
-    const prevIndex = current;
-    const total = slides.length;
-    const nextIndex = (i + total) % total;
-    if(nextIndex === prevIndex) return;
-    const direction = ((nextIndex - prevIndex + total) % total) <= total / 2 ? 'next' : 'prev';
-    current = nextIndex;
-    transitioning = true;
-    render(prevIndex, direction);
-    window.setTimeout(() => { transitioning = false; }, TRANSITION_MS);
-    if(userTriggered) restart();
-  }
-
-  function next(){ goTo(current + 1, true); }
-  function prev(){ goTo(current - 1, true); }
-
-  function start(){
-    if(reduceMotion) return;
-    timer = setInterval(() => goTo(current + 1, false), INTERVAL);
-  }
-  function stop(){
-    if(timer){ clearInterval(timer); timer = null; }
-  }
-  function restart(){ stop(); start(); }
-
-  if(prevBtn) prevBtn.addEventListener('click', prev);
-  if(nextBtn) nextBtn.addEventListener('click', next);
-
-  const carousel = track.closest('.carousel');
-  carousel.addEventListener('mouseenter', stop);
-  carousel.addEventListener('mouseleave', () => {
-    const sel = window.getSelection();
-    if(sel && !sel.isCollapsed) return; // don't resume while text is selected
-    start();
-  });
-  carousel.addEventListener('focusin', stop);
-  carousel.addEventListener('focusout', start);
-  carousel.addEventListener('pointerdown', stop);
-  carousel.addEventListener('touchstart', stop, { passive: true });
-
-  document.addEventListener('selectionchange', () => {
-    const sel = window.getSelection();
-    const selecting = sel && !sel.isCollapsed && sel.anchorNode && carousel.contains(
-      sel.anchorNode.nodeType === 1 ? sel.anchorNode : sel.anchorNode.parentNode
-    );
-    if(selecting) stop();
-  });
-
-  render(null, 'next');
-  recalcHeight();
-  window.addEventListener('resize', recalcHeight);
-  // fonts loading late can change slide heights after first paint
-  if(document.fonts && document.fonts.ready){
-    document.fonts.ready.then(recalcHeight);
-  }
-  start();
-})();
-</script>
-
-<script>
-(function () {
-  'use strict';
-
-  const NUS_SERVICE = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
-  const NUS_TX_CHAR = '6e400003-b5a3-f393-e0a9-e50e24dcca9e'; // watch -> site (notify)
-  const NUS_RX_CHAR = '6e400002-b5a3-f393-e0a9-e50e24dcca9e'; // site -> watch (unused here, receive-only)
-
-  const el = {
-    connectBtn: document.getElementById('connectBtn'),
-    disconnectBtn: document.getElementById('disconnectBtn'),
-    unsupportedNotice: document.getElementById('unsupportedNotice'),
-    statusLine: document.getElementById('statusLine'),
-  };
-
-  let device = null;
-  let rxBuf = ''; // accumulates partial notify chunks until a \n is found
-
-  function setStatus(state, text) {
-    if (el.statusLine) el.statusLine.textContent = text;
-  }
-
-  function handleIncomingLine(line) {
-    if (!line) return;
-    bc.postMessage('Watch: ' + line);
-  }
-
-  const bc = new BroadcastChannel(localStorage.bc);
-  console.log(bc);
-
-  function handleNotify(event) {
-    const value = event.target.value; // DataView
-    const chunk = new TextDecoder('utf-8').decode(value);
-    rxBuf += chunk;
-    let idx;
-    while ((idx = rxBuf.indexOf('\n')) !== -1) {
-      let line = rxBuf.slice(0, idx);
-      rxBuf = rxBuf.slice(idx + 1);
-      if (line.endsWith('\r')) line = line.slice(0, -1);
-      handleIncomingLine(line);
+    window.addEventListener('resize', recalcHeight);
+    if(document.fonts && document.fonts.ready){
+      document.fonts.ready.then(recalcHeight);
     }
-  }
-
-  function onDisconnected() {
-    setStatus('', 'Déconnecté');
-    el.connectBtn.disabled = false;
-    el.disconnectBtn.disabled = true;
-    device = null;
-    rxBuf = '';
-  }
-
-  async function connect() {
+    start();
+  })();
+  </script>
+  
+  <script>
+  /* BLE connection (Nordic UART service) — logic unchanged, plus status dot, searching pulse and connect burst */
+  (function () {
+    'use strict';
+  
+    const NUS_SERVICE = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
+    const NUS_TX_CHAR = '6e400003-b5a3-f393-e0a9-e50e24dcca9e'; // watch -> site (notify)
+  
+    const el = {
+      connectBtn: document.getElementById('connectBtn'),
+      disconnectBtn: document.getElementById('disconnectBtn'),
+      unsupportedNotice: document.getElementById('unsupportedNotice'),
+      statusLine: document.getElementById('statusLine'),
+      statusText: document.getElementById('statusText'),
+    };
+  
+    const bc = new BroadcastChannel(localStorage.bc);
+  
+    let device = null;
+    let rxBuf = '';
+  
+    function setStatus(state, text) {
+      if (el.statusLine) el.statusLine.dataset.state = state || '';
+      if (el.statusText) el.statusText.textContent = text;
+      el.connectBtn.classList.toggle('is-searching', state === 'connecting');
+    }
+  
+    function burst(anchor) {
+      const r = anchor.getBoundingClientRect();
+      const cx = r.left + r.width / 2;
+      const cy = r.top + r.height / 2;
+      const colors = ['#00d97e', '#ff3b7f', '#f2f1ee', '#ffd166'];
+      for (let i = 0; i < 28; i++) {
+        const s = document.createElement('i');
+        s.className = 'confetti';
+        const ang = Math.random() * Math.PI * 2;
+        const dist = 60 + Math.random() * 130;
+        s.style.left = cx + 'px';
+        s.style.top = cy + 'px';
+        s.style.setProperty('--dx', (Math.cos(ang) * dist).toFixed(1) + 'px');
+        s.style.setProperty('--dy', (Math.sin(ang) * dist - 40).toFixed(1) + 'px');
+        s.style.setProperty('--rot', (Math.random() * 720 - 360).toFixed(0) + 'deg');
+        s.style.background = colors[i % colors.length];
+        document.body.appendChild(s);
+        setTimeout(() => s.remove(), 1400);
+      }
+    }
+  
+    function handleIncomingLine(line) {
+      if (!line) return;
+      bc.postMessage('Watch: ' + line);
+    }
+  
+    function handleNotify(event) {
+      const value = event.target.value;
+      const chunk = new TextDecoder('utf-8').decode(value);
+      rxBuf += chunk;
+      let idx;
+      while ((idx = rxBuf.indexOf('\n')) !== -1) {
+        let line = rxBuf.slice(0, idx);
+        rxBuf = rxBuf.slice(idx + 1);
+        if (line.endsWith('\r')) line = line.slice(0, -1);
+        handleIncomingLine(line);
+      }
+    }
+  
+    function onDisconnected() {
+      setStatus('', 'Déconnecté');
+      el.connectBtn.disabled = false;
+      el.disconnectBtn.disabled = true;
+      device = null;
+      rxBuf = '';
+    }
+  
+    async function connect() {
+      if (!navigator.bluetooth) {
+        el.unsupportedNotice.classList.remove('hidden');
+        return;
+      }
+      el.connectBtn.disabled = true;
+      setStatus('connecting', 'Recherche…');
+      try {
+        device = await navigator.bluetooth.requestDevice({
+          filters: [{ services: [NUS_SERVICE] }],
+          optionalServices: [NUS_SERVICE],
+        });
+  
+        device.addEventListener('gattserverdisconnected', onDisconnected);
+  
+        setStatus('connecting', 'Connexion…');
+        const server = await device.gatt.connect();
+        const service = await server.getPrimaryService(NUS_SERVICE);
+        const txChar = await service.getCharacteristic(NUS_TX_CHAR);
+  
+        await txChar.startNotifications();
+        txChar.addEventListener('characteristicvaluechanged', handleNotify);
+  
+        setStatus('connected', 'Connecté' + (device.name ? ' · ' + device.name : ''));
+        el.disconnectBtn.disabled = false;
+  
+        // celebrate, then drop the connexion slide from the carousel
+        burst(el.connectBtn);
+        const connexionSlide = document.getElementById('connexionSlide');
+        if (connexionSlide && window.__carouselRemoveSlide) {
+          window.__carouselRemoveSlide(connexionSlide);
+        }
+      } catch (err) {
+        console.error(err);
+        setStatus('error', err.message || 'Échec de connexion');
+        el.connectBtn.disabled = false;
+      }
+    }
+  
+    async function disconnect() {
+      if (device && device.gatt.connected) {
+        device.gatt.disconnect();
+      } else {
+        onDisconnected();
+      }
+    }
+  
+    el.connectBtn.addEventListener('click', connect);
+    el.disconnectBtn.addEventListener('click', disconnect);
+  
     if (!navigator.bluetooth) {
       el.unsupportedNotice.classList.remove('hidden');
-      return;
+      el.connectBtn.disabled = true;
     }
-    el.connectBtn.disabled = true;
-    setStatus('connecting', 'Recherche…');
-    try {
-      device = await navigator.bluetooth.requestDevice({
-        filters: [{ services: [NUS_SERVICE] }],
-        optionalServices: [NUS_SERVICE],
-      });
-
-      device.addEventListener('gattserverdisconnected', onDisconnected);
-
-      setStatus('connecting', 'Connexion…');
-      const server = await device.gatt.connect();
-      const service = await server.getPrimaryService(NUS_SERVICE);
-      const txChar = await service.getCharacteristic(NUS_TX_CHAR);
-
-      await txChar.startNotifications();
-      txChar.addEventListener('characteristicvaluechanged', handleNotify);
-
-      setStatus(
-        'connected',
-        'Connecté' + (device.name ? ' · ' + device.name : '')
-      );
-      el.disconnectBtn.disabled = false;
-
-      // once actually connected, drop the connexion slide from the carousel
-      const connexionSlide = document.getElementById('connexionSlide');
-      if (connexionSlide && window.__carouselRemoveSlide) {
-        window.__carouselRemoveSlide(connexionSlide);
-      }
-    } catch (err) {
-      console.error(err);
-      setStatus('error', err.message || 'Échec de connexion');
-      el.connectBtn.disabled = false;
-    }
-  }
-
-  async function disconnect() {
-    if (device && device.gatt.connected) {
-      device.gatt.disconnect();
-    } else {
-      onDisconnected();
-    }
-  }
-
-  el.connectBtn.addEventListener('click', connect);
-  el.disconnectBtn.addEventListener('click', disconnect);
-
-  if (!navigator.bluetooth) {
-    el.unsupportedNotice.classList.remove('hidden');
-    el.connectBtn.disabled = true;
-  }
-})();
-</script>
-</body>
-</html>
+  })();
+  </script>
+  
+  </body></html>
