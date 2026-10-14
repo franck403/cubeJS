@@ -272,17 +272,38 @@ let jobCounter = 0;
 
 // Turns plain motor lines into an async function that runs on the hub.
 // Motor calls get `await`, and every line is indented under the function.
+
+
 function wrapForRunloop(textDirty) {
     const name = `job_${++jobCounter}`;
+
     const body = textDirty
         .split(/\r?\n/)
         .map(line => line.trim())
-        .filter(line => line.length > 0)
-        .map(line => line.replace(/motor\.(run_\w+)\(/g, 'await motor.$1('))
+        .filter(Boolean)
+        .map(line =>
+            line.replace(/motor\.(run_\w+)\(/g, 'await motor.$1(')
+        )
         .map(line => '    ' + line)
-        .join('\\n');
-    return `exec("import runloop\\nasync def ${name}():\\n${body}\\nrunloop.run(${name}())")`;
+        .join('\n');
+
+    const pythonSource =
+        'import runloop\n' +
+        `async def ${name}():\n` +
+        body + '\n' +
+        `runloop.run(${name}())`;
+
+    // Encode the Python source as UTF-8 Base64.
+    const bytes = new TextEncoder().encode(pythonSource);
+    let binary = '';
+    for (const byte of bytes) {
+        binary += String.fromCharCode(byte);
+    }
+    const encoded = btoa(binary);
+
+    return `import ubinascii; exec(ubinascii.a2b_base64("${encoded}"))`;
 }
+
 
 function sendLineWait(which, writer, textDirty, timeoutMs = 5000) {
     const text = wrapForRunloop(textDirty);
@@ -523,6 +544,7 @@ async function runMovement(move, sleep = 220) {
         }
         const mov = move.charAt(0);
         const sym = move.charAt(1);
+        await sleepT(10)
         await sendLine(leftWriter, `light_matrix.write("${mov}",100);\n\n`);
         await sendLine(rightWriter, `light_matrix.write("${sym}",100);\n\n`);
         let side = cmd.slice(36, 37)
@@ -1056,7 +1078,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('timerBlock').style.display = 'block'
         } else if (data.startsWith("Move: ") && !window.dontMove) {
             let move = data.replace("Move: ", "");
-            console.log(`%cSec:  ${move}`, 'color:#eb34d8;');
+            console.log(`%cS    ec:  ${move}`, 'color:#eb34d8;');
             playMove(move);
         }
         else {
