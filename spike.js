@@ -263,10 +263,12 @@ const WaitQ = {
     right: []
 };
 
+let QLock = false;
+
 async function sendLine(writer, text, timeoutMs = 5000) {
     const which = leftWriter === writer ? 'left' : 'right';
 
-    if (LineWaiting[which] != null) {
+    if (LineWaiting[which] != null && QLock) {
         WaitQ[which].push([writer, text, timeoutMs]);
         return 'QUEUED';
     }
@@ -292,7 +294,7 @@ async function sendLine(writer, text, timeoutMs = 5000) {
         }
     }));
 
-    sendLineQueues[which] = job.catch(() => {});
+    sendLineQueues[which] = job.catch(() => { });
 
     try {
         return await job;
@@ -303,6 +305,15 @@ async function sendLine(writer, text, timeoutMs = 5000) {
         if (info !== undefined) {
             sendLine(info[0], info[1], info[2]);
         }
+    }
+}
+
+async function sendLineCatch() {
+    // Drain only this side's queue
+    const info = WaitQ[which].shift();
+
+    if (info !== undefined) {
+        sendLine(info[0], info[1], info[2]);
     }
 }
 
@@ -355,6 +366,7 @@ function wrapForRunloop(textDirty) {
 
 
 function sendLineWait(which, writer, textDirty, timeoutMs = 5000) {
+    QLock = true;
     const text = wrapForRunloop(textDirty);
     const job = queues[which].then(() => new Promise((resolve) => {
         const timer = setTimeout(() => {
@@ -372,6 +384,9 @@ function sendLineWait(which, writer, textDirty, timeoutMs = 5000) {
 
     // Keep the queue moving even if this job fails.
     queues[which] = job.catch(() => { });
+    // prevent lines from being 
+    QLock = false;
+    sendLineCatch()
     return job;
 }
 
@@ -428,7 +443,7 @@ async function SerialCmd(which, reader) {
     while (true) {
         const { value, done } = await reader.read();
         if (done) break;
-        
+
         let combinedvalue = null;
         if (value.indexOf('\n') == -1) {
             // skip iteration and append to the buffer
@@ -615,7 +630,7 @@ print('STOP' if abs(p - round(p / 90) * 90) > ${d4} else 'OK')
         if (alignReply !== 'OK') {
             log(`${which} move ${move} failed: ${alignReply}`);
             await stopAll('align failed');
-            return ['FAIL',which,writer,alignLines];
+            return ['FAIL', which, writer, alignLines];
         } else {
             await sleepT(wait);
         }
@@ -758,7 +773,7 @@ async function spikeCube(moves, sleeped) {
         if (g == 'FAIL') {
             await Promise.all([wiggle('left'), wiggle('right')]);
             // if g is a array then run the cmd to realign
-            let cont = Array.isArray(r) ? await sendLineWait(r[2],r[3],r[4]) : null;
+            let cont = Array.isArray(r) ? await sendLineWait(r[2], r[3], r[4]) : null;
             if (cont !== 'OK') {
                 AbortRun = true
             } else {
