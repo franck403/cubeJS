@@ -1,4 +1,4 @@
-z// Map cube letters to colors
+// Map cube letters to colors
 const FACE_COLORS = {
   U: 'white',
   R: 'red',

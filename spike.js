@@ -258,15 +258,20 @@ async function spike(cubeed) {
 }
 
 const sendLineQueues = { left: Promise.resolve(), right: Promise.resolve() };
-const WaitQ = []
-async function sendLine(writer, text) {
-    const which = leftWriter === writer ? 'left' : 'right'
+const WaitQ = {
+    left: [],
+    right: []
+};
+
+async function sendLine(writer, text, timeoutMs = 5000) {
+    const which = leftWriter === writer ? 'left' : 'right';
+
     if (LineWaiting[which] != null) {
-        WaitQ.push([writer,text])
+        WaitQ[which].push([writer, text, timeoutMs]);
         return 'QUEUED';
     }
-    // add to text a ok to be sure it was ran or fully sent
-    const job = sendLineQueues[which].then(() => new Promise((resolve) => {
+
+    const job = sendLineQueues[which].then(() => new Promise((resolve, reject) => {
         const timer = setTimeout(() => {
             LineWaiting[which] = null;
             resolve('TIMEOUT');
@@ -274,19 +279,31 @@ async function sendLine(writer, text) {
 
         LineWaiting[which] = (reply) => {
             clearTimeout(timer);
+            LineWaiting[which] = null;
             resolve(reply);
         };
 
-        _sendLine(writer,text + '\n\n;print("SDOK");\n\n')
+        try {
+            _sendLine(writer, text + '\n\nprint("SDOK");\n\n');
+        } catch (err) {
+            clearTimeout(timer);
+            LineWaiting[which] = null;
+            reject(err);
+        }
     }));
 
-    // Keep the queue moving even if this job fails.
-    sendLineQueues[which] = job.catch(() => { });
+    sendLineQueues[which] = job.catch(() => {});
 
-    // DRAIN THE QUEUE
-    var info = WaitQ.shift()
-    info != undefined ? await sendLine(info[1],info[2]) : console.log('queue empty')
-    return job;
+    try {
+        return await job;
+    } finally {
+        // Drain only this side's queue
+        const info = WaitQ[which].shift();
+
+        if (info !== undefined) {
+            sendLine(info[0], info[1], info[2]);
+        }
+    }
 }
 
 async function _sendLine(writer, text) {
@@ -306,35 +323,34 @@ let jobCounter = 0;
 // Turns plain motor lines into an async function that runs on the hub.
 // Motor calls get `await`, and every line is indented under the function.
 
-
 function wrapForRunloop(textDirty) {
     const name = `job_${++jobCounter}`;
 
     const body = textDirty
-        .split(/\r?\n/)
-        .map(line => line.trim())
-        .filter(Boolean)
-        .map(line =>
-            line.replace(/motor\.(run_\w+)\(/g, 'await motor.$1(')
-        )
-        .map(line => '    ' + line)
+        .replace(/\r\n?/g, '\n')
+        .split('\n')
+        .map(line => line.trimEnd())
+        .filter(line => line.trim() !== '')
+        .map(line => {
+            // Add await to motor.run_*() calls unless already awaited
+            return line.replace(
+                /(?<![\w.])motor\.(run_\w+)\s*\(/g,
+                'await motor.$1('
+            );
+        })
+        .map(line => '    ' + line.trim())
         .join('\n');
 
     const pythonSource =
         'import runloop\n' +
         `async def ${name}():\n` +
-        body + '\n' +
+        (body || '    pass') + '\n' +
         `runloop.run(${name}())`;
 
-    // Encode the Python source as UTF-8 Base64.
-    const bytes = new TextEncoder().encode(pythonSource);
-    let binary = '';
-    for (const byte of bytes) {
-        binary += String.fromCharCode(byte);
-    }
-    const encoded = btoa(binary);
+    // Safely encode Python source as a Python string literal
+    const encoded = JSON.stringify(pythonSource);
 
-    return `import ubinascii; exec(ubinascii.a2b_base64("${encoded}"))`;
+    return `exec(${encoded});\n\n`;
 }
 
 
@@ -407,21 +423,23 @@ function areBothSpikesConnected() {
 const buffers = { left: '', right: '' };
 
 async function SerialCmd(which, reader) {
+    scSecure = true;
     if (!reader) return;
     while (true) {
         const { value, done } = await reader.read();
         if (done) break;
-        console.log(`RX: ${value}`)
+        
         let combinedvalue = null;
-        let buffer = buffers[which]
         if (value.indexOf('\n') == -1) {
             // skip iteration and append to the buffer
-            buffer += value
+            buffers[which] += value
             continue
         } else {
-            combinedvalue = buffer + value.slice(0, value.lastIndexOf('\n') + 1)
-            buffer = value.slice(value.lastIndexOf('\n') + 1, value.length)
+            combinedvalue = buffers[which] + value.slice(0, value.lastIndexOf('\n'))
+            buffers[which] = value.slice(value.lastIndexOf('\n') + 1, value.length)
         }
+
+        console.log(`${which} RX: ${combinedvalue}`)
 
         combinedvalue.split('\n').forEach(elementDirty => {
             var element = elementDirty.trim()
@@ -561,6 +579,7 @@ async function updateBatteries() {
 
 let d4 = 5
 
+
 // MOVE STORE
 async function runMovement(move, sleep = 220) {
     if (!move || typeof move !== "string") return log(`Invalid move ${move}`);
@@ -585,7 +604,7 @@ async function runMovement(move, sleep = 220) {
         await sendLine(leftWriter, `light_matrix.write("${mov}",100);\n\n`);
         await sendLine(rightWriter, `light_matrix.write("${sym}",100);\n\n`);
         let side = cmd.slice(36, 37)
-        const alignLines = `
+        let alignLines = `
 p = motor.absolute_position(port.${side})
 c = round(p / 90) * 90
 motor.run_to_absolute_position(port.${side}, c, 800, acceleration=10000, deceleration=9000, direction=motor.SHORTEST_PATH)
@@ -596,9 +615,10 @@ print('STOP' if abs(p - round(p / 90) * 90) > ${d4} else 'OK')
         if (alignReply !== 'OK') {
             log(`${which} move ${move} failed: ${alignReply}`);
             await stopAll('align failed');
-            return 'FAIL';
+            return ['FAIL',which,writer,alignLines];
+        } else {
+            await sleepT(wait);
         }
-        await sleepT(wait);
     } else if (!ganCubePresent()) {
         await sleepT(sleep)
         if (move.endsWith('2')) {
@@ -734,8 +754,16 @@ async function spikeCube(moves, sleeped) {
 
     async function rnMovementWrapper(move, sleep) {
         let r = await runMovement(move, sleep);
-        if (r == 'FAIL') {
-            AbortRun = true
+        let g = Array.isArray(r) ? r[1] : r
+        if (g == 'FAIL') {
+            await Promise.all([wiggle('left'), wiggle('right')]);
+            // if g is a array then run the cmd to realign
+            let cont = Array.isArray(r) ? await sendLineWait(r[2],r[3],r[4]) : null;
+            if (cont !== 'OK') {
+                AbortRun = true
+            } else {
+                await sleepT(10)
+            }
         }
     }
 
