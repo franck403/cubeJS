@@ -101,6 +101,7 @@ function regen() {
 }
 
 const waiting = { left: null, right: null };
+const LineWaiting = { left: null, right: null };
 
 regen();
 
@@ -256,7 +257,39 @@ async function spike(cubeed) {
     await openSpike('right')
 }
 
+const sendLineQueues = { left: Promise.resolve(), right: Promise.resolve() };
+const WaitQ = []
 async function sendLine(writer, text) {
+    const which = leftWriter === writer ? 'left' : 'right'
+    if (LineWaiting[which] != null) {
+        WaitQ.push([writer,text])
+        return 'QUEUED';
+    }
+    // add to text a ok to be sure it was ran or fully sent
+    const job = sendLineQueues[which].then(() => new Promise((resolve) => {
+        const timer = setTimeout(() => {
+            LineWaiting[which] = null;
+            resolve('TIMEOUT');
+        }, timeoutMs);
+
+        LineWaiting[which] = (reply) => {
+            clearTimeout(timer);
+            resolve(reply);
+        };
+
+        _sendLine(writer,text + '\n\n;print("SDOK");\n\n')
+    }));
+
+    // Keep the queue moving even if this job fails.
+    sendLineQueues[which] = job.catch(() => { });
+
+    // DRAIN THE QUEUE
+    var info = WaitQ.shift()
+    info != undefined ? await sendLine(info[1],info[2]) : console.log('queue empty')
+    return job;
+}
+
+async function _sendLine(writer, text) {
     console.debug(`TX: ${text}`);
     if (!writer) return;
     const normalized = text.replace(/\r?\n/g, '\r\n');
@@ -318,7 +351,7 @@ function sendLineWait(which, writer, textDirty, timeoutMs = 5000) {
             resolve(reply);
         };
 
-        sendLine(writer, text);
+        _sendLine(writer, text);
     }));
 
     // Keep the queue moving even if this job fails.
@@ -438,6 +471,10 @@ async function SerialCmd(which, reader) {
             } else if (element == 'OK') {
                 const finish = waiting[which];
                 waiting[which] = null;
+                if (finish) finish(element);
+            } else if (element == 'SDOK') {
+                const finish = LineWaiting[which];
+                LineWaiting[which] = null;
                 if (finish) finish(element);
             } else {
             }
