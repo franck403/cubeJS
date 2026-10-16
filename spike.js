@@ -308,7 +308,7 @@ async function sendLine(writer, text, timeoutMs = 5000) {
     }
 }
 
-async function sendLineCatch() {
+async function sendLineCatch(which) {
     // Drain only this side's queue
     const info = WaitQ[which].shift();
 
@@ -364,10 +364,29 @@ function wrapForRunloop(textDirty) {
     return `exec(${encoded});\n\n`;
 }
 
+async function waitOnVar(source, wantedValue, timeout = 0) {
+    const start = Date.now();
+    const isGetter = typeof source === 'function';
+    const read = isGetter ? source : () => globalThis[source];
+    const label = isGetter ? 'value' : `"${source}"`;
 
-function sendLineWait(which, writer, textDirty, timeoutMs = 5000) {
+    while (read() !== wantedValue) {
+        if (timeout && Date.now() - start >= timeout) {
+            throw new Error(
+                `waitOnVar: timeout waiting for ${label} to become ${String(wantedValue)}`
+            );
+        }
+        await new Promise((resolve) => setTimeout(resolve, 50));
+    }
+}
+
+async function sendLineWait(which, writer, textDirty, timeoutMs = 5000) {
     QLock = true;
     const text = wrapForRunloop(textDirty);
+    if (LineWaiting[which] != null) {
+        timeoutMs += 2000;
+        await waitOnVar(() => LineWaiting[which], null, 5000);
+    }
     const job = queues[which].then(() => new Promise((resolve) => {
         const timer = setTimeout(() => {
             waiting[which] = null;
@@ -386,7 +405,7 @@ function sendLineWait(which, writer, textDirty, timeoutMs = 5000) {
     queues[which] = job.catch(() => { });
     // prevent lines from being 
     QLock = false;
-    sendLineCatch()
+    sendLineCatch(which)
     return job;
 }
 
