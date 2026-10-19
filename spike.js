@@ -453,6 +453,27 @@ function areBothSpikesConnected() {
     return SpikeState.left && SpikeState.right && leftPort && rightPort;
 }
 
+function scReset() {
+    scSecure = false;
+}
+
+// watcher for scSecure
+let scLasts = false;
+setInterval(()=> {
+    if (scLasts != scSecure) {
+        console.log(scLasts,scSecure)
+        var d = document.getElementById('scReset')
+        if (scLasts) {
+            d.classList.add('fa-lock')
+            d.classList.remove('fa-unlock')    
+        } else {
+            d.classList.remove('fa-lock')
+            d.classList.add('fa-unlock')    
+        }
+        scLasts = scSecure;
+    }
+},100)
+
 // serial command readers
 const buffers = { left: '', right: '' };
 
