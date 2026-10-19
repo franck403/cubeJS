@@ -62,8 +62,6 @@ let AbortRun = false;
 let acel = 100000
 let decel = acel
 
-// motor.absolute_position(port.A)
-// motor.absolute_position(port.A)
 function regen() {
     CLP_LEFT = {
         // Face U
@@ -645,7 +643,8 @@ async function runMovement(move, sleep = 220) {
     const which = CLP_LEFT[move] ? 'left' : 'right';
     if (!cmd || !writer) return;
     if (SpikeState.left && SpikeState.right && ganCubePresent()) {
-        const moveReply = await sendLineWait(which, writer, cmd + "print('OK')");
+        let side = cmd.slice(36, 37)
+        const moveReply = await sendLineWait(which, writer, `motor.reset_relative_position(port.${side});` + cmd + "print('OK')");
         if (moveReply !== 'OK') {
             log(`${which} move ${move} failed: ${moveReply}`);
             AbortRun = true;
@@ -657,12 +656,11 @@ async function runMovement(move, sleep = 220) {
         await sleepT(10)
         await sendLine(leftWriter, `light_matrix.write("${mov}",100);\n\n`);
         await sendLine(rightWriter, `light_matrix.write("${sym}",100);\n\n`);
-        let side = cmd.slice(36, 37)
         let alignLines = `
-p = motor.absolute_position(port.${side})
+p = motor.relative_position(port.${side})
 c = round(p / 90) * 90
-motor.run_to_absolute_position(port.${side}, c, 800, acceleration=10000, deceleration=9000, direction=motor.SHORTEST_PATH)
-p = motor.absolute_position(port.${side})
+motor.run_to_relative_position(port.${side}, c, 800, acceleration=10000, deceleration=9000, direction=motor.SHORTEST_PATH)
+p = motor.relative_position(port.${side})
 print(p)
 print('STOP' if abs(p - round(p / 90) * 90) > ${d4} else 'OK')
 `;
@@ -742,8 +740,8 @@ async function wiggle(which) {
     for (const p of PORTS[which]) {
         lines.push(`motor.run_for_degrees(port.${p}, 3, 500)`);
         lines.push(`motor.run_for_degrees(port.${p}, -3, 500)`);
-        lines.push(`a = motor.absolute_position(port.${p}); c = round(a / 90) * 90`);
-        lines.push(`motor.run_to_absolute_position(port.${p}, c, 500, direction=motor.SHORTEST_PATH)`);
+        lines.push(`a = motor.relative_position(port.${p}); c = round(a / 90) * 90`);
+        lines.push(`motor.run_to_relative_position(port.${p}, c, 500, direction=motor.SHORTEST_PATH)`);
     }
     lines.push(`print('OK')`);
 
