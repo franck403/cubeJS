@@ -42,7 +42,9 @@ const sexyMove2 = ["L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2",
 const sexyMove3 = ["R2", "L2", "U2", "R2", "L2", "U2", "R2", "L2", "U2", "R2", "L2", "U2"];
 const cubecube = ["F", "L", "F", "U'", "R", "U", "F2", "L2", "U'", "L'", "B", "D'", "B'", "L2", "U"]
 
-const startup = "cor=1.5\n\nimport motor\n\nimport runloop\n\nfrom hub import port, light_matrix, sound\n\nimport time\n\nlayer = motor.run_for_degrees\n\nlight_matrix.clear();\n\n";
+const imports = "cor=1.5\n\nimport motor\n\nimport runloop\n\nfrom hub import port, light_matrix, sound\n\nimport time\n\nlight_matrix.clear();\n\n";
+const absoluteModule = "\n\nfbsolude = {port.A:0,port.B:0,port.C:0,port.D:0,port.E:0,port.F:0}; reset_absolute = lambda p: fbsolude.__setitem__(p, motor.absolute_position(p));run_to_offset_absolute = lambda p, c, s=800, acceleration=10000, deceleration=9000, direction=motor.SHORTEST_PATH: motor.run_to_absolute_position(p, c + fbsolude[p], s, acceleration=acceleration, deceleration=deceleration, direction=direction);offset_absolute = lambda p: motor.absolute_position(p) - fbsolude[p];\n\n"
+const startup = imports + "\n\n" + absoluteModule;
 const connectSound = "sound.beep(392,120);time.sleep_ms(120);sound.beep(494,120);time.sleep_ms(120);sound.beep(587,150);time.sleep_ms(150);sound.beep(784,200)";
 const scrambleSound = "sound.beep(784,100);time.sleep_ms(100);sound.beep(659,100);time.sleep_ms(100);sound.beep(587,100);time.sleep_ms(100);sound.beep(494,150);time.sleep_ms(150);sound.beep(392,200)";
 const solveSound = "sound.beep(392,100);time.sleep_ms(100);sound.beep(494,100);time.sleep_ms(100);sound.beep(587,100);time.sleep_ms(100);sound.beep(659,150);time.sleep_ms(150);sound.beep(784,200);time.sleep_ms(200);sound.beep(988,300)";
@@ -61,40 +63,41 @@ let AbortRun = false;
 
 let acel = 100000
 let decel = acel
+let motorSpeed = 800
 
 function regen() {
     CLP_LEFT = {
         // Face U
-        "U": `motor.run_for_degrees(port.A,0 -${deg}, 1000, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
-        "U'": `motor.run_for_degrees(port.A, ${deg}, 1000, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
-        "U2": `motor.run_for_degrees(port.A, ${dog}, 1000, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
+        "U": `motor.run_for_degrees(port.A,  0 -${deg}, ${motorSpeed}, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
+        "U'": `motor.run_for_degrees(port.A,     ${deg}, ${motorSpeed}, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
+        "U2": `motor.run_for_degrees(port.A,     ${dog}, ${motorSpeed}, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
 
         // Face L
-        "L": `motor.run_for_degrees(port.C,  0 - ${deg}, 1000, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
-        "L'": `motor.run_for_degrees(port.C, ${deh}, 1000, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
-        "L2": `motor.run_for_degrees(port.C, ${dog}, 1000, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
+        "L": `motor.run_for_degrees(port.C,  0 - ${deg}, ${motorSpeed}, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
+        "L'": `motor.run_for_degrees(port.C,     ${deh}, ${motorSpeed}, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
+        "L2": `motor.run_for_degrees(port.C,     ${dog}, ${motorSpeed}, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
 
         // Face F
-        "F": `motor.run_for_degrees(port.E,  0 - ${deg}, 1000, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
-        "F'": `motor.run_for_degrees(port.E, ${deg}, 1000, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
-        "F2": `motor.run_for_degrees(port.E, ${dog}, 1000, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
+        "F": `motor.run_for_degrees(port.E,  0 - ${deg}, ${motorSpeed}, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
+        "F'": `motor.run_for_degrees(port.E,     ${deg}, ${motorSpeed}, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
+        "F2": `motor.run_for_degrees(port.E,     ${dog}, ${motorSpeed}, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
     };
 
     CLP_RIGHT = {
         // Face R
-        "R": `motor.run_for_degrees(port.B,  0 - ${deg}, 1000, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
-        "R'": `motor.run_for_degrees(port.B, ${deg}, 1000, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
-        "R2": `motor.run_for_degrees(port.B, ${dog}, 1000, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
+        "R": `motor.run_for_degrees(port.B,  0 - ${deg}, ${motorSpeed}00, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
+        "R'": `motor.run_for_degrees(port.B,     ${deg}, ${motorSpeed}, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
+        "R2": `motor.run_for_degrees(port.B,     ${dog}, ${motorSpeed}, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
 
         // Face B
-        "B": `motor.run_for_degrees(port.F,  0 - ${deg}, 1000, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
-        "B'": `motor.run_for_degrees(port.F, ${deg}, 1000, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
-        "B2": `motor.run_for_degrees(port.F, ${dog}, 1000, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
+        "B": `motor.run_for_degrees(port.F,  0 - ${deg}, ${motorSpeed}, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
+        "B'": `motor.run_for_degrees(port.F,     ${deg}, ${motorSpeed}, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
+        "B2": `motor.run_for_degrees(port.F,     ${dog}, ${motorSpeed}, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
 
         // Face D
-        "D": `motor.run_for_degrees(port.D,  0 - ${deg}, 1000, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
-        "D'": `motor.run_for_degrees(port.D, ${deg}, 1000, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
-        "D2": `motor.run_for_degrees(port.D, ${dog}, 1000, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
+        "D": `motor.run_for_degrees(port.D,  0 - ${deg}, ${motorSpeed}, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
+        "D'": `motor.run_for_degrees(port.D,     ${deg}, ${motorSpeed}, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
+        "D2": `motor.run_for_degrees(port.D,     ${dog}, ${motorSpeed}, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
     };
 }
 
@@ -644,7 +647,7 @@ async function runMovement(move, sleep = 220) {
     if (!cmd || !writer) return;
     if (SpikeState.left && SpikeState.right && ganCubePresent()) {
         let side = cmd.slice(36, 37)
-        const moveReply = await sendLineWait(which, writer, `motor.reset_relative_position(port.${side});` + cmd + "print('OK')");
+        const moveReply = await sendLineWait(which, writer, `reset_absolute(port.${side});` + cmd + "print('OK')");
         if (moveReply !== 'OK') {
             log(`${which} move ${move} failed: ${moveReply}`);
             AbortRun = true;
@@ -657,10 +660,10 @@ async function runMovement(move, sleep = 220) {
         await sendLine(leftWriter, `light_matrix.write("${mov}",100);\n\n`);
         await sendLine(rightWriter, `light_matrix.write("${sym}",100);\n\n`);
         let alignLines = `
-p = motor.relative_position(port.${side})
+p = offset_absolute(port.${side})
 c = round(p / 90) * 90
-motor.run_to_relative_position(port.${side}, c, 800, acceleration=10000, deceleration=9000, direction=motor.SHORTEST_PATH)
-p = motor.relative_position(port.${side})
+motor.run_to_offset_absolute(port.${side}, c, 800, acceleration=10000, deceleration=9000, direction=motor.SHORTEST_PATH)
+p = offset_absolute(port.${side})
 print(p)
 print('STOP' if abs(p - round(p / 90) * 90) > ${d4} else 'OK')
 `;
@@ -740,8 +743,8 @@ async function wiggle(which) {
     for (const p of PORTS[which]) {
         lines.push(`motor.run_for_degrees(port.${p}, 3, 500)`);
         lines.push(`motor.run_for_degrees(port.${p}, -3, 500)`);
-        lines.push(`a = motor.relative_position(port.${p}); c = round(a / 90) * 90`);
-        lines.push(`motor.run_to_relative_position(port.${p}, c, 500, direction=motor.SHORTEST_PATH)`);
+        lines.push(`a = offset_absolute(port.${p}); c = round(a / 90) * 90`);
+        lines.push(`run_to_offset_absolute(port.${p}, c, 500, direction=motor.SHORTEST_PATH)`);
     }
     lines.push(`print('OK')`);
 
