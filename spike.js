@@ -42,6 +42,22 @@ const sexyMove2 = ["L", "F", "U", "F", "R", "F2", "L", "F", "U", "F", "R", "F2",
 const sexyMove3 = ["R2", "L2", "U2", "R2", "L2", "U2", "R2", "L2", "U2", "R2", "L2", "U2"];
 const cubecube = ["F", "L", "F", "U'", "R", "U", "F2", "L2", "U'", "L'", "B", "D'", "B'", "L2", "U"]
 
+/*
+Offseted Absolute Position Module:
+
+- reset_absolute(port): Set the current motor position as the zero reference.
+- run_to_offset_absolute(port, position, speed=800, acceleration=10000, deceleration=9000, direction=motor.SHORTEST_PATH):
+  Move to an absolute position relative to the saved zero offset.
+- offset_absolute(port): Read the current motor position relative to the saved zero offset.
+
+Example:
+reset_absolute(port.A);                         // Set current position as zero
+run_to_offset_absolute(port.A, 90);             // Move to 90°
+run_to_offset_absolute(port.A, -180, 800);      // Move to -180°
+c = offset_absolute(port.A);                    // Read current offset position
+run_to_offset_absolute(port.A, 360, 500);       // Move to 360°
+*/
+
 const imports = "cor=1.5\n\nimport motor\n\nimport runloop\n\nfrom hub import port, light_matrix, sound\n\nimport time\n\nlight_matrix.clear();\n\n";
 const absoluteModule = "\n\nfbsolude = {port.A:0,port.B:0,port.C:0,port.D:0,port.E:0,port.F:0}; reset_absolute = lambda p: fbsolude.__setitem__(p, motor.absolute_position(p));run_to_offset_absolute = lambda p, c, s=800, acceleration=10000, deceleration=9000, direction=motor.SHORTEST_PATH: motor.run_to_absolute_position(p, c + fbsolude[p], s, acceleration=acceleration, deceleration=deceleration, direction=direction);offset_absolute = lambda p: motor.absolute_position(p) - fbsolude[p];\n\n"
 const startup = imports + "\n\n" + absoluteModule;
