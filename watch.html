@@ -648,8 +648,9 @@
               <h3 class="reveal">Le matériel</h3>
               <div class="panel-body">
                 <div class="panel-text">
-                  <p class="reveal">En 2025-2026, l'achat de portables perfomants, clavier, souris et une tablette graphique. Avec <span
-                      class="count" data-target="60000">60 000 $</span> remis par la Caisse Desjardins, la fondation Annie-Caron et le travail de certain des élève au Metro.</p>
+                  <p class="reveal">En 2025-2026, l'achat de portables perfomants, clavier, souris et une tablette
+                    graphique. Avec <span class="count" data-target="60000">60 000 $</span> remis par la Caisse
+                    Desjardins, la fondation Annie-Caron et le travail de certain des élève au Metro.</p>
                   <div class="who reveal">
                     <div class="avatar">MC</div>
                     <div>
@@ -730,7 +731,7 @@
       let current = slides.findIndex(s => s.classList.contains('is-active'));
       if (current < 0) current = 0;
       let timer = null;
-      let timer2 = null; 
+      let timer2 = null;
       let transitioning = false;
       const INTERVAL = 30000;
       const TRANSITION_MS = 500;
@@ -827,7 +828,7 @@
         if (reduceMotion) return;
         if (timer) return;
         timer = setInterval(() => goTo(current + 1, false), INTERVAL);
-        timer2 = setInterval(()=> {document.getElementById('carouselNav').style.setProperty('--progress', `${progress}%`);},100)
+        timer2 = setInterval(() => { document.getElementById('carouselNav').style.setProperty('--progress', `${progress}%`); }, 100)
       }
       function stop() {
         if (timer) { clearInterval(timer); timer = null; }
@@ -984,6 +985,10 @@
       if (!navigator.bluetooth) {
         el.unsupportedNotice.classList.remove('hidden');
         el.connectBtn.disabled = true;
+      }
+      const connexionSlide = document.getElementById('connexionSlide');
+      if (connexionSlide && window.__carouselRemoveSlide) {
+        window.__carouselRemoveSlide(connexionSlide);
       }
     })();
   </script>
