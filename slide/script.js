@@ -2,7 +2,6 @@ let solves = [];
 const last = document.getElementById("last");
 const best = document.getElementById("best");
 const mid = document.getElementById("mid");
-const worst = document.getElementById("worst");
 
 function average(arr) {
   return arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;
@@ -77,10 +76,8 @@ bc.onmessage = (e) => {
   last.textContent = `${data} sec`;
 
   const bestVal = parseFloat(best.textContent) || Infinity;
-  const worstVal = parseFloat(worst.textContent) || 0;
 
   if (data < bestVal) best.textContent = `${data} sec`;
-  if (data > worstVal) worst.textContent = `${data} sec`;
 
   mid.textContent = `${average(solves).toFixed(3)} sec`;
 };

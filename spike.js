@@ -16,17 +16,17 @@ let bcState = false;
 
 let scLenght = 20;
 
-let deg = 90;  // Moves x 1
-let dog = 180; // Moves x 2
+let deg = 93;  // Moves x 1
+let dog = 183; // Moves x 2
 
-let intSolve = 100;
-let intScramble = 100;
+let intSolve = 80;
+let intScramble = 150;
 
 let intSolveFast = 0;
 
-let u = 0, f = 0, l = 0, r = 0, b = 0, d = 0;
-let u1 = 0, f1 = 0, l1 = 0, r1 = 0, b1 = 0, d1 = 0;
-let u2 = 0, f2 = 0, l2 = 0, r2 = 0, b2 = 0, d2 = 0;
+let u = 0, f = 0, l = 0, r = 0, b = 3, d = 0;
+let u1 = 0, f1 = 0, l1 = 0, r1 = 0, b1 = 3, d1 = 0;
+let u2 = 0, f2 = 0, l2 = 0, r2 = 0, b2 = 3, d2 = 0;
 
 var silence = true;
 
@@ -84,36 +84,36 @@ let motorSpeed = 800
 function regen() {
     CLP_LEFT = {
         // Face U
-        "U": `motor.run_for_degrees(port.A,  0 -${deg}, ${motorSpeed}, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
-        "U'": `motor.run_for_degrees(port.A,     ${deg}, ${motorSpeed}, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
-        "U2": `motor.run_for_degrees(port.A,     ${dog}, ${motorSpeed}, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
+        "U": `motor.run_for_degrees(port.A,  0 -${deg + u}, ${motorSpeed}, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
+        "U'": `motor.run_for_degrees(port.A,     ${deg + u1}, ${motorSpeed}, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
+        "U2": `motor.run_for_degrees(port.A,     ${dog + u2}, ${motorSpeed}, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
 
         // Face L
-        "L": `motor.run_for_degrees(port.C,  0 - ${deg}, ${motorSpeed}, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
-        "L'": `motor.run_for_degrees(port.C,     ${deh}, ${motorSpeed}, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
-        "L2": `motor.run_for_degrees(port.C,     ${dog}, ${motorSpeed}, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
+        "L": `motor.run_for_degrees(port.C,  0 - ${deg + l}, ${motorSpeed}, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
+        "L'": `motor.run_for_degrees(port.C,     ${deg + l1}, ${motorSpeed}, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
+        "L2": `motor.run_for_degrees(port.C,     ${dog + l2}, ${motorSpeed}, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
 
         // Face F
-        "F": `motor.run_for_degrees(port.E,  0 - ${deg}, ${motorSpeed}, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
-        "F'": `motor.run_for_degrees(port.E,     ${deg}, ${motorSpeed}, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
-        "F2": `motor.run_for_degrees(port.E,     ${dog}, ${motorSpeed}, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
+        "F": `motor.run_for_degrees(port.E,  0 - ${deg + f}, ${motorSpeed}, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
+        "F'": `motor.run_for_degrees(port.E,     ${deg + f1}, ${motorSpeed}, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
+        "F2": `motor.run_for_degrees(port.E,     ${dog + f2}, ${motorSpeed}, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
     };
 
     CLP_RIGHT = {
         // Face R
-        "R": `motor.run_for_degrees(port.B,  0 - ${deg}, ${motorSpeed}00, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
-        "R'": `motor.run_for_degrees(port.B,     ${deg}, ${motorSpeed}, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
-        "R2": `motor.run_for_degrees(port.B,     ${dog}, ${motorSpeed}, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
+        "R": `motor.run_for_degrees(port.B,  0 - ${deg + r}, ${motorSpeed}00, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
+        "R'": `motor.run_for_degrees(port.B,     ${deg + r1}, ${motorSpeed}, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
+        "R2": `motor.run_for_degrees(port.B,     ${dog + r2}, ${motorSpeed}, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
 
         // Face B
-        "B": `motor.run_for_degrees(port.F,  0 - ${deg}, ${motorSpeed}, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
-        "B'": `motor.run_for_degrees(port.F,     ${deg}, ${motorSpeed}, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
-        "B2": `motor.run_for_degrees(port.F,     ${dog}, ${motorSpeed}, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
+        "B": `motor.run_for_degrees(port.F,  0 - ${deg + b}, ${motorSpeed}, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
+        "B'": `motor.run_for_degrees(port.F,     ${deg + b1}, ${motorSpeed}, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
+        "B2": `motor.run_for_degrees(port.F,     ${dog + b2}, ${motorSpeed}, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
 
         // Face D
-        "D": `motor.run_for_degrees(port.D,  0 - ${deg}, ${motorSpeed}, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
-        "D'": `motor.run_for_degrees(port.D,     ${deg}, ${motorSpeed}, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
-        "D2": `motor.run_for_degrees(port.D,     ${dog}, ${motorSpeed}, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
+        "D": `motor.run_for_degrees(port.D,  0 - ${deg + d}, ${motorSpeed}, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
+        "D'": `motor.run_for_degrees(port.D,     ${deg + d1}, ${motorSpeed}, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
+        "D2": `motor.run_for_degrees(port.D,     ${dog + d2}, ${motorSpeed}, stop=motor.SMART_COAST, acceleration=${acel}, deceleration=${decel});\n`,
     };
 }
 
@@ -352,7 +352,7 @@ let jobCounter = 0;
 // Motor calls get `await`, and every line is indented under the function.
 
 function wrapForRunloop(textDirty) {
-    const name = `job_${++jobCounter}`;
+    const name = `job`;
 
     const body = textDirty
         .replace(/\r\n?/g, '\n')
@@ -495,7 +495,6 @@ setInterval(()=> {
 const buffers = { left: '', right: '' };
 
 async function SerialCmd(which, reader) {
-    scSecure = true;
     if (!reader) return;
     while (true) {
         const { value, done } = await reader.read();
@@ -649,7 +648,7 @@ async function updateBatteries() {
     ganB();
 }
 
-let d4 = 3
+let d4 = 10
 
 // MOVE STORE
 async function runMovement(move, sleep = 220) {
@@ -662,7 +661,7 @@ async function runMovement(move, sleep = 220) {
     const which = CLP_LEFT[move] ? 'left' : 'right';
     if (!cmd || !writer) return;
     if (SpikeState.left && SpikeState.right && ganCubePresent()) {
-        let side = cmd.slice(36, 37)
+        let side = cmd.slice(27, 28)
         const moveReply = await sendLineWait(which, writer, `reset_absolute(port.${side});` + cmd + "print('OK')");
         if (moveReply !== 'OK') {
             log(`${which} move ${move} failed: ${moveReply}`);
@@ -678,7 +677,7 @@ async function runMovement(move, sleep = 220) {
         let alignLines = `
 p = offset_absolute(port.${side})
 c = round(p / 90) * 90
-motor.run_to_offset_absolute(port.${side}, c, 800, acceleration=10000, deceleration=9000, direction=motor.SHORTEST_PATH)
+run_to_offset_absolute(port.${side}, c, 800, acceleration=10000, deceleration=9000, direction=motor.SHORTEST_PATH)
 p = offset_absolute(port.${side})
 print(p)
 print('STOP' if abs(p - round(p / 90) * 90) > ${d4} else 'OK')
